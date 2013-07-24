@@ -14,6 +14,7 @@ import thread
 import os
 import gc
 import decode
+import pytxt2pdf
 
 OLIGO_SIZE = 117
 if hasattr(sys, "frozen"):
@@ -90,7 +91,7 @@ def base4ToDecimal(base4):
 
 #Given a small number append 0 to its begining to make it of length 20
 def decimalOfLength20(num):
-    if len(str(num)) < 20:
+    if len(str(num)) <= 20:
         num = str(num)
         while len(num) < 20:
             num = '0' + num
@@ -686,8 +687,92 @@ def getGCContent(path,costPerBase,naContent):
 		detailsFile.close()
 		#return (noOfGCPairs,minMaxGC[0],minMaxGC[1])
 	except MemoryError:
-		temp.Destroy()
 		return None
+
+def exportToPdf(filePath,savePath):        
+        minMaxGC = decode.degenrateDNAListWithGCCount(filePath)
+        try:
+		dnaFile = open(PATH + '/../.temp/dnaString.txt',"r")
+		fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
+		CHUNK_SIZE = 10000000
+		if (fileSize % CHUNK_SIZE) == 0:
+			if (fileSize/CHUNK_SIZE) == 0:
+				noOfFileChunks = 1
+			else:
+				noOfFileChunks = (fileSize/CHUNK_SIZE)
+		else:
+			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
+		print "No of Chunks" , noOfFileChunks
+		
+		dnaLength = 0
+		noOfGCPairs = 0
+		print "Chunk No : 1"
+		
+		if noOfFileChunks > 1:
+		  
+			tempString = dnaFile.read(CHUNK_SIZE)
+			noOfGCPairs += tempString.count('G')
+			noOfGCPairs += tempString.count('C')
+			del tempString
+			
+			for chunk_number in range(1,noOfFileChunks - 1):
+				print "Chunk No :",chunk_number + 1
+				tempString = dnaFile.read(CHUNK_SIZE)
+				noOfGCPairs += tempString.count('C')
+				noOfGCPairs += tempString.count('G')
+				dnaFile.flush()
+				del tempString
+
+			print "Chunk No:",noOfFileChunks
+			tempString = dnaFile.read(fileSize - (noOfFileChunks - 1) * CHUNK_SIZE)
+			noOfGCPairs += tempString.count('C')
+			noOfGCPairs += tempString.count('G')
+			dnaFile.flush()
+		
+			del tempString
+			#print  "Pairs :" ,noOfGCPairs
+		else:
+			tempString  = dnaFile.read(fileSize)
+			noOfGCPairs += tempString.count('G')
+			noOfGCPairs += tempString.count('C')
+			
+			del tempString
+			#print "Pairs :" ,noOfGCPairs
+		dnaFile.close()
+	except MemoryError:
+		return None
+	
+        detailsFile = file(PATH + '/../.temp/details.txt',"wb")
+        string = "File Selected :" + filePath + "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + `minMaxGC[2]` + "\n- Length of DNA String :- \t\t\t" + `os.path.getsize(PATH + '/../.temp/dnaString.txt')` +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + `os.path.getsize(filePath)` + "\n\n\n\n#DNA CHUNKS :- \n\n"
+ 	detailsFile.write(string)
+        
+        fileOpened = open(filePath,"rb")
+        fileSize = os.path.getsize(filePath)
+        CHUNK_SIZE = 10000000
+        if (fileSize % CHUNK_SIZE) == 0:
+                if (fileSize/CHUNK_SIZE) == 0:
+                        noOfFileChunks = 1
+                else:
+                        noOfFileChunks = (fileSize/CHUNK_SIZE)
+        else:
+                noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
+        print "No of Chunks" , noOfFileChunks
+                
+        if noOfFileChunks >  1 :
+                for chunk_number in xrange(noOfFileChunks - 1):
+                        print "Chunk No :- ", chunk_number + 1
+                        detailsFile.write(fileOpened.read(CHUNK_SIZE))
+                        detailsFile.flush()
+                        fileOpened.flush()
+                print "Chunks No :-", noOfFileChunks
+                detailsFile.write(fileOpened.read())
+        else:
+                detailsFile.write(fileOpened.read(CHUNK_SIZE))
+        detailsFile.close()
+        fileOpened.close()
+        
+        txt2pdf = pytxt2pdf.pyText2Pdf(PATH + '/../.temp/details.txt',savePath + ".pdf")
+        txt2pdf.Convert()
 
 """    
 def genIndexList(length,ID):

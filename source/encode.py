@@ -39,7 +39,7 @@ def genDNAString(readPath):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print noOfFileChunks , fileSize
+		print noOfFileChunks
 		
 		if noOfFileChunks > 1:
                         print "Chunk No: 1",
@@ -152,7 +152,7 @@ def genDNAChunks(readPath,path):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print noOfFileChunks
+		print "No of Chunks :-",noOfFileChunks
 		
 		
 		if noOfFileChunks > 1:

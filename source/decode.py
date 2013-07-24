@@ -352,6 +352,7 @@ def degenrateDNAListWithGCCount(readPath):
 		minGC = 117
 		maxGC = 0
 		GCCount = 0
+		listLength = 0
 		
 		if noOfFileChunks > 1:
 			print "Chunk No : 1"
@@ -365,6 +366,7 @@ def degenrateDNAListWithGCCount(readPath):
 				j -= 1
 			#print j , prependString 
 			tempList = dnaList[:j].split(",")
+			listLength += len(tempList)
 			dnaString = StringIO()
 			for i in xrange(len(tempList)):
 				GCCount = 0
@@ -410,7 +412,7 @@ def degenrateDNAListWithGCCount(readPath):
 					j -= 1
 				#print j , prependString 
 				tempList = (tempList + dnaList[:j]).split(",")
-				
+				listLength += len(tempList)
 				for i in xrange(len(tempList)):
 					GCCount = 0
 					GCCount += tempList[i].count("G")
@@ -457,7 +459,7 @@ def degenrateDNAListWithGCCount(readPath):
 				j -= 1
 			#print j , prependString 
 			tempList = (tempList + dnaList[:j]).split(",")
-
+                        listLength += len(tempList)
 			for i in xrange(len(tempList)):
 				GCCount = 0
 				GCCount += tempList[i].count("G")
@@ -517,6 +519,7 @@ def degenrateDNAListWithGCCount(readPath):
 		  
 			tempList = dnaList[:i].split(",")
 			dnaString = StringIO()
+			listLength += len(tempList)
 			for i in xrange(len(tempList)):
 				GCCount = 0
 				GCCount += tempList[i].count("G")
@@ -556,7 +559,7 @@ def degenrateDNAListWithGCCount(readPath):
 			
 		fileOpened.close()
 		dnaFile.close()
-		return (minGC, maxGC)
+		return (minGC, maxGC, listLength)
 	except MemoryError:
 		return -1
 """

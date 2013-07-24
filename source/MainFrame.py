@@ -18,6 +18,7 @@ import panels
 from multiprocessing.pool import ThreadPool
 import encode
 import decode
+import pytxt2pdf
 
 ############################################
 #Preferences database has 6 rows:-
@@ -38,8 +39,9 @@ SPLASH_TIMEOUT = 2000
 VERSION = "1.0"
 NAME = "DNA-CLOUD"
 OFFICIAL_WEBSITE = 'http://www.guptalab.org/dnacloud'
+PRODUCT_LINK = "http://www.guptalab.org/dnacloud/demo"
 FEEDBACK_LINK = "https://docs.google.com/forms/d/1YGu_I9z7Z56oAP1enGByBahqs-ItHbLqnBwCoJouOro/viewform"
-STATUS_BAR_MESSAGE = "(C) 2013 Gupta Research Lab - www.guptalab.org/dnacloud"
+STATUS_BAR_MESSAGE = "(C) 2013 Gupta Lab - www.guptalab.org/dnacloud"
 ABOUT_COPYRIGHT = '(C) 2013 - All rights Reserved'
 KEY_DEVELOPER = 'Shalin Shah'
 ICON_ARTIST = 'Somusubhra Bairi - DNA Cloud Icon Artist'
@@ -86,7 +88,7 @@ class MyFrame(wx.Frame):
                 
                 estimatorMenu = wx.Menu()
                 estimatorMenu.Append(61,"Memory Required")
-                estimatorMenu.Append(62,"Chemical Properties")
+                estimatorMenu.Append(62,"Bio-Chemical Properties")
                 
 #Add items to the menues by using the Append option after creating the item or using the builtin item                
                 fileItem1 = wx.MenuItem(fileMenu,1,"File to &DNA")
@@ -101,6 +103,8 @@ class MyFrame(wx.Frame):
                 fileMenu.AppendItem(fileItem4)
                 fileItem5 = wx.MenuItem(fileMenu,5,"Import DNA Sequencer File")
                 fileMenu.AppendItem(fileItem5)
+                fileItem8 = wx.MenuItem(fileMenu,8,"Export .dna to .pdf with Details")
+                fileMenu.AppendItem(fileItem8)
                 #fileMenu.AppendMenu(wx.ID_ANY,'E&xport to CSV',exportMenu)
                 #fileMenu.AppendMenu(wx.ID_ANY,'&Import from CSV',importMenu)
                 fileItem6 = wx.MenuItem(fileMenu,6,"&Clear temp Files")
@@ -119,6 +123,8 @@ class MyFrame(wx.Frame):
 
                 helpItem2 = wx.MenuItem(helpMenu,22,"User Manual");
                 helpMenu.AppendItem(helpItem2);
+                helpItem5 = wx.MenuItem(helpMenu,25,"Product Demo");
+                helpMenu.AppendItem(helpItem5);
                 helpItem3 = wx.MenuItem(helpMenu,23,"Product Feedback");
                 helpMenu.AppendItem(helpItem3);
                 helpItem4 = wx.MenuItem(helpMenu,24,"Credits");
@@ -158,6 +164,8 @@ class MyFrame(wx.Frame):
                 self.Bind(wx.EVT_MENU,self.productFeedback,id = 23)
                 self.Bind(wx.EVT_MENU,self.memEstimator,id = 61)
                 self.Bind(wx.EVT_MENU,self.estimator,id = 62)
+                self.Bind(wx.EVT_MENU,self.productDemo,id = 25)
+                self.Bind(wx.EVT_MENU,self.exportPdf,id = 8)
                 
                 super(MyFrame,self).SetSize((1000,1000))
                 super(MyFrame,self).SetTitle(NAME)
@@ -499,6 +507,9 @@ class MyFrame(wx.Frame):
 		os.system("start Credits.pdf")
 		os.chdir(PATH)
 
+        def productDemo(self,e):
+                webbrowser.open(PRODUCT_LINK)
+
 	def productFeedback(self,e):
 		webbrowser.open(FEEDBACK_LINK)
 
@@ -506,7 +517,42 @@ class MyFrame(wx.Frame):
 		os.chdir(PATH + '\..\help')
 		os.system("start UserManual.pdf")
 		os.chdir(PATH)
-
+		
+        def exportPdf(self,e):
+                fileSelector = wx.FileDialog(self, message="Choose a .DNA file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
+                if fileSelector.ShowModal() == wx.ID_OK:
+                        paths = fileSelector.GetPaths()
+                        filePath = paths[0]
+                        terminated = False
+                        
+                        locationSelector = wx.FileDialog(self,"Please select location to save your PDF file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+                        if locationSelector.ShowModal() == wx.ID_OK:
+                                paths = locationSelector.GetPath()
+                                savePath = paths
+                                terminated = False
+                        else:
+                                terminated = True
+                        locationSelector.Destroy()
+                        del locationSelector
+                        
+                        if not terminated:
+                                exportToPdf = multiprocessing.Process(target = extraModules.exportToPdf , name = "PDF Exporter" , args = (filePath,savePath))
+                                exportToPdf.start()
+                        temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
+                        temp.SetSize((450,150))
+                        while len(multiprocessing.active_children()) != 0:
+                                time.sleep(0.1)
+                                if not temp.UpdatePulse("Exporting the File....This may take several minutes...\n.....so sit back and relax.....")[0]:
+                                        exportToPdf.terminate()
+                                        terminated = True
+                                        break
+                        temp.Destroy()
+                        exportToPdf.join()
+                        exportToPdf.terminate()
+                        if not terminated:
+                                wx.MessageDialog(self,'PDF created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+                fileSelector.Destroy()
+                del fileSelector  
 	def exportList(self,e):
 		#extraModules.writeToCsv(stringA,self.ascii,self.huffmanString,self.S1,self.S2,self.S3,self.dnaString,self.fDoubleCompliment)
                 """

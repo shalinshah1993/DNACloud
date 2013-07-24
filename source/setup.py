@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable
 
-includes = ["extraModules","panels","barcodeGenerator","encode","decode","HuffmanDictionary"]
+includes = ["extraModules","panels","barcodeGenerator","encode","decode","HuffmanDictionary","pytxt2pdf"]
 excludes = [
     '_gtkagg', '_tkagg', 'bsddb', 'curses', 'email', 'pywin.debugger',
     'pywin.debugger.dbgcon', 'pywin.dialogs', 'tcl',
