@@ -144,7 +144,7 @@ class encodePanel(wx.Panel):
                 
 		self.hBox12 = wx.BoxSizer(wx.HORIZONTAL)
 		self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.Image(name = PATH + '/../icons/DNAicon.png').ConvertToBitmap())
-		self.hBox12.Add(self.imageCtrl,flag = wx.EXPAND | wx.LEFT | wx.TOP , border = 25)
+		self.hBox12.Add(self.imageCtrl,flag = wx.EXPAND | wx.LEFT | wx.TOP | wx.BOTTOM , border = 25)
 		self.v1Box= wx.BoxSizer(wx.VERTICAL)
 		head =  wx.StaticText(self,label = "DNA-CLOUD")
 		font = wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.BOLD,underline = True)
@@ -247,7 +247,7 @@ class decodePanel(wx.Panel):
 		
 		self.hBox27 = wx.BoxSizer(wx.HORIZONTAL)
 		self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.Image(name = PATH + '/../icons/DNAicon.png').ConvertToBitmap())
-		self.hBox27.Add(self.imageCtrl,flag = wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.TOP , border = 25)
+		self.hBox27.Add(self.imageCtrl,flag = wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.TOP | wx.BOTTOM, border = 25)
 		self.v1Box= wx.BoxSizer(wx.VERTICAL)
 		head =  wx.StaticText(self,label = "DNA-CLOUD")
 		font = wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.BOLD, underline = True)
@@ -581,15 +581,13 @@ class memEstimator(wx.Dialog):
                         if dnaListMem == 0:
                                 dnaListMem = 1
                         errorCorrectionMem = 15 * length
-        		line1 = "File Size(bytes) : \t\t" +  `length`
-                	line2 = "Size of DNA String : \t" + `dnaLength`
-                        line3 = "Free Memory Required : \n" + "To genrate DNA String :\t" +  `dnaStringMem` + "MB\n" + "To generate DNA Chunks :\t" + `dnaListMem` + "MB\n"
-        		line4 = "Amount of DNA Required : \t" + `length / (10.0 ** 20)`
+        		line1 = "File Size(bytes) : \t\t" +  str(length)
+                	line2 = "Size of DNA String : \t" + str(dnaLength)
+                        line3 = "Free Memory Required : \n" + "To genrate DNA String :\t" +  str(dnaStringMem) + " MB\n" + "To generate DNA Chunks :\t" + str(dnaListMem) + " MB\n"
+        		line4 = "Amount of DNA Required : \t" + str(length / (10.0 ** 20))
                 	text = line1 + "\n\n" + line2 + "\n\n" + line3 + "\n\n" + line4 + " gms\n\n" + "File Selected : " + path
                         self.txt.WriteText(text)
 		fileSelector.Destroy()
-		
-		
 
 	def ok(self,e):
 		self.Destroy()
