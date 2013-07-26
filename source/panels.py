@@ -45,7 +45,7 @@ class encodePanel(wx.Panel):
 		self.hBox1.Add(path,flag = wx.ALIGN_CENTER_VERTICAL | wx.LEFT , border = 20)
 		self.vBox1.Add(self.hBox1)
 
-		head =  wx.StaticText(self,label = "Details(approx.)")
+		head =  wx.StaticText(self,label = "Details (approx.)")
 		font = wx.Font(9, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
 		self.vBox1.Add(head,flag = wx.TOP | wx.LEFT,border =20)
@@ -339,7 +339,6 @@ class Preferences(wx.Dialog):
 		self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
 		self.vBox.Add(self.hBoxe, flag = wx.TOP | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTRE_VERTICAL |wx.BOTTOM, border = 10)
 
-		#self.SetSizer(self.vBox)
 		self.SetSizerAndFit(self.vBox)
 
 		con = sqlite3.connect(PATH + '/../database/prefs.db')
@@ -459,8 +458,6 @@ class setPasswordDialog(wx.Dialog):
 		self.saveBut.Bind(wx.EVT_BUTTON,self.save)
 		self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
 		
-		#self.SetSizer(self.vBox)
-		#self.SetSize((570,250))
 		self.SetSizerAndFit(self.vBox)
 
 	def save(self,e):
@@ -660,6 +657,7 @@ class estimator(wx.Dialog):
 		self.butCalc.Bind(wx.EVT_BUTTON,self.calc)
 		self.butSave.Bind(wx.EVT_BUTTON,self.onSave)
 		self.butSave.Disable()
+		self.path = None
 
 	def onChoose(self,e):
 		self.butSave.Disable()
@@ -671,48 +669,58 @@ class estimator(wx.Dialog):
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
 			self.path = paths[0]
+			self.txt.WriteText("#File Selected : " + self.path)
 		fileSelector.Destroy()
-	
+		
 	def calc(self,e):
 		self.txt.Clear()
-		if not self.saltText.IsEmpty() and not self.priceText.IsEmpty() and ".dna" in self.path:
-			"""
-			tempTuple = extraModules.getGCContent(self.path)
-			noOfGCPairs = tempTuple[0]; self.minGC = (tempTuple[1] * 100)/OLIGO_SIZE; self.maxGC = (tempTuple[2] * 100)/OLIGO_SIZE
-			print tempTuple[0] , tempTuple[1] , tempTuple[2]
-			totalPairs = os.path.getsize(PATH + "/../.temp/dnaString.txt")
-			self.GCContent = (noOfGCPairs * 100)/totalPairs
-			self.totalCost = int(self.priceText.GetString(0,self.priceText.GetLastPosition())) * totalPairs
-			naContent = int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
-			
-			self.minMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (self.minGC) - 600)/OLIGO_SIZE 
-			self.maxMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (self.maxGC) - 600)/OLIGO_SIZE 
-			
-			self.details = "#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + `self.GCContent` + "\n-  Total Cost($ of DNA String):\t\t\t" + `self.totalCost` + "\n-   Min Melting Point(℃/nucleotide):\t" + str(self.minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t" + str(self.maxMeltingPoint)
-			"""
-			naContent = int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
-			
-			p = multiprocessing.Process(target = extraModules.getGCContent , args = (self.path,float(self.priceText.GetString(0,self.priceText.GetLastPosition())),naContent,) , name = "Checking Details Process")
-			p.start()
-			temp = wx.ProgressDialog('Please wait...','Analysing the String....This may take a while....' ,parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
-			temp.SetSize((400,180))
-			while len(multiprocessing.active_children()) != 0:
-				time.sleep(0.5)
-				if not temp.UpdatePulse("Analysing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-					p.terminate()
-					break
-			p.join()
-			temp.Destroy()
-			p.terminate()
-			
-			tempFile = open(PATH + "/../.temp/details.txt","r")
-			self.details = tempFile.read()
-			self.txt.WriteText(self.details)
-			tempFile.close()
-			self.butSave.Enable()
-		else:
-			wx.MessageDialog(self,'Make sure you filled the required details and .dna file is selected', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal() 
-		
+		if self.path != None:
+                        if not self.saltText.IsEmpty() and not self.priceText.IsEmpty() and ".dna" in self.path:
+                                """
+                                tempTuple = extraModules.getGCContent(self.path)
+                                noOfGCPairs = tempTuple[0]; self.minGC = (tempTuple[1] * 100)/OLIGO_SIZE; self.maxGC = (tempTuple[2] * 100)/OLIGO_SIZE
+                                print tempTuple[0] , tempTuple[1] , tempTuple[2]
+                                totalPairs = os.path.getsize(PATH + "/../.temp/dnaString.txt")
+                                self.GCContent = (noOfGCPairs * 100)/totalPairs
+                                self.totalCost = int(self.priceText.GetString(0,self.priceText.GetLastPosition())) * totalPairs
+                                naContent = int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                
+                                self.minMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (self.minGC) - 600)/OLIGO_SIZE 
+                                self.maxMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (self.maxGC) - 600)/OLIGO_SIZE 
+                                
+                                self.details = "#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + `self.GCContent` + "\n-  Total Cost($ of DNA String):\t\t\t" + `self.totalCost` + "\n-   Min Melting Point(℃/nucleotide):\t" + str(self.minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t" + str(self.maxMeltingPoint)
+                                """
+                                try:
+                                        int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                        int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                except ValueError:
+                                        wx.MessageDialog(self,'Please fill numbers and not alphabets', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal() 
+                                        return
+
+                                naContent = int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                
+                                p = multiprocessing.Process(target = extraModules.getGCContent , args = (self.path,float(self.priceText.GetString(0,self.priceText.GetLastPosition())),naContent,) , name = "Checking Details Process")
+                                p.start()
+                                temp = wx.ProgressDialog('Please wait...','Analysing the String....This may take a while....' ,parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
+                                temp.SetSize((400,180))
+                                while len(multiprocessing.active_children()) != 0:
+                                        time.sleep(0.1)
+                                        if not temp.UpdatePulse("Analysing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+                                                p.terminate()
+                                                break
+                                p.join()
+                                temp.Destroy()
+                                p.terminate()
+                                
+                                tempFile = open(PATH + "/../.temp/details.txt","r")
+                                self.details = tempFile.read()
+                                self.txt.WriteText(self.details)
+                                tempFile.close()
+                                self.butSave.Enable()
+                        else:
+                                wx.MessageDialog(self,'Make sure you filled the required details and .dna file is selected', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                else:
+                        wx.MessageDialog(self,'Make sure you selected a .dna file', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
 		
 	def onSave(self,e):
 		locationSelector = wx.FileDialog(self,"Please select location to save your details",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -722,7 +730,7 @@ class estimator(wx.Dialog):
 			
 			propFile = file(self.savePath + ".txt","w")
 			propFile.write("\n" + self.details)
-			propFile.write("\n\n\n © 2013 - GUPTA RESEARCH LABS - Generated by DNA-CLOUD")		
+			#propFile.write("\n\n\n © 2013 - GUPTA RESEARCH LABS - Generated by DNA-CLOUD")		
 			
 			wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
 		else:

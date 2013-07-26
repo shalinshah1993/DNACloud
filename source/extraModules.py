@@ -376,7 +376,7 @@ def genErrorChecksForString(string,index,ID):
 #####################################################################################################
 #Decoding Modules 
 
-#@profile
+#COnvert the chunks to corrosponding DNA String
 def dnaChunksToDNAString(listx):
     dnaString = StringIO()
     try:
@@ -623,7 +623,7 @@ def readStringFromCsv(filePath,path):
 def getGCContent(path,costPerBase,naContent):
 	minMaxGC = decode.degenrateDNAListWithGCCount(path)
 	try:
-		dnaFile = open(PATH + '/../.temp/dnaString.txt',"r")
+		dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
 		fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
 		CHUNK_SIZE = 10000000
 		if (fileSize % CHUNK_SIZE) == 0:
@@ -658,12 +658,11 @@ def getGCContent(path,costPerBase,naContent):
 			tempString = dnaFile.read(fileSize - (noOfFileChunks - 1) * CHUNK_SIZE)
 			noOfGCPairs += tempString.count('C')
 			noOfGCPairs += tempString.count('G')
-			dnaFile.flush()
-		
+			
 			del tempString
 			#print  "Pairs :" ,noOfGCPairs
 		else:
-			tempString  = dnaFile.read(fileSize)
+			tempString  = dnaFile.read()
 			noOfGCPairs += tempString.count('G')
 			noOfGCPairs += tempString.count('C')
 			
@@ -680,19 +679,19 @@ def getGCContent(path,costPerBase,naContent):
 		minMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (minGC) - 600)/OLIGO_SIZE 
 		maxMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (maxGC) - 600)/OLIGO_SIZE 
 			
-                details = "\n" + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-  Min Melting Point(°C/nucleotide):\t\t\t" + str(minMeltingPoint) + "\n-  Max Melting Point(°C/nucleotide):\t\t\t" + str(maxMeltingPoint)
+                details = "#File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-  Min Melting Point(°C/nucleotide):\t\t\t" + str(minMeltingPoint) + "\n-  Max Melting Point(°C/nucleotide):\t\t\t" + str(maxMeltingPoint)
 		
-		detailsFile = file(PATH + '/../.temp/details.txt',"w")
+		detailsFile = file(PATH + '/../.temp/details.txt',"wb")
 		detailsFile.write(details + "\n\n ©2013 Generated using DNA-CLOUD." )
 		detailsFile.close()
-		#return (noOfGCPairs,minMaxGC[0],minMaxGC[1])
+		print minMaxGC[2]
 	except MemoryError:
 		return None
 
 def exportToPdf(filePath,savePath):        
         minMaxGC = decode.degenrateDNAListWithGCCount(filePath)
         try:
-		dnaFile = open(PATH + '/../.temp/dnaString.txt',"r")
+		dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
 		fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
 		CHUNK_SIZE = 10000000
 		if (fileSize % CHUNK_SIZE) == 0:
@@ -743,7 +742,7 @@ def exportToPdf(filePath,savePath):
 		return None
 	
         detailsFile = file(PATH + '/../.temp/details.txt',"wb")
-        string = "File Selected :" + filePath + "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + `minMaxGC[2]` + "\n- Length of DNA String :- \t\t\t" + `os.path.getsize(PATH + '/../.temp/dnaString.txt')` +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + `os.path.getsize(filePath)` + "\n\n\n\n#DNA CHUNKS :- \n\n"
+        string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + `os.path.getsize(filePath)` + "\n\n\n\n#DNA CHUNKS :- \n\n"
  	detailsFile.write(string)
         
         fileOpened = open(filePath,"rb")
@@ -756,18 +755,93 @@ def exportToPdf(filePath,savePath):
                         noOfFileChunks = (fileSize/CHUNK_SIZE)
         else:
                 noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-        print "No of Chunks" , noOfFileChunks
-                
+        print "Writing to PDF\nNo of Chunks" , noOfFileChunks
+
+        counter = 0
         if noOfFileChunks >  1 :
-                for chunk_number in xrange(noOfFileChunks - 1):
-                        print "Chunk No :- ", chunk_number + 1
-                        detailsFile.write(fileOpened.read(CHUNK_SIZE))
-                        detailsFile.flush()
-                        fileOpened.flush()
-                print "Chunks No :-", noOfFileChunks
-                detailsFile.write(fileOpened.read())
-        else:
-                detailsFile.write(fileOpened.read(CHUNK_SIZE))
+                print "Chunk No : 1"
+		dnaList = fileOpened.read(CHUNK_SIZE)
+		prependString = ""
+		j = -1
+		while True:
+			if dnaList[j] == ',':
+				break
+			prependString = dnaList[j] + prependString
+			j -= 1
+		#print j , prependString 
+		tempList = (dnaList.split(","))[:-1]
+        	dnaString = StringIO()
+		for i in xrange(len(tempList)):
+			dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
+			counter += 1
+		detailsFile.write(dnaString.getvalue())
+		
+		del tempList
+		del dnaString
+		del j
+		del dnaList
+		#print dnaLength
+		for chunk_number in xrange(1,noOfFileChunks-1):
+			print "Chunk No :" , chunk_number + 1
+			dnaString = StringIO()
+			tempList = prependString
+			dnaList = fileOpened.read(CHUNK_SIZE)
+			prependString = ""
+			j = -1
+			while True:
+				if dnaList[j] == ',':
+					break
+				prependString = dnaList[j] + prependString
+				j -= 1
+			#print j , prependString 
+			tempList = ((tempList + dnaList).split(","))[:-1]
+			
+			for i in xrange(len(tempList)):
+				dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
+				counter += 1
+			detailsFile.write(dnaString.getvalue())
+
+			del dnaString
+			del tempList
+			del j
+			del dnaList
+			
+		print "Chunk No :",noOfFileChunks
+		dnaString = StringIO()
+		tempList = prependString
+		dnaList = fileOpened.read()
+		j = -1
+		prependString = ""
+		while True:
+			if dnaList[j] == ',':
+				break
+			prependString = dnaList[j] + prependString
+			j -= 1
+		#print j , prependString 
+		tempList = ((tempList + dnaList).split(","))[:-1]
+		
+		for i in xrange(len(tempList)):
+			dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
+			counter += 1 
+		detailsFile.write(dnaString.getvalue())
+		
+		del tempList
+		del dnaString
+		del j
+		del dnaList
+ 	else:
+		dnaString = StringIO()
+		tempList = (fileOpened.read().split(","))[:-1]
+		for i in xrange(len(tempList)):
+			dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
+			counter += 1 
+		detailsFile.write(dnaString.getvalue())
+ 		detailsFile.flush()
+ 		fileOpened.flush()
+		
+		del tempList
+		del dnaString
+
         detailsFile.close()
         fileOpened.close()
         

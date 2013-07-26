@@ -218,7 +218,7 @@ class MyFrame(wx.Frame):
 			con.close()
 		
 #First of all asked whether to encode or deocode so display a dialog to ask him what he wants to do
-		self.ask =  panels.chooseDialog(None,101,"Alert!")
+		self.ask =  panels.chooseDialog(None,101,"Welcome to DNA-CLOUD!")
 		self.ask.encodeBut.Bind(wx.EVT_BUTTON,self.encode)
 		self.ask.decodeBut.Bind(wx.EVT_BUTTON,self.decode)
 		self.ask.ShowModal()
@@ -524,35 +524,39 @@ class MyFrame(wx.Frame):
                         paths = fileSelector.GetPaths()
                         filePath = paths[0]
                         terminated = False
-                        
-                        locationSelector = wx.FileDialog(self,"Please select location to save your PDF file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-                        if locationSelector.ShowModal() == wx.ID_OK:
-                                paths = locationSelector.GetPath()
-                                savePath = paths
-                                terminated = False
-                        else:
-                                terminated = True
-                        locationSelector.Destroy()
-                        del locationSelector
-                        
-                        if not terminated:
-                                exportToPdf = multiprocessing.Process(target = extraModules.exportToPdf , name = "PDF Exporter" , args = (filePath,savePath))
-                                exportToPdf.start()
-                        temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
-                        temp.SetSize((450,150))
-                        while len(multiprocessing.active_children()) != 0:
-                                time.sleep(0.1)
-                                if not temp.UpdatePulse("Exporting the File....This may take several minutes...\n.....so sit back and relax.....")[0]:
-                                        exportToPdf.terminate()
+
+                        if ".dna" in filePath:
+                                locationSelector = wx.FileDialog(self,"Please select location to save your PDF file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+                                if locationSelector.ShowModal() == wx.ID_OK:
+                                        paths = locationSelector.GetPath()
+                                        savePath = paths
+                                        terminated = False
+                                else:
                                         terminated = True
-                                        break
-                        temp.Destroy()
-                        exportToPdf.join()
-                        exportToPdf.terminate()
-                        if not terminated:
-                                wx.MessageDialog(self,'PDF created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+                                locationSelector.Destroy()
+                                del locationSelector
+                                
+                                if not terminated:
+                                        exportToPdf = multiprocessing.Process(target = extraModules.exportToPdf , name = "PDF Exporter" , args = (filePath,savePath))
+                                        exportToPdf.start()
+                                temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
+                                temp.SetSize((450,150))
+                                while len(multiprocessing.active_children()) != 0:
+                                        time.sleep(0.1)
+                                        if not temp.UpdatePulse("Exporting the File....This may take several minutes...\n.....so sit back and relax.....")[0]:
+                                                exportToPdf.terminate()
+                                                terminated = True
+                                                break
+                                temp.Destroy()
+                                exportToPdf.join()
+                                exportToPdf.terminate()
+                                if not terminated:
+                                        wx.MessageDialog(self,'PDF created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+                        else:
+                                wx.MessageDialog(self,'Please select a .dna file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
                 fileSelector.Destroy()
-                del fileSelector  
+                del fileSelector
+                
 	def exportList(self,e):
 		#extraModules.writeToCsv(stringA,self.ascii,self.huffmanString,self.S1,self.S2,self.S3,self.dnaString,self.fDoubleCompliment)
                 """

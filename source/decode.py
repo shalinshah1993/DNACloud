@@ -335,8 +335,8 @@ def degenrateDNAList(readPath):
 
 def degenrateDNAListWithGCCount(readPath):
 	try:
-		fileOpened = open(readPath,"r")
-		dnaFile = file(PATH + "\..\.temp\dnaString.txt","w")
+		fileOpened = open(readPath,"rb")
+		dnaFile = file(PATH + "\..\.temp\dnaString.txt","wb")
 		
 		dnaLength = 0
 		fileSize = os.path.getsize(readPath)
@@ -392,7 +392,7 @@ def degenrateDNAListWithGCCount(readPath):
 						dnaLength += 25
 			dnaFile.write(dnaString.getvalue())
 			dnaFile.flush()
-			fileOpened.flush()
+			#fileOpened.flush()
 			
 			del tempList
 			del dnaString
@@ -439,7 +439,7 @@ def degenrateDNAListWithGCCount(readPath):
 
 				dnaFile.write(dnaString.getvalue())
 				dnaFile.flush()
-				fileOpened.flush()
+				#fileOpened.flush()
 				
 				del dnaString
 				del tempList
@@ -500,7 +500,7 @@ def degenrateDNAListWithGCCount(readPath):
 					dnaLength += 75
 			dnaFile.write(dnaString.getvalue())
 			dnaFile.flush()
-			fileOpened.flush()
+			#fileOpened.flush()
 			
 			del tempList
 			del dnaString
@@ -555,7 +555,7 @@ def degenrateDNAListWithGCCount(readPath):
 			
 			dnaFile.write(dnaString.getvalue())
 			dnaFile.flush()
-			fileOpened.flush()
+			#fileOpened.flush()
 			
 		fileOpened.close()
 		dnaFile.close()
