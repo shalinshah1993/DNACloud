@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from cStringIO import StringIO
 import sqlite3
 import math
@@ -742,7 +742,7 @@ def exportToPdf(filePath,savePath):
 		return None
 	
         detailsFile = file(PATH + '/../.temp/details.txt',"wb")
-        string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + `os.path.getsize(filePath)` + "\n\n\n\n#DNA CHUNKS :- \n\n"
+        string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + str(os.path.getsize(filePath)) + "\n\n\n\n#DNA CHUNKS :- \n\n"
  	detailsFile.write(string)
         
         fileOpened = open(filePath,"rb")
