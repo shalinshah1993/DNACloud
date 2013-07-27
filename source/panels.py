@@ -691,13 +691,13 @@ class estimator(wx.Dialog):
                                 self.details = "#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + `self.GCContent` + "\n-  Total Cost($ of DNA String):\t\t\t" + `self.totalCost` + "\n-   Min Melting Point(℃/nucleotide):\t" + str(self.minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t" + str(self.maxMeltingPoint)
                                 """
                                 try:
-                                        int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
-                                        int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                        float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                        float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
                                 except ValueError:
                                         wx.MessageDialog(self,'Please fill numbers and not alphabets', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal() 
                                         return
 
-                                naContent = int(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                naContent = float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
                                 
                                 p = multiprocessing.Process(target = extraModules.getGCContent , args = (self.path,float(self.priceText.GetString(0,self.priceText.GetLastPosition())),naContent,) , name = "Checking Details Process")
                                 p.start()
