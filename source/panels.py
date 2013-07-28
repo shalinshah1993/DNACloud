@@ -1,4 +1,16 @@
 # -*- coding: utf-8 -*-
+"""
+#########################################################################
+Author: Shalin Shah
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 28 July 2013
+Website: www.guptalab.org/dnacloud
+This module contains both the panels for encoding and decoding.
+#########################################################################
+"""
+
 import sys
 from PIL import Image
 from PIL import PngImagePlugin
@@ -19,19 +31,24 @@ else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 #print PATH , "panels"
 
+FILE_EXT = '.dnac'
 BARCODE_HEIGHT = 96
 BARCODE_WIDTH = 470
 PREF_DISCLAIMER = "Disclaimer : Please note that this details will be used to identify user of the DNA strings by Bio Companies hence these are mandatory to be filled."
 
-SOFTWARE_DETAILS = "\n\n  Version 1.0\n\n  www.guptalab.org/dnacloud\n\n  Report bugs at dnacloud@guptalab.org"
+SOFTWARE_DETAILS = "\n\n  Version 1.0\n\n  Visit us at www.guptalab.org/dnacloud\n\n  Contact us at dnacloud@guptalab.org"
 
 class encodePanel(wx.Panel):
 	def __init__(self,parent):
 		wx.Panel.__init__(self,parent = parent,style = wx.TAB_TRAVERSAL)
 		
 		self.vBox1 = wx.BoxSizer(wx.VERTICAL)
+		head = wx.StaticText(self ,label = "DNA-ENCODER",style = wx.CENTER)
+		font = wx.Font(pointSize = 14, family = wx.DEFAULT,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
+		head.SetFont(font)
+		self.vBox1.Add(head ,flag = wx.ALIGN_CENTER | wx.TOP | wx.LEFT , border = 10)
 #This is the adjustment of the Basic BUI text and textCtrl panels along with save to DataBase and Discard Button Options
-		head = wx.StaticText(self ,label = "Encode file into DNA String",style = wx.CENTER)
+		head = wx.StaticText(self ,label = "Encode data file into DNA String",style = wx.CENTER)
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
 		self.vBox1.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
@@ -39,9 +56,9 @@ class encodePanel(wx.Panel):
 		self.vBox1.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
 		
 		self.hBox1 = wx.BoxSizer(wx.HORIZONTAL)
-		self.butChoose = wx.Button(self , label = "Choose File",size = (100,30))
+		self.butChoose = wx.Button(self , label = "Choose file",size = (150,30))
 		self.hBox1.Add(self.butChoose,flag = wx.EXPAND | wx.LEFT , border = 10)
-		path = wx.StaticText(self, label = "Select any File from you File System")
+		path = wx.StaticText(self, label = "Select any data file (audio, video, doc etc.) from your computer")
 		self.hBox1.Add(path,flag = wx.ALIGN_CENTER_VERTICAL | wx.LEFT , border = 20)
 		self.vBox1.Add(self.hBox1)
 
@@ -82,7 +99,7 @@ class encodePanel(wx.Panel):
 		self.vBox1.Add(self.hBox4,flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 5)
 		
 		self.hBox5 = wx.BoxSizer(wx.HORIZONTAL)
-		content1 = wx.StaticText(self, label = "File Size(Bytes) : " , style = wx.ALIGN_CENTRE)
+		content1 = wx.StaticText(self, label = "File Size (Bytes) : " , style = wx.ALIGN_CENTRE)
 		self.txt5 = wx.TextCtrl(self,name = "hBox5",size = (300,25),style= wx.TE_READONLY)
 		self.hBox5.Add(content1, 2, flag = wx.EXPAND)
 		self.hBox5.Add(self.txt5, 8, flag = wx.EXPAND | wx.RIGHT , border = 20)
@@ -115,8 +132,8 @@ class encodePanel(wx.Panel):
 		self.vBox1.Add(self.hBox10 ,flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 5)
 		"""
 		self.hBox11 = wx.BoxSizer(wx.HORIZONTAL)
-		self.saveBut = wx.Button(self,label = "Encode  your  File",size = (200,40))
-		self.discardBut = wx.Button(self,label = "Reset  file  Selected",size = (200,40))
+		self.saveBut = wx.Button(self,label = "Encode  your  File",size = (150,30))
+		self.discardBut = wx.Button(self,label = "Reset  file  Selected",size = (150,30))
 		self.hBox11.Add(self.saveBut, flag = wx.EXPAND | wx.LEFT  , border = 20)
 		self.hBox11.Add(self.discardBut, flag = wx.EXPAND | wx.LEFT ,border = 20)
 		self.vBox1.Add(self.hBox11 ,flag = wx.TOP | wx.BOTTOM ,border = 10)                
@@ -165,30 +182,14 @@ class decodePanel(wx.Panel):
 		wx.Panel.__init__(self,parent = parent,style = wx.TAB_TRAVERSAL)
 	
 		self.vBox2 = wx.BoxSizer(wx.VERTICAL)
-		head = wx.StaticText(self ,label = "Generate File from DNA String",style = wx.CENTER)
-		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+
+		self.vBox2 = wx.BoxSizer(wx.VERTICAL)
+		head = wx.StaticText(self ,label = "DNA-DECODER",style = wx.CENTER)
+		font = wx.Font(pointSize = 14, family = wx.FONTFAMILY_ROMAN,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
 		head.SetFont(font)
-		self.vBox2.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
-
-		line1 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
-		self.vBox2.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
-
+		self.vBox2.Add(head ,flag = wx.ALIGN_CENTER | wx.LEFT | wx.TOP , border = 10)
 		
-		self.hBox21 = wx.BoxSizer(wx.HORIZONTAL)
-		path = wx.StaticText(self, label = "Please Write DNA String :", style = wx.ALIGN_CENTRE)
-		self.txt21 = wx.TextCtrl(self,name = "hBox") 
-                self.hBox21.Add(path, 2,flag = wx.EXPAND)
-		self.hBox21.Add(self.txt21, 8,flag = wx.EXPAND | wx.RIGHT , border = 20)
-		self.vBox2.Add(self.hBox21 , flag = wx.EXPAND)
-
-		self.hBox22 = wx.BoxSizer(wx.HORIZONTAL)
-		self.decodeBut = wx.Button(self,label = "Decode",size = (150,30))
-		self.resetBut = wx.Button(self,label = "Reset",size = (150,30))
-		self.hBox22.Add(self.decodeBut ,flag = wx.LEFT ,border = 20)
-		self.hBox22.Add(self.resetBut ,flag = wx.EXPAND | wx.LEFT , border = 20)
-		self.vBox2.Add(self.hBox22 ,flag = wx.EXPAND | wx.TOP | wx.ALIGN_CENTER, border = 15)   
-
-		head = wx.StaticText(self ,label = "Generate File from already encoded files",style = wx.CENTER)
+		head = wx.StaticText(self ,label = "Generate data file from already encoded DNA files",style = wx.CENTER)
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
 		self.vBox2.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT, border = 20)
@@ -207,7 +208,7 @@ class decodePanel(wx.Panel):
 		self.vBox2.Add(self.hBox23,flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 5)
 		
 		self.hBox24 = wx.BoxSizer(wx.HORIZONTAL)
-		content1 = wx.StaticText(self, label = "Lenght Of DNA String (approx.) : " , style = wx.ALIGN_CENTRE)
+		content1 = wx.StaticText(self, label = "Lenght of DNA String (approx.) : " , style = wx.ALIGN_CENTRE)
 		self.txt2 = wx.TextCtrl(self,name = "hBox3",style= wx.TE_READONLY)
 		self.hBox24.Add(content1, 2, flag = wx.EXPAND)
 		self.hBox24.Add(self.txt2, 8, flag = wx.EXPAND | wx.RIGHT , border = 20)
@@ -221,13 +222,37 @@ class decodePanel(wx.Panel):
 		self.vBox2.Add(self.hBox25,flag = wx.EXPAND | wx.TOP , border = 10)
 		
 		self.hBox26 = wx.BoxSizer(wx.HORIZONTAL)
-		self.butChoose = wx.Button(self , label = "Select  .dna  File ",size = (200,40))
+		self.butChoose = wx.Button(self , label = "Select  .dnac  File ",size = (150,30))
 		self.hBox26.Add(self.butChoose,flag = wx.EXPAND | wx.LEFT , border = 20)
-		self.decodeBut1 = wx.Button(self,label = "Decode  selected  File ",size = (200,40))
+		self.decodeBut1 = wx.Button(self,label = "Decode  selected  File ",size = (150,30))
 		self.hBox26.Add(self.decodeBut1,flag = wx.EXPAND | wx.LEFT , border = 20)
-		self.vBox2.Add(self.hBox26,flag = wx.TOP , border = 15)
-		
-		"""
+		self.vBox2.Add(self.hBox26,flag = wx.TOP | wx.BOTTOM, border = 15)
+
+                
+		head = wx.StaticText(self ,label = "Try DNA String just for fun",style = wx.CENTER)
+                font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+                head.SetFont(font)
+                self.vBox2.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
+
+                line1 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
+                self.vBox2.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
+
+                
+                self.hBox21 = wx.BoxSizer(wx.HORIZONTAL)
+                path = wx.StaticText(self, label = "Please Write DNA String :", style = wx.ALIGN_CENTRE)
+                self.txt21 = wx.TextCtrl(self,name = "hBox") 
+                self.hBox21.Add(path, 2,flag = wx.EXPAND)
+                self.hBox21.Add(self.txt21, 8,flag = wx.EXPAND | wx.RIGHT , border = 20)
+                self.vBox2.Add(self.hBox21 , flag = wx.EXPAND)
+
+                self.hBox22 = wx.BoxSizer(wx.HORIZONTAL)
+                self.decodeBut = wx.Button(self,label = "Decode",size = (150,30))
+                self.resetBut = wx.Button(self,label = "Reset",size = (150,30))
+                self.hBox22.Add(self.decodeBut ,flag = wx.LEFT ,border = 20)
+                self.hBox22.Add(self.resetBut ,flag = wx.EXPAND | wx.LEFT , border = 20)
+                self.vBox2.Add(self.hBox22 ,flag = wx.EXPAND | wx.TOP | wx.ALIGN_CENTER, border = 15)   
+
+                """
 		head =  wx.StaticText(self,label = "© QR Code generated for given User Details")
 		font = wx.Font(9, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
@@ -302,7 +327,7 @@ class Preferences(wx.Dialog):
 		self.vBox.Add(self.hBoxd, flag = wx.TOP | wx.BOTTOM, border = 7)
 
 		self.hBoxb = wx.BoxSizer(wx.HORIZONTAL)
-		path = wx.StaticText(self,label = "File Name (Eg a.mkv.dna): ", style = wx.ALIGN_CENTRE)
+		path = wx.StaticText(self,label = "File Name (Eg a.mkv.dnac): ", style = wx.ALIGN_CENTRE)
 		self.hBoxb.Add(path,proportion = 2,flag = wx.EXPAND | wx.LEFT,border = 7)
 		self.txtb = wx.TextCtrl(self,name = "hBox")
 		self.hBoxb.Add(self.txtb,proportion = 5 ,flag = wx.EXPAND |wx.RIGHT, border = 10)
@@ -525,7 +550,7 @@ class memEstimator(wx.Dialog):
 		
 		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(ico)
-		head = wx.StaticText(self ,label = "Estimate the numbers",style = wx.ALIGN_CENTER_HORIZONTAL)
+		head = wx.StaticText(self ,label = "Memory Estimation",style = wx.ALIGN_CENTER_HORIZONTAL)
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
 		self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 5)
@@ -536,7 +561,7 @@ class memEstimator(wx.Dialog):
 		self.hBox = wx.BoxSizer(wx.HORIZONTAL)
 		self.butChoose = wx.Button(self , label = "Choose File")
 		self.hBox.Add(self.butChoose,flag = wx.EXPAND | wx.LEFT | wx.RIGHT , border = 10,proportion = 1)
-		path = wx.StaticText(self, label = "Select a File from your File System")
+		path = wx.StaticText(self, label = "Select a data file from your Computer")
 		self.hBox.Add(path,flag = wx.EXPAND,proportion = 2)
 		self.vBox.Add(self.hBox)
 		
@@ -597,7 +622,7 @@ class estimator(wx.Dialog):
 		self.vBox = wx.BoxSizer(wx.VERTICAL)
 		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(ico)
-		head = wx.StaticText(self ,label = "Estimate properties",style = wx.ALIGN_CENTER_HORIZONTAL)
+		head = wx.StaticText(self ,label = "Biochemical Property Estimator",style = wx.ALIGN_CENTER_HORIZONTAL)
 		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
 		self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 5)
@@ -608,7 +633,7 @@ class estimator(wx.Dialog):
 		self.hBox = wx.BoxSizer(wx.HORIZONTAL)
 		self.butChoose = wx.Button(self , label = "Choose File")
 		self.hBox.Add(self.butChoose,flag = wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_VERTICAL , border = 10,proportion = 1)
-		path = wx.StaticText(self, label = "Select a DNA File from your File System",style = wx.ALIGN_CENTER_VERTICAL)
+		path = wx.StaticText(self, label = "Select a DNA file from your Computer",style = wx.ALIGN_CENTER_VERTICAL)
 		self.hBox.Add(path,flag = wx.ALIGN_CENTER_VERTICAL,proportion = 2)
 		self.vBox.Add(self.hBox)
 		
@@ -635,7 +660,7 @@ class estimator(wx.Dialog):
 		head = wx.StaticText(self ,label = "Disclaimer:This values are just an approximation and the actual values may vary",style = wx.ALIGN_CENTER_HORIZONTAL)
 		font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
-		self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT |wx.ALIGN_CENTER_HORIZONTAL, border = 10)
+		self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT |wx.ALIGN_CENTER_HORIZONTAL | wx.RIGHT, border = 10)
 		
 		line2 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
 		self.vBox.Add(line2, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 15)
@@ -675,7 +700,7 @@ class estimator(wx.Dialog):
 	def calc(self,e):
 		self.txt.Clear()
 		if self.path != None:
-                        if not self.saltText.IsEmpty() and not self.priceText.IsEmpty() and ".dna" in self.path:
+                        if not self.saltText.IsEmpty() and not self.priceText.IsEmpty() and FILE_EXT in self.path:
                                 """
                                 tempTuple = extraModules.getGCContent(self.path)
                                 noOfGCPairs = tempTuple[0]; self.minGC = (tempTuple[1] * 100)/OLIGO_SIZE; self.maxGC = (tempTuple[2] * 100)/OLIGO_SIZE
@@ -697,12 +722,13 @@ class estimator(wx.Dialog):
                                         wx.MessageDialog(self,'Please fill numbers and not alphabets', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal() 
                                         return
 
-                                naContent = float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                self.naContent = float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
+                                self.costPerBase = float(self.priceText.GetString(0,self.priceText.GetLastPosition()))
                                 
-                                p = multiprocessing.Process(target = extraModules.getGCContent , args = (self.path,float(self.priceText.GetString(0,self.priceText.GetLastPosition())),naContent,) , name = "Checking Details Process")
+                                p = multiprocessing.Process(target = extraModules.getGCContent , args = (self.path,self.costPerBase,self.naContent,) , name = "Checking Details Process")
                                 p.start()
-                                temp = wx.ProgressDialog('Please wait...','Analysing the String....This may take a while....' ,parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
-                                temp.SetSize((400,180))
+                                temp = wx.ProgressDialog('Please wait...','Analysing the String....This may take a while....' ,parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+                                temp.SetSize((400,160))
                                 while len(multiprocessing.active_children()) != 0:
                                         time.sleep(0.1)
                                         if not temp.UpdatePulse("Analysing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
@@ -718,9 +744,9 @@ class estimator(wx.Dialog):
                                 tempFile.close()
                                 self.butSave.Enable()
                         else:
-                                wx.MessageDialog(self,'Make sure you filled the required details and .dna file is selected', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                                wx.MessageDialog(self,'Make sure you filled the required details and .dnac file is selected', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
                 else:
-                        wx.MessageDialog(self,'Make sure you selected a .dna file', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                        wx.MessageDialog(self,'Make sure you selected a .dnac file', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
 		
 	def onSave(self,e):
 		locationSelector = wx.FileDialog(self,"Please select location to save your details",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -729,7 +755,7 @@ class estimator(wx.Dialog):
 			self.savePath = paths
 			
 			propFile = file(self.savePath + ".txt","w")
-			propFile.write("\n" + self.details)
+			propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t\t" + str(self.costPerBase) + "\n" + self.details)
 			#propFile.write("\n\n\n © 2013 - GUPTA RESEARCH LABS - Generated by DNA-CLOUD")		
 			
 			wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 

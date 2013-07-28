@@ -1,3 +1,15 @@
+"""
+#########################################################################
+Author: Shalin Shah
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 28 July 2013
+Website: www.guptalab.org/dnacloud
+This module contains method to encode a given data file into corrosponding dnac file.
+#########################################################################
+"""
+
 from cStringIO import StringIO
 import sqlite3
 import sqlite3 as lite
@@ -13,6 +25,7 @@ import os
 import gc
 import extraModules
 
+FILE_EXT = '.dnac'
 if hasattr(sys, "frozen"):
         PATH = os.path.dirname(sys.executable)
 else:
@@ -39,10 +52,10 @@ def genDNAString(readPath):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print noOfFileChunks
+		#print noOfFileChunks
 		
 		if noOfFileChunks > 1:
-                        print "Chunk No: 1",
+                        #print "Chunk No: 1",
                         tempString = StringIO()
 			tempString.write(fileOpened.read(CHUNK_SIZE))
 			a = extraModules.stringToAscii(tempString.getvalue())
@@ -60,7 +73,7 @@ def genDNAString(readPath):
 			del huffmanDictionary
 			
 			for chunk_number in range(1,noOfFileChunks-1):
-				print "Chunk No:",chunk_number + 1
+				#print "Chunk No:",chunk_number + 1
                                 tempString = StringIO()
 				tempString.write(fileOpened.read(CHUNK_SIZE))
 					
@@ -79,8 +92,7 @@ def genDNAString(readPath):
 				del a
 				del tempString
 				
-			print "Chunk No:",noOfFileChunks
-			
+			#print "Chunk No:",noOfFileChunks
 			
 			tempString =StringIO()
 			tempString.write(fileOpened.read(CHUNK_SIZE))
@@ -98,7 +110,7 @@ def genDNAString(readPath):
 			del a
 			del tempString
 		else:
-			print "Chunk No: 1",
+			#print "Chunk No: 1",
 			tempString = StringIO()
 			tempString.write(fileOpened.read())
 			a = extraModules.stringToAscii(tempString.getvalue())
@@ -140,7 +152,7 @@ def genDNAChunks(readPath,path):
 	try:
 		xtemp = readPath.split(".")
 		fileOpened = open(PATH + '\..\.temp\dnaString.txt',"rb")
-		dnaFile = file(path + "." + xtemp[len(xtemp) - 1] + '.dna','wb')
+		dnaFile = file(path + "." + xtemp[len(xtemp) - 1] + FILE_EXT,'wb')
 		
 		dnaListLength = 0
 		fileSize = os.path.getsize(PATH + '\..\.temp\dnaString.txt')
@@ -152,11 +164,10 @@ def genDNAChunks(readPath,path):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print "No of Chunks :-",noOfFileChunks
-		
+		#print "No of Chunks :-",noOfFileChunks
 		
 		if noOfFileChunks > 1:
-                        print "Chunk No: 1"
+                        #print "Chunk No: 1"
 			tempString = StringIO()
 			tempString.write(fileOpened.read(CHUNK_SIZE))
 			prependString = ""
@@ -178,7 +189,7 @@ def genDNAChunks(readPath,path):
 			del dnaList	
 		
 			for chunk_number in range(1,noOfFileChunks-1):
-				print "Chunk No:",chunk_number + 1
+				#print "Chunk No:",chunk_number + 1
 				tempString = StringIO()
 				tempString.write(prependString)
 				tempString.write(fileOpened.read(CHUNK_SIZE))
@@ -203,7 +214,7 @@ def genDNAChunks(readPath,path):
 				del dnaString
 				del dnaList
 		
-			print "Chunk No:",noOfFileChunks
+			#print "Chunk No:",noOfFileChunks
 			tempString = StringIO()
 			tempString.write(prependString)
 			tempString.write(fileOpened.read())
@@ -222,7 +233,7 @@ def genDNAChunks(readPath,path):
 			del dnaString
 			del dnaList
 		else:
-			print "Chunk No: 1"
+			#print "Chunk No: 1"
 			tempString = StringIO()
 			tempString.write(fileOpened.read())
 			prependString = ""

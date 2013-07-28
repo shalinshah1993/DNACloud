@@ -1,3 +1,16 @@
+"""
+#########################################################################
+Author: Shalin Shah
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 28 July 2013
+Website: www.guptalab.org/dnacloud
+This module is nothing but Huffman Encoding given any string as input we
+get there Huffman values as output.
+#########################################################################
+"""
+
 from collections import Counter
 from treelib import Node,Tree
 

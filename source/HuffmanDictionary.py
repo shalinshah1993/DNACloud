@@ -1,4 +1,16 @@
 # -*- coding: utf-8 -*-
+"""
+#########################################################################
+Author: Shalin Shah
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 28 July 2013
+Website: www.guptalab.org/dnacloud
+This module contains dictionary of Huffman values.
+#########################################################################
+"""
+
 import extraModules
 import gc
 

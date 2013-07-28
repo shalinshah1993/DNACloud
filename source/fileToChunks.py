@@ -1,3 +1,15 @@
+"""
+#########################################################################
+Author: Shalin Shah
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 28 July 2013
+Website: www.guptalab.org/dnacloud
+This module contains method which are not yet used but could be used in future to ensure parellel processing.
+#########################################################################
+"""
+
 #This method can be used in future when a complete parellel process is available to encode and decode to and from DNA.At present thi file is not used.
 def file_block(fp, number_of_blocks, block):
     '''
@@ -27,7 +39,7 @@ import os
 import sys
 #PATH = os.path.dirname(os.path.abspath(__file__))
 PATH =  sys.path[0]
-print PATH , "chunks"
+#print PATH , "chunks"
 """ 
 if __name__ == '__main__':
     fp = open(PATH + '/../icons/DNAicon.png','r')

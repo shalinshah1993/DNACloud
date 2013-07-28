@@ -1,4 +1,16 @@
 # -*- coding: cp1252 -*-
+"""
+#########################################################################
+Author: Shalin Shah
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 28 July 2013
+Website: www.guptalab.org/dnacloud
+This module contains code for the main GUI Frame.
+#########################################################################
+"""
+
 import webbrowser
 import os
 import wx
@@ -35,6 +47,7 @@ else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 #print PATH,"main"
 ############################################
+FILE_EXT = '.dnac'
 SPLASH_TIMEOUT = 2000
 VERSION = "1.0"
 NAME = "DNA-CLOUD"
@@ -42,12 +55,12 @@ OFFICIAL_WEBSITE = 'http://www.guptalab.org/dnacloud'
 PRODUCT_LINK = "http://www.guptalab.org/dnacloud/demo"
 FEEDBACK_LINK = "https://docs.google.com/forms/d/1YGu_I9z7Z56oAP1enGByBahqs-ItHbLqnBwCoJouOro/viewform"
 STATUS_BAR_MESSAGE = "(C) 2013 Gupta Lab - www.guptalab.org/dnacloud"
-ABOUT_COPYRIGHT = '(C) 2013 - All rights Reserved'
+ABOUT_COPYRIGHT = '(C) 2013 - All rights Reserved.'
 KEY_DEVELOPER = 'Shalin Shah'
-ICON_ARTIST = 'Somusubhra Bairi - DNA Cloud Icon Artist'
+ICON_ARTIST = 'Foram Joshi - DNA Cloud Icon Artist'
 ICON_IDEA = 'Dixita Limbachiya - DNA Cloud Icon Idea'
 
-ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77–80). For more information visit us website which is as under."
+ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77–80). For more information visit us at "
 
 DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license agreement and may be used only in accordance with the terms of the agreement.\n\nAny selling or distribution of the program or its parts,original or modified, is prohibited without a written permission from Manish K Gupta."
 #############################################
@@ -87,15 +100,15 @@ class MyFrame(wx.Frame):
                 #importMenu.Append(52,"Import DNA Chunks..")
                 
                 estimatorMenu = wx.Menu()
-                estimatorMenu.Append(61,"Memory Required")
-                estimatorMenu.Append(62,"Bio-Chemical Properties")
+                estimatorMenu.Append(61,"Memory Required (Data File)")
+                estimatorMenu.Append(62,"Bio-Chemical Properties (DNA File)")
                 
 #Add items to the menues by using the Append option after creating the item or using the builtin item                
-                fileItem1 = wx.MenuItem(fileMenu,1,"File to &DNA")
+                fileItem1 = wx.MenuItem(fileMenu,1,"File to &DNA (Encoder)")
                 fileMenu.AppendItem(fileItem1)
-                fileItem2 = wx.MenuItem(fileMenu,2,"DNA to &File")
+                fileItem2 = wx.MenuItem(fileMenu,2,"DNA to &File (Decoder)")
                 fileMenu.AppendItem(fileItem2)
-                fileMenu.AppendMenu(wx.ID_ANY,'E&stimator',estimatorMenu)
+                fileMenu.AppendMenu(wx.ID_ANY,'Storage E&stimator',estimatorMenu)
                 fileMenu.AppendSeparator()
                 fileItem7 = wx.MenuItem(fileMenu,7,"Export Generated &Barcode")
                 fileMenu.AppendItem(fileItem7)     
@@ -103,11 +116,13 @@ class MyFrame(wx.Frame):
                 fileMenu.AppendItem(fileItem4)
                 fileItem5 = wx.MenuItem(fileMenu,5,"Import DNA Sequencer File")
                 fileMenu.AppendItem(fileItem5)
-                fileItem8 = wx.MenuItem(fileMenu,8,"Export .dna to .pdf with Details")
+                fileItem8 = wx.MenuItem(fileMenu,8,"Export Details to PDF")
                 fileMenu.AppendItem(fileItem8)
+                fileItem9 = wx.MenuItem(fileMenu,9,"Export Latex File")
+                fileMenu.AppendItem(fileItem9)
                 #fileMenu.AppendMenu(wx.ID_ANY,'E&xport to CSV',exportMenu)
                 #fileMenu.AppendMenu(wx.ID_ANY,'&Import from CSV',importMenu)
-                fileItem6 = wx.MenuItem(fileMenu,6,"&Clear temp Files")
+                fileItem6 = wx.MenuItem(fileMenu,6,"&Clear Temporary Files")
                 fileMenu.AppendItem(fileItem6)
                 fileMenu.AppendSeparator()
                 fileItem3 = wx.MenuItem(fileMenu,3,"&Exit")
@@ -166,6 +181,7 @@ class MyFrame(wx.Frame):
                 self.Bind(wx.EVT_MENU,self.estimator,id = 62)
                 self.Bind(wx.EVT_MENU,self.productDemo,id = 25)
                 self.Bind(wx.EVT_MENU,self.exportPdf,id = 8)
+                self.Bind(wx.EVT_MENU,self.exportLatex,id = 9)
                 
                 super(MyFrame,self).SetSize((1000,1000))
                 super(MyFrame,self).SetTitle(NAME)
@@ -330,7 +346,7 @@ class MyFrame(wx.Frame):
 			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
 			if not terminated:
 				p.start()
-			temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
+			temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 			temp.SetSize((450,180))
 			while len(multiprocessing.active_children()) != 0:
 				time.sleep(0.1)
@@ -381,7 +397,7 @@ class MyFrame(wx.Frame):
         def decodeBut1(self,e):
 		try:
 			progressMax = 100
-			dialog = wx.ProgressDialog("Note!", "Your file is being prepared from DNA Chunks, Please Wait...", progressMax, style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
+			dialog = wx.ProgressDialog("Note!", "Your file is being prepared from DNA Chunks, Please Wait...", progressMax, style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 			keepGoing = True
 			count = 0
 
@@ -428,7 +444,7 @@ class MyFrame(wx.Frame):
 
 #This method is called whenever we have a DNA String to be decoded 
 	def decodeBut2(self,e):
-		if (not self.pnl1.txt.IsEmpty()) and (".dna" in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())):
+		if (not self.pnl1.txt.IsEmpty()) and (FILE_EXT in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())):
 
 			locationSelector = wx.FileDialog(self,"Please select location to save your decoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
@@ -443,7 +459,7 @@ class MyFrame(wx.Frame):
 			if not terminated:
                                 p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Encode Process")
 				p.start()
-			temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT)
+			temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 			temp.SetSize((450,180))
 			while len(multiprocessing.active_children()) != 0:
 				time.sleep(0.1)
@@ -459,7 +475,7 @@ class MyFrame(wx.Frame):
 			if not terminated:
 				    wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
 		else:
-			wx.MessageDialog(self,'Please Select a .dna file', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			wx.MessageDialog(self,'Please Select a .dnac file', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 
         def discard1(self,e):
                 self.pnl1.txt21.Clear()
@@ -519,13 +535,13 @@ class MyFrame(wx.Frame):
 		os.chdir(PATH)
 		
         def exportPdf(self,e):
-                fileSelector = wx.FileDialog(self, message="Choose a .DNA file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
+                fileSelector = wx.FileDialog(self, message="Choose a .dnac file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
                 if fileSelector.ShowModal() == wx.ID_OK:
                         paths = fileSelector.GetPaths()
                         filePath = paths[0]
                         terminated = False
 
-                        if ".dna" in filePath:
+                        if FILE_EXT in filePath:
                                 locationSelector = wx.FileDialog(self,"Please select location to save your PDF file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
                                 if locationSelector.ShowModal() == wx.ID_OK:
                                         paths = locationSelector.GetPath()
@@ -539,8 +555,8 @@ class MyFrame(wx.Frame):
                                 if not terminated:
                                         exportToPdf = multiprocessing.Process(target = extraModules.exportToPdf , name = "PDF Exporter" , args = (filePath,savePath))
                                         exportToPdf.start()
-                                temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT)
-                                temp.SetSize((450,150))
+                                temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+                                temp.SetSize((450,180))
                                 while len(multiprocessing.active_children()) != 0:
                                         time.sleep(0.1)
                                         if not temp.UpdatePulse("Exporting the File....This may take several minutes...\n.....so sit back and relax.....")[0]:
@@ -553,13 +569,51 @@ class MyFrame(wx.Frame):
                                 if not terminated:
                                         wx.MessageDialog(self,'PDF created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
                         else:
-                                wx.MessageDialog(self,'Please select a .dna file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                                wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                fileSelector.Destroy()
+                del fileSelector
+
+        def exportLatex(self,e):
+                fileSelector = wx.FileDialog(self, message="Choose a .dnac file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
+                if fileSelector.ShowModal() == wx.ID_OK:
+                        paths = fileSelector.GetPaths()
+                        filePath = paths[0]
+                        terminated = False
+
+                        if FILE_EXT in filePath:
+                                locationSelector = wx.FileDialog(self,"Please select location to save your Latex file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+                                if locationSelector.ShowModal() == wx.ID_OK:
+                                        paths = locationSelector.GetPath()
+                                        savePath = paths
+                                        terminated = False
+                                else:
+                                        terminated = True
+                                locationSelector.Destroy()
+                                del locationSelector
+                                
+                                if not terminated:
+                                        exportToLatex = multiprocessing.Process(target = extraModules.exportToLatex , name = "Latex Exporter" , args = (filePath,savePath))
+                                        exportToLatex.start()
+                                temp = wx.ProgressDialog('Exporting to latex file....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+                                temp.SetSize((450,180))
+                                while len(multiprocessing.active_children()) != 0:
+                                        time.sleep(0.1)
+                                        if not temp.UpdatePulse("Exporting to latex file....This may take several minutes...\n.....so sit back and relax.....")[0]:
+                                                exportToLatex.terminate()
+                                                terminated = True
+                                                break
+                                temp.Destroy()
+                                exportToLatex.join()
+                                exportToLatex.terminate()
+                                if not terminated:
+                                        wx.MessageDialog(self,'Latex File created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+                        else:
+                                wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
                 fileSelector.Destroy()
                 del fileSelector
                 
 	def exportList(self,e):
-		#extraModules.writeToCsv(stringA,self.ascii,self.huffmanString,self.S1,self.S2,self.S3,self.dnaString,self.fDoubleCompliment)
-                """
+		"""
 		files = []
 		print PATH
 		con = lite.connect(PATH + '/../database/dnaBase.db')

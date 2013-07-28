@@ -1,3 +1,14 @@
+"""
+Author: Shalin Shah
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 28 July 2013
+Website: www.guptalab.org/dnacloud
+This module contains method to decode the given dnac file.
+"""
+
+
 from cStringIO import StringIO
 import sqlite3
 import sqlite3 as lite
@@ -49,10 +60,10 @@ def degenrateDNAString(readPath,savePath):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print "No of Chunks" , noOfFileChunks
+		#print "No of Chunks" , noOfFileChunks
 		
 		dnaLength = 0
-		print "Chunk No : 1"
+		#print "Chunk No : 1"
 		
 		if noOfFileChunks > 1:
 		  
@@ -76,7 +87,7 @@ def degenrateDNAString(readPath,savePath):
 			del string
 		
 			for chunk_number in range(1,noOfFileChunks - 1):
-				print "Chunk No :",chunk_number + 1
+				#print "Chunk No :",chunk_number + 1
 				tempString = StringIO()
 				tempString.write(prependString)
 				tempString.write(dnaFile.read(CHUNK_SIZE))
@@ -104,7 +115,7 @@ def degenrateDNAString(readPath,savePath):
 				del dnaString
 				del base3String
 				
-			print "Chunk No:",noOfFileChunks
+			#print "Chunk No:",noOfFileChunks
 			tempString = StringIO()
 			tempString.write(prependString)
 			tempString.write(dnaFile.read(fileSize - (noOfFileChunks - 1) * CHUNK_SIZE))
@@ -156,10 +167,10 @@ def degenrateDNAList(readPath):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print "No of Chunks" , noOfFileChunks
+		#print "No of Chunks" , noOfFileChunks
 		
 		if noOfFileChunks > 1:
-			print "Chunk No : 1"
+			#print "Chunk No : 1"
 			dnaList = fileOpened.read(CHUNK_SIZE)
 			prependString = ""
 			j = -1
@@ -195,7 +206,7 @@ def degenrateDNAList(readPath):
 			del j
 			del dnaList
 			for chunk_number in xrange(1,noOfFileChunks-1):
-				print "Chunk No :" , chunk_number + 1
+				#print "Chunk No :" , chunk_number + 1
 				dnaString = StringIO()
 				tempList = prependString
 				dnaList = fileOpened.read(CHUNK_SIZE)
@@ -234,7 +245,7 @@ def degenrateDNAList(readPath):
 				del j
 				del dnaList
 				
-			print "Chunk No :",noOfFileChunks
+			#print "Chunk No :",noOfFileChunks
 			dnaString = StringIO()
 			tempList = prependString
 			dnaList = fileOpened.read()
@@ -348,14 +359,14 @@ def degenrateDNAListWithGCCount(readPath):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print "No of Chunks" , noOfFileChunks
+		#print "No of Chunks" , noOfFileChunks
 		minGC = 117
 		maxGC = 0
 		GCCount = 0
 		listLength = 0
 		
 		if noOfFileChunks > 1:
-			print "Chunk No : 1"
+			#print "Chunk No : 1"
 			dnaList = fileOpened.read(CHUNK_SIZE)
 			prependString = ""
 			j = -1
@@ -399,7 +410,7 @@ def degenrateDNAListWithGCCount(readPath):
 			del j
 			del dnaList
 			for chunk_number in xrange(1,noOfFileChunks-1):
-				print "Chunk No :" , chunk_number + 1
+				#print "Chunk No :" , chunk_number + 1
 				dnaString = StringIO()
 				tempList = prependString
 				dnaList = fileOpened.read(CHUNK_SIZE)
@@ -446,7 +457,7 @@ def degenrateDNAListWithGCCount(readPath):
 				del j
 				del dnaList
 				
-			print "Chunk No :",noOfFileChunks
+			#print "Chunk No :",noOfFileChunks
 			dnaString = StringIO()
 			tempList = prependString
 			dnaList = fileOpened.read()
