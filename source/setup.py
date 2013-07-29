@@ -11,6 +11,7 @@ This module is used to freeze the application.
 """
 
 from cx_Freeze import setup, Executable
+import sys
 
 includes = ["extraModules","panels","barcodeGenerator","encode","decode","HuffmanDictionary","pytxt2pdf"]
 excludes = [
@@ -18,7 +19,7 @@ excludes = [
     'pywin.debugger.dbgcon', 'pywin.dialogs', 'tcl',
     'Tkconstants', 'Tkinter'
 ]
-include_files = ['barcode/','PIL/']
+include_files = ['barcode/','PIL/',"registryFile.py"]
 
 build_exe_options = {
                      "includes":includes, 

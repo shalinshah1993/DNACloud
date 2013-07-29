@@ -65,7 +65,7 @@ if "linux" in sys.platform:
 
   DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license\nagreement and may be used only in accordance with the terms of the agreement.Any selling or distribution of the\nprogram or it parts,original or modified, is prohibited without a written permission from Manish K Gupta."
 
-elif win in sys.platform:  
+elif "win" in sys.platform:  
   ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77–80). For more information visit us at "
   
   DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license agreement and may be used only in accordance with the terms of the agreement.\n\nAny selling or distribution of the program or its parts,original or modified, is prohibited without a written permission from Manish K Gupta."
@@ -503,7 +503,7 @@ class MyFrame(wx.Frame):
 				temp.SetSize((450,180))
 				while len(multiprocessing.active_children()) != 0:
 					time.sleep(0.1)
-					if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and 		relax.....")[0]:
+					if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
 						p.terminate()
 						terminated = True
 						self.clear()

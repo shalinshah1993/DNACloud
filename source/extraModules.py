@@ -690,10 +690,7 @@ def getGCContent(path,costPerBase,naContent):
 		minMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (minGC) - 600)/OLIGO_SIZE 
 		maxMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (maxGC) - 600)/OLIGO_SIZE 
 			
-		if "win" in sys.platform:
-			details = "#File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-  Min Melting Point(°C/nucleotide):\t\t\t" + str(minMeltingPoint) + "\n-  Max Melting Point(°C/nucleotide):\t\t\t" + str(maxMeltingPoint)
-		elif "linux" in sys.platform:
-			details = "File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-   Min Melting Point(℃/nucleotide):\t\t" + str(minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t\t" + str(maxMeltingPoint)
+		details = "File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-   Min Melting Point(℃/nucleotide):\t\t" + str(minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t\t" + str(maxMeltingPoint)
 	
 		detailsFile = file(PATH + '/../.temp/details.txt',"wb")
 		detailsFile.write(details + "\n\n ©2013 Generated using DNA-CLOUD." )
@@ -718,7 +715,7 @@ def exportToPdf(filePath,savePath):
 		
 		dnaLength = 0
 		noOfGCPairs = 0
-		print "Chunk No : 1"
+		#print "Chunk No : 1"
 		
 		if noOfFileChunks > 1:
 		  
