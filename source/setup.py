@@ -25,16 +25,20 @@ build_exe_options = {
                      "excludes":excludes,
                      "include_files":include_files
 }
- 
+
+base = None
+if "win" in sys.platform:
+	base = "Win32GUI"
+
 exe = Executable(
     script="MainFrame.py",
-    base="Win32GUI"
+    base=base
 )
  
 setup(
     name = "Dna-Cloud",
     version = "1",
-    description = "Dna Cloud - Converter",
+    description = "Dna Cloud - A software to manage DNA Files",
     options = {"build_exe": build_exe_options},
     executables = [exe]
 )

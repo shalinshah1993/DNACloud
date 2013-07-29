@@ -645,11 +645,11 @@ def getGCContent(path,costPerBase,naContent):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print "No of Chunks" , noOfFileChunks
+		#print "No of Chunks" , noOfFileChunks
 		
 		dnaLength = 0
 		noOfGCPairs = 0
-		print "Chunk No : 1"
+		#print "Chunk No : 1"
 		
 		if noOfFileChunks > 1:
 		  
@@ -659,14 +659,14 @@ def getGCContent(path,costPerBase,naContent):
 			del tempString
 			
 			for chunk_number in range(1,noOfFileChunks - 1):
-				print "Chunk No :",chunk_number + 1
+				#print "Chunk No :",chunk_number + 1
 				tempString = dnaFile.read(CHUNK_SIZE)
 				noOfGCPairs += tempString.count('C')
 				noOfGCPairs += tempString.count('G')
 				dnaFile.flush()
 				del tempString
 
-			print "Chunk No:",noOfFileChunks
+			#print "Chunk No:",noOfFileChunks
 			tempString = dnaFile.read(fileSize - (noOfFileChunks - 1) * CHUNK_SIZE)
 			noOfGCPairs += tempString.count('C')
 			noOfGCPairs += tempString.count('G')
@@ -680,7 +680,6 @@ def getGCContent(path,costPerBase,naContent):
 			
 			del tempString
 			#print "Pairs :" ,noOfGCPairs
-			
 		dnaFile.close()
 		
 		noOfGCPairs = noOfGCPairs; minGC = (minMaxGC[0] * 100)/OLIGO_SIZE; maxGC = (minMaxGC[1] * 100)/OLIGO_SIZE
@@ -691,18 +690,20 @@ def getGCContent(path,costPerBase,naContent):
 		minMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (minGC) - 600)/OLIGO_SIZE 
 		maxMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (maxGC) - 600)/OLIGO_SIZE 
 			
-                details = "#File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-  Min Melting Point(°C/nucleotide):\t\t\t" + str(minMeltingPoint) + "\n-  Max Melting Point(°C/nucleotide):\t\t\t" + str(maxMeltingPoint)
-		
+		if "win" in sys.platform:
+			details = "#File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-  Min Melting Point(°C/nucleotide):\t\t\t" + str(minMeltingPoint) + "\n-  Max Melting Point(°C/nucleotide):\t\t\t" + str(maxMeltingPoint)
+		elif "linux" in sys.platform:
+			details = "File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-   Min Melting Point(℃/nucleotide):\t\t" + str(minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t\t" + str(maxMeltingPoint)
+	
 		detailsFile = file(PATH + '/../.temp/details.txt',"wb")
 		detailsFile.write(details + "\n\n ©2013 Generated using DNA-CLOUD." )
 		detailsFile.close()
-		print minMaxGC[2]
 	except MemoryError:
 		return None
 
 def exportToPdf(filePath,savePath):        
-        minMaxGC = decode.degenrateDNAListWithGCCount(filePath)
-        try:
+	minMaxGC = decode.degenrateDNAListWithGCCount(filePath)
+	try:
 		dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
 		fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
 		CHUNK_SIZE = 10000000
@@ -713,7 +714,7 @@ def exportToPdf(filePath,savePath):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print "No of Chunks" , noOfFileChunks
+		#print "No of Chunks" , noOfFileChunks
 		
 		dnaLength = 0
 		noOfGCPairs = 0
@@ -727,14 +728,14 @@ def exportToPdf(filePath,savePath):
 			del tempString
 			
 			for chunk_number in range(1,noOfFileChunks - 1):
-				print "Chunk No :",chunk_number + 1
+				#print "Chunk No :",chunk_number + 1
 				tempString = dnaFile.read(CHUNK_SIZE)
 				noOfGCPairs += tempString.count('C')
 				noOfGCPairs += tempString.count('G')
 				dnaFile.flush()
 				del tempString
 
-			print "Chunk No:",noOfFileChunks
+			#print "Chunk No:",noOfFileChunks
 			tempString = dnaFile.read(fileSize - (noOfFileChunks - 1) * CHUNK_SIZE)
 			noOfGCPairs += tempString.count('C')
 			noOfGCPairs += tempString.count('G')
@@ -753,25 +754,25 @@ def exportToPdf(filePath,savePath):
 	except MemoryError:
 		return None
 	
-        detailsFile = file(PATH + '/../.temp/details.txt',"wb")
-        string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + str(os.path.getsize(filePath)) + "\n\n\n\n#DNA CHUNKS :- \n\nSeq_ID\t\t\t\tSequence\n\n"
- 	detailsFile.write(string)
-        
-        fileOpened = open(filePath,"rb")
-        fileSize = os.path.getsize(filePath)
-        CHUNK_SIZE = 10000000
-        if (fileSize % CHUNK_SIZE) == 0:
-                if (fileSize/CHUNK_SIZE) == 0:
-                        noOfFileChunks = 1
-                else:
-                        noOfFileChunks = (fileSize/CHUNK_SIZE)
-        else:
-                noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-        print "Writing to PDF\nNo of Chunks" , noOfFileChunks
+	detailsFile = file(PATH + '/../.temp/details.txt',"wb")
+	string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + str(os.path.getsize(filePath)) + "\n\n\n\n#DNA CHUNKS :- \n\nSeq_ID\t\t\t\tSequence\n\n"
+	detailsFile.write(string)
+	
+	fileOpened = open(filePath,"rb")
+	fileSize = os.path.getsize(filePath)
+	CHUNK_SIZE = 10000000
+	if (fileSize % CHUNK_SIZE) == 0:
+		if (fileSize/CHUNK_SIZE) == 0:
+			noOfFileChunks = 1
+		else:
+			noOfFileChunks = (fileSize/CHUNK_SIZE)
+	else:
+		noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
+	#print "Writing to PDF\nNo of Chunks" , noOfFileChunks
 
-        counter = 1
-        if noOfFileChunks >  1 :
-                print "Chunk No : 1"
+	counter = 1
+	if noOfFileChunks >  1 :
+		#print "Chunk No : 1"
 		dnaList = fileOpened.read(CHUNK_SIZE)
 		prependString = ""
 		j = -1
@@ -782,10 +783,10 @@ def exportToPdf(filePath,savePath):
 			j -= 1
 		#print j , prependString 
 		tempList = (dnaList.split(","))[:-1]
-        	dnaString = StringIO()
+		dnaString = StringIO()
 		for i in xrange(len(tempList)):
 			#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                        dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+			dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
 			counter += 1
 		detailsFile.write(dnaString.getvalue())
 		
@@ -795,7 +796,7 @@ def exportToPdf(filePath,savePath):
 		del dnaList
 		#print dnaLength
 		for chunk_number in xrange(1,noOfFileChunks-1):
-			print "Chunk No :" , chunk_number + 1
+			#print "Chunk No :" , chunk_number + 1
 			dnaString = StringIO()
 			tempList = prependString
 			dnaList = fileOpened.read(CHUNK_SIZE)
@@ -811,7 +812,7 @@ def exportToPdf(filePath,savePath):
 			
 			for i in xrange(len(tempList)):
 				#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                                dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+				dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
 				counter += 1
 			detailsFile.write(dnaString.getvalue())
 
@@ -820,7 +821,7 @@ def exportToPdf(filePath,savePath):
 			del j
 			del dnaList
 			
-		print "Chunk No :",noOfFileChunks
+		#print "Chunk No :",noOfFileChunks
 		dnaString = StringIO()
 		tempList = prependString
 		dnaList = fileOpened.read()
@@ -836,7 +837,7 @@ def exportToPdf(filePath,savePath):
 		
 		for i in xrange(len(tempList)):
 			#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                        dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+			dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
 			counter += 1 
 		detailsFile.write(dnaString.getvalue())
 		
@@ -844,25 +845,25 @@ def exportToPdf(filePath,savePath):
 		del dnaString
 		del j
 		del dnaList
- 	else:
+	else:
 		dnaString = StringIO()
 		tempList = (fileOpened.read().split(","))[:-1]
 		for i in xrange(len(tempList)):
 			#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                        dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+			dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
 			counter += 1 
 		detailsFile.write(dnaString.getvalue())
- 		detailsFile.flush()
- 		fileOpened.flush()
+		detailsFile.flush()
+		fileOpened.flush()
 		
 		del tempList
 		del dnaString
 
-        detailsFile.close()
-        fileOpened.close()
-        
-        txt2pdf = pytxt2pdf.pyText2Pdf(PATH + '/../.temp/details.txt',savePath + ".pdf")
-        txt2pdf.Convert()
+	detailsFile.close()
+	fileOpened.close()
+	
+	txt2pdf = pytxt2pdf.pyText2Pdf(PATH + '/../.temp/details.txt',savePath + ".pdf")
+	txt2pdf.Convert()
 
 def exportToLatex(filePath,savePath):        
         minMaxGC = decode.degenrateDNAListWithGCCount(filePath)
@@ -877,11 +878,11 @@ def exportToLatex(filePath,savePath):
 				noOfFileChunks = (fileSize/CHUNK_SIZE)
 		else:
 			noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-		print "No of Chunks" , noOfFileChunks
+		#print "No of Chunks" , noOfFileChunks
 		
 		dnaLength = 0
 		noOfGCPairs = 0
-		print "Chunk No : 1"
+		#print "Chunk No : 1"
 		
 		if noOfFileChunks > 1:
 		  
@@ -891,14 +892,14 @@ def exportToLatex(filePath,savePath):
 			del tempString
 			
 			for chunk_number in range(1,noOfFileChunks - 1):
-				print "Chunk No :",chunk_number + 1
+				#print "Chunk No :",chunk_number + 1
 				tempString = dnaFile.read(CHUNK_SIZE)
 				noOfGCPairs += tempString.count('C')
 				noOfGCPairs += tempString.count('G')
 				dnaFile.flush()
 				del tempString
 
-			print "Chunk No:",noOfFileChunks
+			#print "Chunk No:",noOfFileChunks
 			tempString = dnaFile.read(fileSize - (noOfFileChunks - 1) * CHUNK_SIZE)
 			noOfGCPairs += tempString.count('C')
 			noOfGCPairs += tempString.count('G')
@@ -959,23 +960,23 @@ def exportToLatex(filePath,savePath):
 \\endlastfoot
 \\hline
    \mbox{\\bf Seq ID} & \mbox{\\bf DNA Chunk Sequence} \\\\\\hline\\hline \n"""
- 	detailsFile.write(string)
-        
-        fileOpened = open(filePath,"rb")
-        fileSize = os.path.getsize(filePath)
-        CHUNK_SIZE = 10000000
-        if (fileSize % CHUNK_SIZE) == 0:
-                if (fileSize/CHUNK_SIZE) == 0:
-                        noOfFileChunks = 1
-                else:
-                        noOfFileChunks = (fileSize/CHUNK_SIZE)
-        else:
-                noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
-        print "No of Chunks" , noOfFileChunks
+	detailsFile.write(string)
+	
+	fileOpened = open(filePath,"rb")
+	fileSize = os.path.getsize(filePath)
+	CHUNK_SIZE = 10000000
+	if (fileSize % CHUNK_SIZE) == 0:
+		if (fileSize/CHUNK_SIZE) == 0:
+			noOfFileChunks = 1
+		else:
+			noOfFileChunks = (fileSize/CHUNK_SIZE)
+	else:
+		noOfFileChunks = (fileSize/CHUNK_SIZE) + 1 
+	#print "No of Chunks" , noOfFileChunks
 
-        counter = 1
-        if noOfFileChunks >  1 :
-                print "Chunk No : 1"
+	counter = 1
+	if noOfFileChunks >  1 :
+		#print "Chunk No : 1"
 		dnaList = fileOpened.read(CHUNK_SIZE)
 		prependString = ""
 		j = -1
@@ -986,11 +987,11 @@ def exportToLatex(filePath,savePath):
 			j -= 1
 		#print j , prependString 
 		tempList = (dnaList.split(","))[:-1]
-        	dnaString = StringIO()
+		dnaString = StringIO()
 		for i in xrange(len(tempList)):
 			#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                        #dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
-                        dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
+			#dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+			dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
 			counter += 1
 		detailsFile.write(dnaString.getvalue())
 		
@@ -1000,7 +1001,7 @@ def exportToLatex(filePath,savePath):
 		del dnaList
 		#print dnaLength
 		for chunk_number in xrange(1,noOfFileChunks-1):
-			print "Chunk No :" , chunk_number + 1
+			#print "Chunk No :" , chunk_number + 1
 			dnaString = StringIO()
 			tempList = prependString
 			dnaList = fileOpened.read(CHUNK_SIZE)
@@ -1016,8 +1017,8 @@ def exportToLatex(filePath,savePath):
 			
 			for i in xrange(len(tempList)):
 				#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                                #dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
-                                dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
+				#dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+				dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
 				counter += 1
 			detailsFile.write(dnaString.getvalue())
 
@@ -1026,7 +1027,7 @@ def exportToLatex(filePath,savePath):
 			del j
 			del dnaList
 			
-		print "Chunk No :",noOfFileChunks
+		#print "Chunk No :",noOfFileChunks
 		dnaString = StringIO()
 		tempList = prependString
 		dnaList = fileOpened.read()
@@ -1042,8 +1043,8 @@ def exportToLatex(filePath,savePath):
 		
 		for i in xrange(len(tempList)):
 			#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                        #dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
-                        dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
+			#dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+			dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
 			counter += 1 
 		detailsFile.write(dnaString.getvalue())
 		
@@ -1051,17 +1052,17 @@ def exportToLatex(filePath,savePath):
 		del dnaString
 		del j
 		del dnaList
- 	else:
+	else:
 		dnaString = StringIO()
 		tempList = (fileOpened.read().split(","))[:-1]
 		for i in xrange(len(tempList)):
 			#dnaString.write(tempList[i] + " - " + str(counter) + ",\n")
-                        #dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
-                        dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
+			#dnaString.write(str(counter) + " - " + tempList[i] + " ,\n")
+			dnaString.write(str(counter) + " & " + tempList[i] + " , \\\\ \n")
 			counter += 1 
 		detailsFile.write(dnaString.getvalue())
- 		detailsFile.flush()
- 		fileOpened.flush()
+		detailsFile.flush()
+		fileOpened.flush()
 		
 		del tempList
 		del dnaString
@@ -1071,10 +1072,11 @@ def exportToLatex(filePath,savePath):
 \\end{landscape}
 }
 \\end{document}""")
-        detailsFile.close()
-        fileOpened.close()
+	detailsFile.close()
+	fileOpened.close()
 
-"""    
+"""   
+#This are the older version of these modules
 def genIndexList(length,ID):
     #i3List = []
     print length
@@ -1115,183 +1117,4 @@ def divideStringIntoChunks(string):
     listx.append(temp)
     #print listx
     return listx
-
-def writeStringToCsv(dnaList,id):
-    dnaList = unicodedata.normalize('NFKD', dnaList).encode('ascii','ignore')
-    lists = dnaList.split(",")
-    dnaList = [lists[0][2:119]]
-    for i in xrange(1,len(lists)-1):
-	dnaList.append(lists[i][2:119])
-    dnaList.append(lists[len(lists) - 1][2:119])
-    del lists
-
-    print "Lists made"
-    dnaString = dnaChunksToDNAString(dnaList)	
-    length = len(dnaList)
-    del dnaList
-    print "Writer Starting",str(length)
-    
-    c = csv.writer(open("/home/.DNAStore/myFile.csv","wb"))
-    c.writerow([])
-    c.writerow(["",""," © Data Generated using DNA Store"])
-    c.writerow([])
-    if length > 5:
-	dnaString = divideStringIntoChunks(dnaString)
-	print "Divsion incomplete che ke shu?",len(dnaString)
-	c.writerow(["DNA String:","",dnaString[0]])
-	for i in xrange(1,len(dnaString)):
-	    c.writerow(["","",dnaString[i]])
-    else:
-	c.writerow(["DNA String:","",dnaString])
-    print "Exported"
-        
-    print fileName
-    fileOpened = file(fileName,"rb")
-    
-    read = fileOpened.read()
-    fileOpened.flush()
-    fileOpened.close()
-    asciiVal = stringToAscii(read)
-
-    c = csv.writer(open("/home/.DNAStore/myFile.csv","wb"))
-    c.writerow(["Details of the Encode/Decode process",""," © Data Generated using DNA Store"])
-    c.writerow([])
-    c.writerow(["File Selected","",fileName])
-    c.writerow([])
-    del read
-
-    length = len(asciiVal)
-    huffmanList = HuffmanDictionary.stringToBase3(asciiVal)
-    if length > 100:
-        asciiVal = divideStringIntoChunks(asciiVal)
-        c.writerow(["Ascii Values","",asciiVal[0]])
-        for i in xrange(1,len(asciiVal)):
-            c.writerow(["","",asciiVal[i]])
-        c.writerow([])
-    else:
-        c.writerow(["Ascii Values","",asciiVal])
-        c.writerow([])
-    del asciiVal
-
-    if length > 100:
-        huffmanList = divideStringIntoChunks(huffmanList)
-        c.writerow(["Huffman Values","",huffmanList[0]])
-        for i in xrange(1,len(huffmanList)):
-            c.writerow(["","",huffmanList[i]])
-        c.writerow([])
-    else:
-        c.writerow(["Huffman Vales:","",huffmanList])
-        c.writerow([])
-    s1 = HuffmanToString(huffmanList)
-    s2 = decimalOfLength20(decimalToBase3(len(s1)))
-    temp = len(s1) + len(s2)
-    sx = ""
-    while temp % 25 != 0:
-        sx = sx + "0"
-        temp = temp + 1
-        s3 = sx                        
-    s4 = s1 + s3 + s2
-    print "base3 to DNA"
-    del huffmanList
-        
-    if length > 100:
-        s1 = divideStringIntoChunks(s1)
-        c.writerow(["String S1:","",s1[0]])
-        for i in xrange(1,len(s1)):
-            c.writerow(["","",s1[i]])
-        c.writerow([])
-        c.writerow(["String S2:","",s2])
-        c.writerow(["String S3:","",s3])
-        c.writerow([])
-    else:
-        c.writerow(["String S1:","",str(s1)])
-        c.writerow([])
-        c.writerow(["String S2:","",str(s2)])
-        c.writerow([])
-        c.writerow(["String S3:","",str(s3)])
-        c.writerow([])
-    del s1
-    del s2
-    del s3
-    
-    dnaString = base3ToDNABase(s4)
-    del s4
-    if length > 100:
-        dnaString = divideStringIntoChunks(dnaString)
-        c.writerow(["DNA String:","",dnaString[0]])
-        for i in xrange(1,len(dnaString)):
-            c.writerow(["","",dnaString[i]])
-        c.writerow([])
-    else:
-        c.writerow([])
-        c.writerow(["DNA String:","",dnaString])        
-    print "dna strings"
-    f = stringToChunks(dnaString)
-    del dnaString
-
-    print "Chunks"
-    fCompliment = appendIndexInfo(f)
-    del f
-    print "Index info"
-    dnaList = appendPrepend(fCompliment)
-    del fCompliment
-
-    c.writerow(["DNA List:","",dnaList[0]])
-    for i in xrange(1,len(dnaList)):
-        c.writerow(["","",dnaList[i]])
-    del dnaList
-        
-
-    if len(asciiVal) > 100:
-        asciiVal = divideStringIntoChunks(asciiVal)
-        c.writerow(["Ascii Values","",asciiVal[0]])
-        for i in xrange(1,len(asciiVal)):
-            c.writerow(["","",asciiVal[i]])
-    
-        c.writerow([])
-        huffmanList = divideStringIntoChunks(huffmanList)
-        c.writerow(["Huffman Values","",huffmanList[0]])
-        for i in xrange(1,len(huffmanList)):
-            c.writerow(["","",huffmanList[i]])
-    
-        c.writerow([])
-        s1 = divideStringIntoChunks(s1)
-        c.writerow(["String S1:","",s1[0]])
-        for i in xrange(1,len(s1)):
-            c.writerow(["","",s1[i]])
-    
-        c.writerow([])
-        c.writerow(["String S2:","",s2])
-        c.writerow(["String S3:","",s3])
-    
-        c.writerow([])
-        dnaString = divideStringIntoChunks(dnaString)
-        c.writerow(["DNA String:","",dnaString[0]])
-        for i in xrange(1,len(dnaString)):
-            c.writerow(["","",dnaString[i]])
-    
-        c.writerow([])
-        c.writerow(["DNA List:","",dnaList[0]])
-        for i in xrange(1,len(dnaList)):
-            c.writerow(["","",dnaList[i]])
-    else:
-        c.writerow(["Ascii Values","",asciiVal])
-
-        c.writerow([])
-        c.writerow(["Huffman Vales:","",huffmanList])
-
-        c.writerow([])
-        c.writerow(["String S1:","",str(s1)])
-
-        c.writerow([])
-        c.writerow(["String S2:","",str(s2)])
-
-        c.writerow([])
-        c.writerow(["String S3:","",str(s3)])
-
-        c.writerow([])
-        c.writerow(["DNA String:","",dnaString])
-
-        c.writerow([])
-        c.writerow(["DNA List:","",dnaList])
 """

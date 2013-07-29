@@ -37,14 +37,19 @@ def decode(readPath,savePath):
 def degenrateDNAString(readPath,savePath):
 	try:
 		xtemp = readPath.split(".")
-		dnaFile = open(PATH + '\..\.temp\dnaString.txt',"rb")
+		if "win" in sys.platform:
+			dnaFile = open(PATH + '\..\.temp\dnaString.txt',"rb")
+			fileSize = os.path.getsize(PATH + '\..\.temp\dnaString.txt')
+		elif "linux" in sys.platform:
+			dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
+			fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
 		#decodedFile = file(PATH + '\\..\\decodedFiles\\decode','wb')
 		if len(xtemp) == 3:
 			decodedFile = file(savePath+ "." + xtemp[1],'wb')
 		else:
-                        decodedFile = file(savePath,'w')
+                        decodedFile = file(savePath,'wb')
 		
-		fileSize = os.path.getsize(PATH + '\..\.temp\dnaString.txt')
+		
 		dnaFile.seek(fileSize - 21,0)
 		temp = dnaFile.read()
 		temp = extraModules.DNABaseToBase3WithChar(temp[1:],temp[0])
@@ -64,7 +69,6 @@ def degenrateDNAString(readPath,savePath):
 		
 		dnaLength = 0
 		#print "Chunk No : 1"
-		
 		if noOfFileChunks > 1:
 		  
 			tempString = StringIO()
@@ -82,7 +86,7 @@ def degenrateDNAString(readPath,savePath):
 			decodedFile.write(string)
 			temp = dnaString[-1]
 
-                        del tempString
+			del tempString
 			del asciiList
 			del string
 		
@@ -128,7 +132,7 @@ def degenrateDNAString(readPath,savePath):
 			#dnaFile.flush()
 			decodedFile.flush()
 
-                        del string
+			del string
 			del asciiList
 			del tempString
 			del prependString
@@ -154,7 +158,10 @@ def degenrateDNAString(readPath,savePath):
 def degenrateDNAList(readPath):
 	try:
 		fileOpened = open(readPath,"rb")
-		dnaFile = file(PATH + "\..\.temp\dnaString.txt","wb")
+		if "win" in sys.platform:
+			dnaFile = file(PATH + "\..\.temp\dnaString.txt","wb")
+		elif "linux" in sys.platform:
+			dnaFile = file(PATH + "/../.temp/dnaString.txt","wb")
 		
 		dnaLength = 0
 		#fileSize = os.path.getsize(PATH + "/../.temp/dnaList.txt")
@@ -347,7 +354,10 @@ def degenrateDNAList(readPath):
 def degenrateDNAListWithGCCount(readPath):
 	try:
 		fileOpened = open(readPath,"rb")
-		dnaFile = file(PATH + "\..\.temp\dnaString.txt","wb")
+		if "win" in sys.platform:
+			dnaFile = file(PATH + "\..\.temp\dnaString.txt","wb")
+		elif "linux" in sys.platform:
+			dnaFile = file(PATH + "/../.temp/dnaString.txt","w")
 		
 		dnaLength = 0
 		fileSize = os.path.getsize(readPath)

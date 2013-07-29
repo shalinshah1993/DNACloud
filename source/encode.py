@@ -39,7 +39,10 @@ def encode(readPath,savePath):
 def genDNAString(readPath):
 	 try:
 		fileOpened = open(readPath,"rb")
-		dnaFile = file(PATH + '\..\.temp\dnaString.txt','wb')
+		if "win" in sys.platform:
+			dnaFile = file(PATH + '\..\.temp\dnaString.txt','wb')
+		elif "linux" in sys.platform:
+			dnaFile = file(PATH + '/../.temp/dnaString.txt','wb')
 		
 		dnaLength = 0
 		fileSize = os.path.getsize(readPath)
@@ -151,11 +154,16 @@ def genDNAString(readPath):
 def genDNAChunks(readPath,path):
 	try:
 		xtemp = readPath.split(".")
-		fileOpened = open(PATH + '\..\.temp\dnaString.txt',"rb")
+		if "win" in sys.platform:
+			fileOpened = open(PATH + '\..\.temp\dnaString.txt',"rb")
+			fileSize = os.path.getsize(PATH + '\..\.temp\dnaString.txt')
+		elif "linux" in sys.platform:
+			fileOpened = open(PATH + '/../.temp/dnaString.txt',"rb")
+			fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
 		dnaFile = file(path + "." + xtemp[len(xtemp) - 1] + FILE_EXT,'wb')
 		
 		dnaListLength = 0
-		fileSize = os.path.getsize(PATH + '\..\.temp\dnaString.txt')
+		
 		CHUNK_SIZE = 10000000
 		if (fileSize % CHUNK_SIZE) == 0:
 			if (fileSize/CHUNK_SIZE) == 0:

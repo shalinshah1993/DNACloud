@@ -60,9 +60,15 @@ KEY_DEVELOPER = 'Shalin Shah'
 ICON_ARTIST = 'Foram Joshi - DNA Cloud Icon Artist'
 ICON_IDEA = 'Dixita Limbachiya - DNA Cloud Icon Idea'
 
-ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77–80). For more information visit us at "
+if "linux" in sys.platform:
+  ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-maintenance information storage in synthesized DNA. Nature 494 (7435): 77.80). For more information visit us at"
 
-DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license agreement and may be used only in accordance with the terms of the agreement.\n\nAny selling or distribution of the program or its parts,original or modified, is prohibited without a written permission from Manish K Gupta."
+  DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license\nagreement and may be used only in accordance with the terms of the agreement.Any selling or distribution of the\nprogram or it parts,original or modified, is prohibited without a written permission from Manish K Gupta."
+
+elif win in sys.platform:  
+  ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77–80). For more information visit us at "
+  
+  DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license agreement and may be used only in accordance with the terms of the agreement.\n\nAny selling or distribution of the program or its parts,original or modified, is prohibited without a written permission from Manish K Gupta."
 #############################################
 
 class MyFrame(wx.Frame):
@@ -81,10 +87,14 @@ class MyFrame(wx.Frame):
                 self.pnl.Hide()
                 self.pnl1.Hide()
                 self.clear()
-		self.Layout()
+                self.Layout()
                 
-                ico = wx.Icon(PATH + '\..\icons\DNAicon.ico', wx.BITMAP_TYPE_ICO)
-                self.SetIcon(ico)
+                if "linux" in sys.platform:
+		  ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
+		  self.SetIcon(ico)
+                elif "win" in sys.platform:
+		  ico = wx.Icon(PATH + '\..\icons\DNAicon.ico', wx.BITMAP_TYPE_ICO)
+		  self.SetIcon(ico)
 #Create an instance of Menu bar and instances of menues you want in menuBar
                 menuBar = wx.MenuBar(); 
                 fileMenu = wx.Menu();
@@ -189,16 +199,24 @@ class MyFrame(wx.Frame):
                 p = wx.Point(200,200)
                 super(MyFrame,self).Move(p)
 
-		con = sqlite3.connect(PATH + '\..\database\prefs.db')
+		if "win" in sys.platform:
+			con = sqlite3.connect(PATH + '\..\database\prefs.db')
+		elif "linux" in sys.platform:
+			con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
 			cur = con.cursor()
 			string = (cur.execute('SELECT * FROM prefs WHERE id = 4').fetchone())[1]
+			if "linux" in sys.platform:
+				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+
 			if string == "false":
 				prefs = panels.Preferences(None,0,"Your Details").ShowModal()
 			
 			string = (cur.execute('SELECT * FROM prefs WHERE id = 5').fetchone())[1]
 			if string == 'true':
 				password = (cur.execute('SELECT * FROM prefs WHERE id = 6').fetchone())[1]
+				if "linux" in sys.platform:
+					password = unicodedata.normalize('NFKD', password).encode('ascii','ignore')
 				result = wx.PasswordEntryDialog(None,'Please Enter Your Password','Password','',wx.OK | wx.CANCEL)
 				passwordMatch = False
 				while passwordMatch != True:
@@ -211,10 +229,15 @@ class MyFrame(wx.Frame):
 					else:
 						result.Destroy()
 						sys.exit()
-			self.qrText = ""
-			for i in cur.execute('SELECT * FROM prefs where id < 4'):
-				self.qrText = self.qrText + i[1] + "\n"
+			#self.qrText = ""
+			#for i in cur.execute('SELECT * FROM prefs where id < 4'):
+			#	if "win" in sys.platform:
+			#		self.qrText = self.qrText + i[1] + "\n"
+			#	if "linux" in sys.platform:
+			#		self.qrText = self.qrText + unicodedata.normalize('NFKD', i[1]).encode('ascii','ignore') + "\n"
 			self.isPasswordProtected = cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]
+			if "linux" in sys.platform:
+				self.isPasswordProtected = unicodedata.normalize('NFKD', cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]).encode('ascii','ignore')
 			con.close() 
                 except sqlite3.OperationalError:
 			cur.execute('DROP TABLE IF EXISTS prefs')
@@ -229,8 +252,13 @@ class MyFrame(wx.Frame):
 			prefs = panels.Preferences(None,0,"Your Details").ShowModal()
 			#self.qrText = ""
 			#for i in cur.execute('SELECT * FROM prefs where id < 4'):
-			#	self.qrText = self.qrText + i[1] + "\n"
+			#	if "win" in sys.platform:
+			#		self.qrText = self.qrText + i[1] + "\n"
+			#	if "linux" in sys.platform:
+			#		self.qrText = self.qrText + unicodedata.normalize('NFKD', i[1]).encode('ascii','ignore') + "\n"
 			self.isPasswordProtected = cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]
+			if "linux" in sys.platform:
+				self.isPasswordProtected = unicodedata.normalize('NFKD', cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]).encode('ascii','ignore')
 			con.close()
 		
 #First of all asked whether to encode or deocode so display a dialog to ask him what he wants to do
@@ -250,18 +278,27 @@ class MyFrame(wx.Frame):
 #The password modules
 
 	def changePassword(self,e):
-		con = sqlite3.connect(PATH + '\..\database\prefs.db')
+		if "win" in sys.platform:
+			con = sqlite3.connect(PATH + '\..\database\prefs.db')
+		elif "linux" in sys.platform:
+			con = sqlite3.connect(PATH + '/../database/prefs.db')
 		with con:
 			cur = con.cursor()
 			password = panels.setPasswordDialog(None,101,"Password").ShowModal()
-			isEnabled = cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]
+			if "win" in sys.platform:
+				isEnabled = cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]
+			elif "linux" in sys.platform:
+				isEnabled = unicodedata.normalize('NFKD', cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]).encode('ascii','ignore')
 			if isEnabled == 'true':
 				self.prefMenu.Check(self.prefItem1.GetId(), True)
 			elif isEnabled == 'false':
 				self.prefMenu.Check(self.prefItem1.GetId(), False)
 			
 	def enablePassword(self,e):
-		con = sqlite3.connect(PATH + '\..\database\prefs.db')
+		if "win" in sys.platform:
+			con = sqlite3.connect(PATH + '\..\database\prefs.db')
+		elif "linux" in sys.platform:
+			con = sqlite3.connect(PATH + '/../database/prefs.db')
 		with con:
 			cur = con.cursor()
 			if self.prefItem1.IsChecked():
@@ -269,7 +306,10 @@ class MyFrame(wx.Frame):
 			else:
 				cur.execute('UPDATE prefs SET details = ? WHERE id = ?',("false",5))
 		#con = sqlite3.connect("/home/../database/prefs.db")
-			isEnabled = cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]
+			if "win" in sys.platform:
+				isEnabled = cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]
+			elif "linux" in sys.platform:
+				isEnabled = unicodedata.normalize('NFKD', cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]).encode('ascii','ignore')
 			if isEnabled == 'true':
 				self.prefMenu.Check(self.prefItem1.GetId(), True)
 			elif isEnabled == 'false':
@@ -283,7 +323,7 @@ class MyFrame(wx.Frame):
                 self.pnl1.Hide()
                 self.pnl.Show()
                 self.clear()
-		self.Layout()
+                self.Layout()
                 self.bindEncodeItems()
                 self.ask.Destroy()
 
@@ -293,7 +333,10 @@ class MyFrame(wx.Frame):
                 fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
-			self.path = paths[0]
+			if "win" in sys.platform:
+				self.path = paths[0]
+			elif "linux" in sys.platform:
+				self.path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')                
                 else:
                         self.path = None
 		fileSelector.Destroy()
@@ -314,19 +357,6 @@ class MyFrame(wx.Frame):
 		return
 
 ############################################################################
-#This are the modules which make temp file with DNA Strings and List
-
-	def viewString(self,e):
-		os.chdir(PATH + "\..\.temp")
-		webbrowser.open("dnaString.txt")
-		os.chdir(PATH)
-
-	def viewList(self,e):
-		os.chdir(PATH + '\..\.temp')
-		webbrowser.open("dnaList.txt")
-		os.chdir(PATH)
-                
-############################################################################
 #This are the save cancel button modules
 
 	def save(self,e):
@@ -336,7 +366,10 @@ class MyFrame(wx.Frame):
 			locationSelector = wx.FileDialog(self,"Please select location to save your encoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
 				paths = locationSelector.GetPath()
-				self.savePath = paths
+				if "win" in sys.platform:
+					self.savePath = paths
+				elif "linux" in sys.platform:
+					self.savePath = unicodedata.normalize('NFKD', paths).encode('ascii','ignore')
 				terminated = False
 			else:
 				terminated = True
@@ -346,18 +379,19 @@ class MyFrame(wx.Frame):
 			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
 			if not terminated:
 				p.start()
-			temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-			temp.SetSize((450,180))
-			while len(multiprocessing.active_children()) != 0:
-				time.sleep(0.1)
-				if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-					p.terminate()
-					terminated = True
-					self.clear()
-					break
-			temp.Destroy()
-			p.join()
-			p.terminate()
+				temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+				temp.SetSize((450,180))
+				while len(multiprocessing.active_children()) != 0:
+					time.sleep(0.1)
+					if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						p.terminate()
+						terminated = True
+						self.clear()
+						break
+				temp.Destroy()
+				p.join()
+				p.terminate()
+			
 			if not terminated:
 				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
 		else:
@@ -386,18 +420,18 @@ class MyFrame(wx.Frame):
 ##################################################################
 #This is the main decoding part
 
-        def decode(self,e):
-                self.pnl.Hide()
-                self.pnl1.Show()
-                self.bindDecodeItems()
-                self.clear()
+	def decode(self,e):
+		self.pnl.Hide()
+		self.pnl1.Show()
+		self.bindDecodeItems()
+		self.clear()
 		self.Layout()
-                self.ask.Destroy()
-                
+		self.ask.Destroy()
+		
         def decodeBut1(self,e):
 		try:
 			progressMax = 100
-			dialog = wx.ProgressDialog("Note!", "Your file is being prepared from DNA Chunks, Please Wait...", progressMax, style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+			dialog = wx.ProgressDialog("Note!", "Your file is being prepared from DNA Chunks, Please Wait...", progressMax,parent = self, style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 			keepGoing = True
 			count = 0
 
@@ -430,7 +464,10 @@ class MyFrame(wx.Frame):
 			count = count + 25
 			keepGoing = dialog.Update(count)
 			
-			decodedFile = file(PATH + "\..\decodedFiles\decode","wb")
+			if "win" in sys.platform:
+				decodedFile = file(PATH + "\..\decodedFiles\decode","wb")
+			elif "linux" in sys.platform:
+				decodedFile = file(PATH + "/../decodedFiles/decode","wb")
 			decodedFile.write(string)
 			decodedFile.close()
 			count = count + 25
@@ -449,7 +486,10 @@ class MyFrame(wx.Frame):
 			locationSelector = wx.FileDialog(self,"Please select location to save your decoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
 				paths = locationSelector.GetPath()
-				self.savePath = paths
+				if "win" in sys.platform:
+					self.savePath = paths
+				elif "linux" in sys.platform:
+					self.savePath = unicodedata.normalize('NFKD', paths).encode('ascii','ignore')
 				terminated = False
 			else:
 				terminated = True
@@ -457,23 +497,23 @@ class MyFrame(wx.Frame):
 			del locationSelector
 			
 			if not terminated:
-                                p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Encode Process")
+				p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Encode Process")
 				p.start()
-			temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-			temp.SetSize((450,180))
-			while len(multiprocessing.active_children()) != 0:
-				time.sleep(0.1)
-				if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-					p.terminate()
-					terminated = True
-					self.clear()
-					break
-			temp.Destroy()
-			p.join()
-			p.terminate()
-		      
+				temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+				temp.SetSize((450,180))
+				while len(multiprocessing.active_children()) != 0:
+					time.sleep(0.1)
+					if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and 		relax.....")[0]:
+						p.terminate()
+						terminated = True
+						self.clear()
+						break
+				temp.Destroy()
+				p.join()
+				p.terminate()
+				
 			if not terminated:
-				    wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
+				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
 		else:
 			wx.MessageDialog(self,'Please Select a .dnac file', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 
@@ -482,26 +522,48 @@ class MyFrame(wx.Frame):
 
         def onClear(self,e):
 		size = 0
-		os.chdir(PATH + '\..\.temp')
+		if "win" in sys.platform:
+			os.chdir(PATH + '\..\.temp')
+			try:
+				size += os.path.getsize("dnaString.txt") 
+				os.system("del dnaString.txt")
+				EXIST_DNASTRING = True
+			except OSError:
+				EXIST_DNASTRING = False
+			try:
+				size += os.path.getsize("barcode")
+				os.system("del barcode")
+				EXIST_BARCODE = True
+			except OSError:
+				EXIST_BARCODE = False
+			try:
+				size += os.path.getsize("details.txt")
+				os.system("del details.txt")
+				EXIST_DETAILS = True
+			except OSError:
+			      EXIST_DETAILS = False
 		
-		try:
-			size += os.path.getsize("dnaString.txt") 
-			os.system("del dnaString.txt")
-			EXIST_DNASTRING = True
-		except OSError:
-                        EXIST_DNASTRING = False
-		try:
-			size += os.path.getsize("dnaList.txt")
-			os.system("del dnaList.txt")
-			EXIST_DNALIST = True
-		except OSError:
-                        EXIST_DNALIST = False
-		try:
-			size += os.path.getsize("details.txt")
-			os.system("del details.txt")
-			EXIST_DETAILS = True
-		except OSError:
-                        EXIST_DETAILS = False
+		elif "linux" in sys.platform:
+			os.chdir(PATH + '/../.temp')
+			try:
+				size += os.path.getsize("dnaString.txt") 
+				os.system("rm dnaString.txt")
+				EXIST_DNASTRING = True
+			except OSError:
+				EXIST_DNASTRING = False
+			try:
+				size += os.path.getsize("barcode")
+				os.system("rm barcode")
+				EXIST_BARCODE = True
+			except OSError:
+				EXIST_BARCODE = False
+			try:
+				size += os.path.getsize("details.txt")
+				os.system("rm details.txt")
+				EXIST_DETAILS = True
+			except OSError:
+			      EXIST_DETAILS = False
+		
 		os.chdir(PATH)
 		"""
 		os.chdir(PATH + '\..\database')
@@ -518,100 +580,124 @@ class MyFrame(wx.Frame):
 #######################################################################
 #This are the modules which run when different list items from menu bar are clicked
 
-        def credits(self,e):
-                os.chdir(PATH + '\..\help')
-		os.system("start Credits.pdf")
-		os.chdir(PATH)
+	def credits(self,e):
+		if "win" in sys.platform:
+			os.chdir(PATH + '\..\help')
+			os.system("start Credits.pdf")
+			os.chdir(PATH)
+		elif "linux" in sys.platform:
+			os.chdir(PATH + '/../help')
+			os.system("xdg-open Credits.pdf")
+			os.chdir(PATH)
 
-        def productDemo(self,e):
-                webbrowser.open(PRODUCT_LINK)
+	def productDemo(self,e):
+		webbrowser.open(PRODUCT_LINK)
 
 	def productFeedback(self,e):
 		webbrowser.open(FEEDBACK_LINK)
 
         def userManuel(self,e):
-		os.chdir(PATH + '\..\help')
-		os.system("start UserManual.pdf")
-		os.chdir(PATH)
+		if "win" in sys.platform:
+			os.chdir(PATH + '\..\help')
+			os.system("start UserManual.pdf")
+			os.chdir(PATH)
+		elif "linux" in sys.platform:
+			os.chdir(PATH + '/../help')
+			os.system("xdg-open UserManual.pdf")
+			os.chdir(PATH)
 		
-        def exportPdf(self,e):
-                fileSelector = wx.FileDialog(self, message="Choose a .dnac file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
-                if fileSelector.ShowModal() == wx.ID_OK:
-                        paths = fileSelector.GetPaths()
-                        filePath = paths[0]
-                        terminated = False
+	def exportPdf(self,e):
+		fileSelector = wx.FileDialog(self, message="Choose a .dnac file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
+		if fileSelector.ShowModal() == wx.ID_OK:
+			paths = fileSelector.GetPaths()
+			if "win" in sys.platform:
+				filePath = paths[0]
+			elif "linux" in sys.platform:
+				filePath = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
+			terminated = False
 
-                        if FILE_EXT in filePath:
-                                locationSelector = wx.FileDialog(self,"Please select location to save your PDF file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-                                if locationSelector.ShowModal() == wx.ID_OK:
-                                        paths = locationSelector.GetPath()
-                                        savePath = paths
-                                        terminated = False
-                                else:
-                                        terminated = True
-                                locationSelector.Destroy()
-                                del locationSelector
-                                
-                                if not terminated:
-                                        exportToPdf = multiprocessing.Process(target = extraModules.exportToPdf , name = "PDF Exporter" , args = (filePath,savePath))
-                                        exportToPdf.start()
-                                temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-                                temp.SetSize((450,180))
-                                while len(multiprocessing.active_children()) != 0:
-                                        time.sleep(0.1)
-                                        if not temp.UpdatePulse("Exporting the File....This may take several minutes...\n.....so sit back and relax.....")[0]:
-                                                exportToPdf.terminate()
-                                                terminated = True
-                                                break
-                                temp.Destroy()
-                                exportToPdf.join()
-                                exportToPdf.terminate()
-                                if not terminated:
-                                        wx.MessageDialog(self,'PDF created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-                        else:
-                                wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
-                fileSelector.Destroy()
-                del fileSelector
+			if FILE_EXT in filePath:
+				locationSelector = wx.FileDialog(self,"Please select location to save your PDF file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+				if locationSelector.ShowModal() == wx.ID_OK:
+					paths = locationSelector.GetPath()
+					if "win" in sys.platform:
+						savePath = paths
+					elif "linux" in sys.platform:
+						savePath = unicodedata.normalize('NFKD', paths).encode('ascii','ignore')
+					terminated = False
+				else:
+					terminated = True
+				locationSelector.Destroy()
+				del locationSelector
+				
+				if not terminated:
+					exportToPdf = multiprocessing.Process(target = extraModules.exportToPdf , name = "PDF Exporter" , args = (filePath,savePath))
+					exportToPdf.start()
+					temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...' ,parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+					temp.SetSize((450,180))
+					while len(multiprocessing.active_children()) != 0:
+						time.sleep(0.1)
+						if not temp.UpdatePulse("Exporting the File....This may take several minutes...\n.....so sit back and relax.....")[0]:
+							exportToPdf.terminate()
+							terminated = True
+							break
+					temp.Destroy()
+					exportToPdf.join()
+					exportToPdf.terminate()
+			
+				if not terminated:
+					wx.MessageDialog(self,'PDF created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			else:
+				wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+		fileSelector.Destroy()
+		del fileSelector
 
-        def exportLatex(self,e):
-                fileSelector = wx.FileDialog(self, message="Choose a .dnac file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
-                if fileSelector.ShowModal() == wx.ID_OK:
-                        paths = fileSelector.GetPaths()
-                        filePath = paths[0]
-                        terminated = False
+	def exportLatex(self,e):
+		fileSelector = wx.FileDialog(self, message="Choose a .dnac file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
+		if fileSelector.ShowModal() == wx.ID_OK:
+			paths = fileSelector.GetPaths()
+			if "win" in sys.platform:
+				filePath = paths[0]
+			elif "linux" in sys.platform:
+				filePath = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
+			terminated = False
 
-                        if FILE_EXT in filePath:
-                                locationSelector = wx.FileDialog(self,"Please select location to save your Latex file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-                                if locationSelector.ShowModal() == wx.ID_OK:
-                                        paths = locationSelector.GetPath()
-                                        savePath = paths
-                                        terminated = False
-                                else:
-                                        terminated = True
-                                locationSelector.Destroy()
-                                del locationSelector
-                                
-                                if not terminated:
-                                        exportToLatex = multiprocessing.Process(target = extraModules.exportToLatex , name = "Latex Exporter" , args = (filePath,savePath))
-                                        exportToLatex.start()
-                                temp = wx.ProgressDialog('Exporting to latex file....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-                                temp.SetSize((450,180))
-                                while len(multiprocessing.active_children()) != 0:
-                                        time.sleep(0.1)
-                                        if not temp.UpdatePulse("Exporting to latex file....This may take several minutes...\n.....so sit back and relax.....")[0]:
-                                                exportToLatex.terminate()
-                                                terminated = True
-                                                break
-                                temp.Destroy()
-                                exportToLatex.join()
-                                exportToLatex.terminate()
-                                if not terminated:
-                                        wx.MessageDialog(self,'Latex File created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-                        else:
-                                wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
-                fileSelector.Destroy()
-                del fileSelector
-                
+			if FILE_EXT in filePath:
+				locationSelector = wx.FileDialog(self,"Please select location to save your Latex file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+				if locationSelector.ShowModal() == wx.ID_OK:
+					paths = locationSelector.GetPath()
+					if "win" in sys.platform:
+						savePath = paths
+					elif "linux" in sys.platform:
+						savePath = unicodedata.normalize('NFKD', paths).encode('ascii','ignore')
+					terminated = False
+				else:
+					terminated = True
+				locationSelector.Destroy()
+				del locationSelector
+				
+				if not terminated:
+					exportToLatex = multiprocessing.Process(target = extraModules.exportToLatex , name = "Latex Exporter" , args = (filePath,savePath))
+					exportToLatex.start()
+					temp = wx.ProgressDialog('Exporting to latex file....This may take a while....', 'Please wait...',parent = self, style = 	wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+					temp.SetSize((450,180))
+					while len(multiprocessing.active_children()) != 0:
+						time.sleep(0.1)
+						if not temp.UpdatePulse("Exporting to latex file....This may take several minutes...\n.....so sit back and relax.....")[0]:
+							exportToLatex.terminate()
+							terminated = True
+							break
+					temp.Destroy()
+					exportToLatex.join()
+					exportToLatex.terminate()
+				
+				if not terminated:
+					wx.MessageDialog(self,'Latex File created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			else:
+				wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+		fileSelector.Destroy()
+		del fileSelector
+		
 	def exportList(self,e):
 		"""
 		files = []
@@ -750,33 +836,40 @@ class MyFrame(wx.Frame):
 		else:
 			wx.MessageDialog(self,"You are already on the Decode Page!","Note!",wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
                         
-        def aboutUs(self,e):
-                info = wx.AboutDialogInfo()
-                info.SetIcon(wx.Icon(PATH + '\..\icons\DNAicon.png', wx.BITMAP_TYPE_PNG))
-                info.SetName(NAME)
-                info.SetVersion(VERSION)
-                info.SetDescription(ABOUT_DESCRIPTION)
-                info.SetCopyright(ABOUT_COPYRIGHT)
-                info.SetWebSite(OFFICIAL_WEBSITE)
-                
-                info.SetLicence(DETAILED_LICENSE)
-                info.AddDeveloper(KEY_DEVELOPER)
-                info.AddArtist(ICON_ARTIST)
-                info.AddArtist(ICON_IDEA)
-                wx.AboutBox(info)
-                
-        def settings(self,e):
-	       p = panels.Preferences(None,0,"Details").ShowModal()
-	       
-	       self.qrText = ""
-	       con = sqlite3.connect(PATH + '\..\database\prefs.db')
-	       with con:
+	def aboutUs(self,e):
+		info = wx.AboutDialogInfo()
+		if "win" in sys.platform:
+			info.SetIcon(wx.Icon(PATH + '\..\icons\DNAicon.png', wx.BITMAP_TYPE_PNG))
+		elif "linux" in sys.platform:
+			info.SetIcon(wx.Icon(PATH + '/../icons/DNAicon.png', wx.BITMAP_TYPE_PNG))  
+		info.SetName(NAME)
+		info.SetVersion(VERSION)
+		info.SetDescription(ABOUT_DESCRIPTION)
+		info.SetCopyright(ABOUT_COPYRIGHT)
+		info.SetWebSite(OFFICIAL_WEBSITE)
+		
+		info.SetLicence(DETAILED_LICENSE)
+		info.AddDeveloper(KEY_DEVELOPER)
+		info.AddArtist(ICON_ARTIST)
+		info.AddArtist(ICON_IDEA)
+		wx.AboutBox(info)
+
+	def settings(self,e):
+	      p = panels.Preferences(None,0,"Details").ShowModal()
+
+	      """
+	      self.qrText = ""
+	      if "win" in sys.platform:
+			con = sqlite3.connect(PATH + '\..\database\prefs.db')
+		elif "linux" in sys.platform:
+			con = sqlite3.connect(PATH + '/../database/prefs.db')
+	      with con:
 			self.qrText = ""
 			cur = con.cursor()
 			for i in cur.execute('SELECT * FROM prefs WHERE id < 4'):
 				self.qrText = self.qrText + i[1] + "\n"
-	       #self.onUseQrcode(self.qrText)
-
+	      #self.onUseQrcode(self.qrText)
+	      """
 
 	def memEstimator(self,e):
 		gc.collect()
@@ -790,8 +883,13 @@ class MyFrame(wx.Frame):
                 fileSelector = wx.FileDialog(self, message="Choose a location to save barcode",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
-			barcodeFile = file(paths[0] + ".png","wb")
-			barcodeFile.write(open(PATH + '/../icons/barcode.png',"rb").read())
+			if "win" in sys.platform:
+				barcodeFile = file(paths[0] + ".png","wb")
+				barcodeFile.write(open(PATH + '\\..\\icons\\barcode.png',"rb").read())
+			elif "linux" in sys.platform:
+				paths = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
+				barcodeFile = file(paths + ".png","wb")
+				barcodeFile.write(open(PATH + '/../icons/barcode.png',"rb").read())
 			barcodeFile.close()
 			wx.MessageDialog(self,'Last generated barcode Saved to specified location', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
                 fileSelector.Destroy()
@@ -821,7 +919,10 @@ class MySplashScreen(wx.SplashScreen):
         frame = MyFrame(None)
                 
     def __init__(self,parent=None):
-        bmp = wx.Bitmap(PATH + '\..\icons\DNA.png', wx.BITMAP_TYPE_PNG)
+        if "linux" in sys.platform:
+	  bmp = wx.Bitmap(PATH + '/../icons/DNA.png', wx.BITMAP_TYPE_PNG)
+        elif "win" in sys.platform:
+	  bmp = wx.Bitmap(PATH + '\..\icons\DNA.png', wx.BITMAP_TYPE_PNG)
         wx.SplashScreen.__init__(self,bmp,wx.SPLASH_CENTER_ON_SCREEN | wx.SPLASH_TIMEOUT,SPLASH_TIMEOUT,parent)
         self.Bind(wx.EVT_CLOSE,self.OnSplashScreenExit)
         
