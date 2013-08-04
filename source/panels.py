@@ -347,7 +347,12 @@ class Preferences(wx.Dialog):
 			
 			img = Image.open(PATH + '/../icons/barcode.png')
 			img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
-			img.save(PATH + '/../.temp/barcode', "PNG")
+                        try:
+                                img.save(PATH + '/../.temp/barcode', "PNG")
+                        except IOError:
+                                """Permission Error"""
+                                wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                                sys.exit(0)
 			img = wx.Image(PATH + '/../.temp/barcode', wx.BITMAP_TYPE_ANY)
 			self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.BitmapFromImage(img))
 			self.vBox.Add(self.imageCtrl,flag = wx.LEFT | wx.RIGHT |wx.BOTTOM , border = 10)
@@ -417,7 +422,12 @@ class Preferences(wx.Dialog):
 			
 			img = Image.open(PATH + '/../icons/barcode.png')
 			img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
-			img.save(PATH + '/../.temp/barcode', "PNG")
+			try:
+                                img.save(PATH + '/../.temp/barcode', "PNG")
+			except IOError:
+                                """Permission Error"""
+                                wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                                sys.exit(0)
 			img = wx.Image(PATH + '/../.temp/barcode', wx.BITMAP_TYPE_ANY)
 			self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.BitmapFromImage(img))
 			self.vBox.Add(self.imageCtrl,flag = wx.LEFT | wx.ALIGN_CENTER_HORIZONTAL , border = 10)
