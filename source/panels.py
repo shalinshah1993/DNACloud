@@ -26,6 +26,7 @@ import wx
 import extraModules
 import multiprocessing
 import time
+from datetime import datetime
 
 CHUNK_SIZE = 1000000
 if hasattr(sys, "frozen"):
@@ -41,7 +42,8 @@ if "win" in sys.platform:
 elif "linux" in sys.platform:
 	BARCODE_HEIGHT = 96
 	BARCODE_WIDTH = 600
-	
+
+FOLDER_DISCLAIMER = "It is not mandatory for you to select default folder. If you don't then every time you save .dnac file you would be asked to save a location"	
 PREF_DISCLAIMER = "Disclaimer : Please note that this details will be used to identify user of the DNA strings by Bio Companies hence these are mandatory to be filled."
 
 SOFTWARE_DETAILS = "\n\n  Version 1.0\n\n  Visit us at www.guptalab.org/dnacloud\n\n  Contact us at dnacloud@guptalab.org"
@@ -306,7 +308,28 @@ class Preferences(wx.Dialog):
 		self.SetIcon(ico)
 			
 		if "win" in sys.platform:  
-			head = wx.StaticText(self ,label = "Enter your details",style = wx.CENTER)
+			head = wx.StaticText(self ,label = "Select Your Default Folder",style = wx.CENTER)
+			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+			head.SetFont(font)
+			self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
+
+                        line4 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
+			self.vBox.Add(line4, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 5)
+
+			self.hBoxf = wx.BoxSizer(wx.HORIZONTAL)
+			self.txtf = wx.TextCtrl(self,name = "hBox")
+			self.hBoxf.Add(self.txtf,proportion = 9 ,flag = wx.EXPAND |wx.RIGHT | wx.LEFT, border = 10)
+			self.browBut = wx.Button(self,label=" Browse ")
+			self.hBoxf.Add(self.browBut,proportion = 2,flag = wx.EXPAND | wx.LEFT | wx.RIGHT, border = 7)
+			self.vBox.Add(self.hBoxf , flag = wx.TOP | wx.BOTTOM , border = 7)
+
+			head = wx.StaticText(self ,label = FOLDER_DISCLAIMER,style = wx.ALIGN_CENTER_HORIZONTAL)
+			font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+			head.SetFont(font)
+			head.Wrap(450)
+			self.vBox.Add(head ,flag = wx.EXPAND | wx.LEFT | wx.RIGHT , border = 10)
+
+                        head = wx.StaticText(self ,label = "Enter your details",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 			head.SetFont(font)
 			self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 5)
@@ -373,13 +396,31 @@ class Preferences(wx.Dialog):
 			self.hBoxe.Add(self.saveBut, flag = wx.RIGHT , border = 10)
 			self.hBoxe.Add(self.barcodeBut, flag = wx.RIGHT | wx.wx.LEFT , border = 10)
 			self.hBoxe.Add(self.cancelBut, flag = wx.RIGHT , border = 10)
-			self.saveBut.Bind(wx.EVT_BUTTON,self.save)
-			self.barcodeBut.Bind(wx.EVT_BUTTON,self.generate)
-			self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
 			self.vBox.Add(self.hBoxe, flag = wx.TOP | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTRE_VERTICAL |wx.BOTTOM, border = 10)
 
 			self.SetSizerAndFit(self.vBox)
 		elif "linux" in sys.platform:
+                        
+                        head = wx.StaticText(self ,label = "Select Your Default Folder",style = wx.CENTER)
+			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+			head.SetFont(font)
+			self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
+
+                        line4 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
+			self.vBox.Add(line4, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 5)
+
+			self.hBoxf = wx.BoxSizer(wx.HORIZONTAL)
+			self.txtf = wx.TextCtrl(self,name = "hBox")
+			self.hBoxf.Add(self.txtf,proportion = 9 ,flag = wx.EXPAND |wx.RIGHT | wx.LEFT, border = 10)
+			self.browBut = wx.Button(self,label=" Browse ")
+			self.hBoxf.Add(self.browBut,proportion = 2,flag = wx.EXPAND | wx.LEFT | wx.RIGHT, border = 7)
+			self.vBox.Add(self.hBoxf , flag = wx.TOP | wx.BOTTOM , border = 7)
+
+			head = wx.StaticText(self ,label = FOLDER_DISCLAIMER,style = wx.ALIGN_CENTER_HORIZONTAL)
+			font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+			head.SetFont(font)
+			head.Wrap(450)
+			self.vBox.Add(head ,flag = wx.EXPAND | wx.LEFT | wx.RIGHT , border = 10)
 			  
 			head = wx.StaticText(self ,label = "Enter your details",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
@@ -448,14 +489,17 @@ class Preferences(wx.Dialog):
 			self.hBoxe.Add(self.saveBut, flag = wx.RIGHT , border = 10)
 			self.hBoxe.Add(self.barcodeBut, flag = wx.RIGHT | wx.wx.LEFT , border = 10)
 			self.hBoxe.Add(self.cancelBut, flag = wx.RIGHT , border = 10)
-			self.saveBut.Bind(wx.EVT_BUTTON,self.save)
-			self.barcodeBut.Bind(wx.EVT_BUTTON,self.generate)
-			self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
+			
 			self.vBox.Add(self.hBoxe, flag = wx.TOP | wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, border = 5)
 
 			self.SetSizerAndFit(self.vBox)
 			self.Layout()
 
+                self.saveBut.Bind(wx.EVT_BUTTON,self.save)
+		self.barcodeBut.Bind(wx.EVT_BUTTON,self.generate)
+		self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
+		self.browBut.Bind(wx.EVT_BUTTON,self.onChoose)
+			
 		con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
 			cur = con.cursor()
@@ -471,6 +515,10 @@ class Preferences(wx.Dialog):
 			if "linux" in sys.platform:
 				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 			self.txtd.WriteText(string)
+			string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
+                        if "linux" in sys.platform:
+				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+			self.txtf.WriteText(string)
 			
 			con.commit()
 		except sqlite3.OperationalError:
@@ -480,6 +528,19 @@ class Preferences(wx.Dialog):
 			
 		#self.SetSize((500,450))
 
+        def onChoose(self,e):
+                locationSelector = wx.DirDialog(self,"Please select default location to save all your file",style = wx.DD_DEFAULT_STYLE)
+		if locationSelector.ShowModal() == wx.ID_OK:
+			paths = locationSelector.GetPath()
+			if "win" in sys.platform:
+				self.savePath = paths
+			elif "linux" in sys.platform:
+				self.savePath = unicodedata.normalize('NFKD', paths).encode('ascii','ignore')
+			self.txtf.Clear()
+			self.txtf.WriteText(self.savePath)
+		else:
+			self.savePath = None
+
 	def save(self,e):
 		con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
@@ -488,11 +549,15 @@ class Preferences(wx.Dialog):
 			cur.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.txtc.GetString(0,self.txtc.GetLastPosition()),len("xy")))
 			cur.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.txtd.GetString(0,self.txtd.GetLastPosition()),len("xyz")))
 			cur.execute('UPDATE prefs SET details = "true" WHERE id = 4')
+			if not self.txtf.IsEmpty():
+                                cur.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.txtf.GetString(0,self.txtf.GetLastPosition()),7))
+                        else:
+                                cur.execute('UPDATE prefs SET details = "None" WHERE id = 7')
 			con.commit()
 		except sqlite3.OperationalError:
 			DATABASE_ERROR = True
 		if con:
-			con.close()		
+			con.close()
 
 		self.Destroy()
 		
@@ -986,19 +1051,36 @@ class estimator(wx.Dialog):
 			wx.MessageDialog(self,'Make sure you selected a .dnac file', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
 		
 	def onSave(self,e):
-		locationSelector = wx.FileDialog(self,"Please select location to save your details",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-		if locationSelector.ShowModal() == wx.ID_OK:
-			paths = locationSelector.GetPath()
-			self.savePath = paths
-			
-			propFile = file(self.savePath + ".txt","w")
-			propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t" + str(self.costPerBase) + "\n\n" + self.details)
-			#propFile.write("\n\n\n © 2013 - GUPTA RESEARCH LABS - Generated by DNA-CLOUD")		
-			
-			wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
-		else:
-			locationSelector.Destroy()
-			del locationSelector
+                con = sqlite3.connect(PATH + '/../database/prefs.db')
+		try:
+			cur = con.cursor()
+                        string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
+                        if "linux" in sys.platform:
+                                string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+                except:
+                        string = 'None'
+
+                if string == 'None':
+                        locationSelector = wx.FileDialog(self,"Please select location to save your details",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+                        if locationSelector.ShowModal() == wx.ID_OK:
+                                paths = locationSelector.GetPath()
+                                self.savePath = paths
+                                
+                                propFile = file(self.savePath + ".txt","w")
+                                propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t" + str(self.costPerBase) + "\n\n" + self.details)
+                                #propFile.write("\n\n\n © 2013 - GUPTA RESEARCH LABS - Generated by DNA-CLOUD")		
+                                
+                                wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
+                        else:
+                                locationSelector.Destroy()
+                                del locationSelector
+                elif string != 'None':
+                         xtime = datetime.now().timetuple()
+                         self.savePath = string + "_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+                         propFile = file(self.savePath + ".txt","w")
+                         propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t" + str(self.costPerBase) + "\n\n" + self.details)
+                                
+                         wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
 		
 	def onCancel(self,e):
 		self.Destroy()

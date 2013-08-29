@@ -31,6 +31,7 @@ from multiprocessing.pool import ThreadPool
 import encode
 import decode
 import pytxt2pdf
+from datetime import datetime
 
 ############################################
 #Preferences database has 6 rows:-
@@ -40,6 +41,7 @@ import pytxt2pdf
 #4->Opened before or this is the first time
 #5->Password enabled/disabled
 #6->Password Value if Enabled
+#7->Default Directory
 ############################################
 if hasattr(sys, "frozen"):
         PATH = os.path.dirname(sys.executable)
@@ -263,6 +265,7 @@ class MyFrame(wx.Frame):
 			cur.execute('INSERT INTO prefs VALUES(4,"false")')
 			cur.execute('INSERT INTO prefs VALUES(5,"false")')
 			cur.execute('INSERT INTO prefs VALUES(6,"password")')
+			cur.execute('INSERT INTO prefs VALUES(7,"None")')
 			con.commit()
 			prefs = panels.Preferences(None,0,"Your Details").ShowModal()
 			#self.qrText = ""
@@ -375,8 +378,17 @@ class MyFrame(wx.Frame):
 #This are the save cancel button modules
 
 	def save(self,e):
-		
-		if not self.pnl.txt.IsEmpty():
+
+                con = sqlite3.connect(PATH + '/../database/prefs.db')
+		try:
+			cur = con.cursor()
+                        string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
+                        if "linux" in sys.platform:
+                                string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+                except:
+                        string = 'None'
+                        
+		if not self.pnl.txt.IsEmpty() and string == "None":
 
 			locationSelector = wx.FileDialog(self,"Please select location to save your encoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
@@ -408,7 +420,29 @@ class MyFrame(wx.Frame):
 				p.terminate()
 			
 			if not terminated:
-				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
+				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+		elif not self.pnl.txt.IsEmpty() and string != "None":
+                        xtime = datetime.now().timetuple()
+                        self.savePath = string + "_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]` 
+                        p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
+                        terminated = False
+			if not terminated:
+				p.start()
+				temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+				temp.SetSize((450,180))
+				while len(multiprocessing.active_children()) != 0:
+					time.sleep(0.1)
+					if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						p.terminate()
+						terminated = True
+						self.clear()
+						break
+				temp.Destroy()
+				p.join()
+				p.terminate()
+			
+			if not terminated:
+				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 		else:
 			wx.MessageDialog(self,'Please Select a file from you file system before Converting', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
                               
@@ -496,7 +530,16 @@ class MyFrame(wx.Frame):
 
 #This method is called whenever we have a DNA String to be decoded 
 	def decodeBut2(self,e):
-		if (not self.pnl1.txt.IsEmpty()) and (FILE_EXT in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())):
+                con = sqlite3.connect(PATH + '/../database/prefs.db')
+		try:
+			cur = con.cursor()
+                        string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
+                        if "linux" in sys.platform:
+                                string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+                except:
+                        string = 'None'
+                        
+		if (not self.pnl1.txt.IsEmpty()) and (FILE_EXT in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())) and string == 'None':
 
 			locationSelector = wx.FileDialog(self,"Please select location to save your decoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
@@ -528,7 +571,32 @@ class MyFrame(wx.Frame):
 				p.terminate()
 				
 			if not terminated:
-				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
+				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+				
+		elif (not self.pnl1.txt.IsEmpty()) and (FILE_EXT in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())) and string != 'None':
+
+                        terminated = False
+                        xtime = datetime.now().timetuple()
+                        self.savePath = string + "_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+                        
+                        if not terminated:
+				p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Encode Process")
+				p.start()
+				temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+				temp.SetSize((450,180))
+				while len(multiprocessing.active_children()) != 0:
+					time.sleep(0.1)
+					if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						p.terminate()
+						terminated = True
+						self.clear()
+						break
+				temp.Destroy()
+				p.join()
+				p.terminate()
+				
+			if not terminated:
+				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 		else:
 			wx.MessageDialog(self,'Please Select a .dnac file', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 
