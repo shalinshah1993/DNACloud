@@ -59,6 +59,9 @@ ABOUT_COPYRIGHT = '(C) 2013 - All rights Reserved.'
 KEY_DEVELOPER = 'Shalin Shah'
 ICON_ARTIST = 'Foram Joshi - DNA Cloud Icon Artist'
 ICON_IDEA = 'Dixita Limbachiya - DNA Cloud Icon Idea'
+FB_LINK = "www.facebook.com"
+TWITTER_LINK = "www.twitter.com"
+QUORA_LINK = "www.quora.com"
 
 if "linux" in sys.platform:
   ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-maintenance information storage in synthesized DNA. Nature 494 (7435): 77.80). For more information visit us at"
@@ -96,10 +99,11 @@ class MyFrame(wx.Frame):
 		  ico = wx.Icon(PATH + '\..\icons\DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		  self.SetIcon(ico)
 #Create an instance of Menu bar and instances of menues you want in menuBar
-                menuBar = wx.MenuBar(); 
-                fileMenu = wx.Menu();
-                self.prefMenu = wx.Menu();
-                helpMenu = wx.Menu();
+                menuBar = wx.MenuBar()
+                fileMenu = wx.Menu()
+                self.prefMenu = wx.Menu()
+                helpMenu = wx.Menu()
+                socialMediaMenu = wx.Menu()
                 
                 #exportMenu = wx.Menu()
                 #exportMenu.Append(41,"Export DNA String..")
@@ -157,10 +161,18 @@ class MyFrame(wx.Frame):
                 helpMenu.AppendSeparator()
                 helpItem1 = wx.MenuItem(helpMenu,21,"About Us");
                 helpMenu.AppendItem(helpItem1);
+
+                socialMediaItem1 = wx.MenuItem(socialMediaMenu,41,"@Facebook")
+                socialMediaItem2 = wx.MenuItem(socialMediaMenu,42,"@Twitter")
+                socialMediaItem3 = wx.MenuItem(socialMediaMenu,43,"@Quora")
+                socialMediaMenu.AppendItem(socialMediaItem1)
+                socialMediaMenu.AppendItem(socialMediaItem2)
+                socialMediaMenu.AppendItem(socialMediaItem3)
                                                 
                 menuBar.Append(fileMenu,'&File')
                 menuBar.Append(self.prefMenu,'&Preferences');
                 menuBar.Append(helpMenu,"&Help");
+                menuBar.Append(socialMediaMenu,"F&ollow Us")
                 self.SetMenuBar(menuBar)
                 
 #Create a status Bar which can be used to indicate the progress
@@ -192,6 +204,9 @@ class MyFrame(wx.Frame):
                 self.Bind(wx.EVT_MENU,self.productDemo,id = 25)
                 self.Bind(wx.EVT_MENU,self.exportPdf,id = 8)
                 self.Bind(wx.EVT_MENU,self.exportLatex,id = 9)
+                self.Bind(wx.EVT_MENU,self.followFB,id = 41)
+                self.Bind(wx.EVT_MENU,self.followTwitter,id = 42)
+                self.Bind(wx.EVT_MENU,self.followQuora,id = 43)
                 
                 super(MyFrame,self).SetSize((1000,1000))
                 super(MyFrame,self).SetTitle(NAME)
@@ -579,6 +594,15 @@ class MyFrame(wx.Frame):
 
 #######################################################################
 #This are the modules which run when different list items from menu bar are clicked
+        def followFB(self,e):
+                webbrowser.open(FB_LINK)
+
+        def followTwitter(self,e):
+                webbrowser.open(TWITTER_LINK)
+
+        def followQuora(self,e):
+                webbrowser.open(QUORA_LINK)
+
 
 	def credits(self,e):
 		if "win" in sys.platform:
