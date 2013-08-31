@@ -280,10 +280,10 @@ class MyFrame(wx.Frame):
 			con.close()
 		
 #First of all asked whether to encode or deocode so display a dialog to ask him what he wants to do
-		self.ask =  panels.chooseDialog(None,101,"Welcome to DNA-CLOUD!")
-		self.ask.encodeBut.Bind(wx.EVT_BUTTON,self.encode)
-		self.ask.decodeBut.Bind(wx.EVT_BUTTON,self.decode)
-		self.ask.ShowModal()
+		#self.ask =  panels.chooseDialog(None,101,"Welcome to DNA-CLOUD!")
+		#self.ask.encodeBut.Bind(wx.EVT_BUTTON,self.encode)
+		#self.ask.decodeBut.Bind(wx.EVT_BUTTON,self.decode)
+		#self.ask.ShowModal()
 		
 		if self.isPasswordProtected == 'true':
 			self.prefMenu.Check(self.prefItem1.GetId(), True)
@@ -662,15 +662,14 @@ class MyFrame(wx.Frame):
 
 #######################################################################
 #This are the modules which run when different list items from menu bar are clicked
-        def followFB(self,e):
-                webbrowser.open(FB_LINK)
+	def followFB(self,e):
+		webbrowser.open(FB_LINK)
 
-        def followTwitter(self,e):
-                webbrowser.open(TWITTER_LINK)
+	def followTwitter(self,e):
+		webbrowser.open(TWITTER_LINK)
 
-        def followQuora(self,e):
-                webbrowser.open(QUORA_LINK)
-
+	def followQuora(self,e):
+		webbrowser.open(QUORA_LINK)
 
 	def credits(self,e):
 		if "win" in sys.platform:
@@ -914,6 +913,13 @@ class MyFrame(wx.Frame):
 			self.pnl.Refresh()
 			self.bindEncodeItems()
 			gc.collect()
+		elif not (self.pnl1.IsShown() or self.pnl.IsShown()):
+			self.pnl.Show()
+			self.clear()
+			self.Layout()
+			self.pnl.Refresh()
+			self.bindEncodeItems()
+			gc.collect()
 		else:
 			wx.MessageDialog(self,"You are already on the Encode Page!","Note!",wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 
@@ -924,6 +930,13 @@ class MyFrame(wx.Frame):
 			self.Layout()
 			self.bindDecodeItems()
 			self.pnl1.Refresh()
+			gc.collect()
+		elif not (self.pnl1.IsShown() or self.pnl.IsShown()):
+			self.pnl1.Show()
+			self.clear()
+			self.Layout()
+			self.pnl.Refresh()
+			self.bindEncodeItems()
 			gc.collect()
 		else:
 			wx.MessageDialog(self,"You are already on the Decode Page!","Note!",wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
