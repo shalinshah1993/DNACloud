@@ -41,7 +41,9 @@ from datetime import datetime
 #4->Opened before or this is the first time
 #5->Password enabled/disabled
 #6->Password Value if Enabled
-#7->Default Directory
+#7->Default Workspace Enabled/Disabled
+#8->Default Workspace Name/Current workspace used
+#9->Number of Workspaces
 ############################################
 if hasattr(sys, "frozen"):
         PATH = os.path.dirname(sys.executable)
@@ -61,9 +63,9 @@ ABOUT_COPYRIGHT = '(C) 2013 - All rights Reserved.'
 KEY_DEVELOPER = 'Shalin Shah'
 ICON_ARTIST = 'Foram Joshi - DNA Cloud Icon Artist'
 ICON_IDEA = 'Dixita Limbachiya - DNA Cloud Icon Idea'
-FB_LINK = "www.facebook.com"
-TWITTER_LINK = "www.twitter.com"
-QUORA_LINK = "www.quora.com"
+FB_LINK = "http://www.facebook.com/dnacloud"
+TWITTER_LINK = "http://www.twitter.com/guptalab"
+QUORA_LINK = "http://www.quora.com/Dna-Cloud"
 
 if "linux" in sys.platform:
   ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-maintenance information storage in synthesized DNA. Nature 494 (7435): 77.80). For more information visit us at"
@@ -149,20 +151,22 @@ class MyFrame(wx.Frame):
                 prefItem3 = wx.MenuItem(self.prefMenu,13,"Change Password");
                 self.prefMenu.AppendItem(prefItem3);
                 self.prefMenu.AppendSeparator()
-                prefItem2 = wx.MenuItem(self.prefMenu,12,"User Details");
-                self.prefMenu.AppendItem(prefItem2);
+                prefItem2 = wx.MenuItem(self.prefMenu,12,"User Details")
+                self.prefMenu.AppendItem(prefItem2)
+                prefItem4 = wx.MenuItem(self.prefMenu,14,"Switch Workspace")
+                self.prefMenu.AppendItem(prefItem4)
 
-                helpItem2 = wx.MenuItem(helpMenu,22,"User Manual");
-                helpMenu.AppendItem(helpItem2);
-                helpItem5 = wx.MenuItem(helpMenu,25,"Product Demo");
-                helpMenu.AppendItem(helpItem5);
-                helpItem3 = wx.MenuItem(helpMenu,23,"Product Feedback");
-                helpMenu.AppendItem(helpItem3);
-                helpItem4 = wx.MenuItem(helpMenu,24,"Credits");
-                helpMenu.AppendItem(helpItem4);
+                helpItem2 = wx.MenuItem(helpMenu,22,"User Manual")
+                helpMenu.AppendItem(helpItem2)
+                helpItem5 = wx.MenuItem(helpMenu,25,"Product Demo")
+                helpMenu.AppendItem(helpItem5)
+                helpItem3 = wx.MenuItem(helpMenu,23,"Product Feedback")
+                helpMenu.AppendItem(helpItem3)
+                helpItem4 = wx.MenuItem(helpMenu,24,"Credits")
+                helpMenu.AppendItem(helpItem4)
                 helpMenu.AppendSeparator()
-                helpItem1 = wx.MenuItem(helpMenu,21,"About Us");
-                helpMenu.AppendItem(helpItem1);
+                helpItem1 = wx.MenuItem(helpMenu,21,"About Us")
+                helpMenu.AppendItem(helpItem1)
 
                 socialMediaItem1 = wx.MenuItem(socialMediaMenu,41,"@Facebook")
                 socialMediaItem2 = wx.MenuItem(socialMediaMenu,42,"@Twitter")
@@ -172,8 +176,8 @@ class MyFrame(wx.Frame):
                 socialMediaMenu.AppendItem(socialMediaItem3)
                                                 
                 menuBar.Append(fileMenu,'&File')
-                menuBar.Append(self.prefMenu,'&Preferences');
-                menuBar.Append(helpMenu,"&Help");
+                menuBar.Append(self.prefMenu,'&Preferences')
+                menuBar.Append(helpMenu,"&Help")
                 menuBar.Append(socialMediaMenu,"F&ollow Us")
                 self.SetMenuBar(menuBar)
                 
@@ -209,6 +213,7 @@ class MyFrame(wx.Frame):
                 self.Bind(wx.EVT_MENU,self.followFB,id = 41)
                 self.Bind(wx.EVT_MENU,self.followTwitter,id = 42)
                 self.Bind(wx.EVT_MENU,self.followQuora,id = 43)
+                self.Bind(wx.EVT_MENU,self.switchWork,id = 14)
                 
                 super(MyFrame,self).SetSize((1000,1000))
                 super(MyFrame,self).SetTitle(NAME)
@@ -223,8 +228,10 @@ class MyFrame(wx.Frame):
 		try:
 			cur = con.cursor()
 			string = (cur.execute('SELECT * FROM prefs WHERE id = 4').fetchone())[1]
+			self.hasDefaultWorkspace = (cur.execute('SELECT * FROM prefs WHERE id = 7').fetchone())[1]
 			if "linux" in sys.platform:
 				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
+				self.hasDefaultWorkspace = unicodedata.normalize('NFKD', self.hasDefaultWorkspace).encode('ascii','ignore')
 
 			if string == "false":
 				prefs = panels.Preferences(None,0,"Your Details").ShowModal()
@@ -255,6 +262,8 @@ class MyFrame(wx.Frame):
 			self.isPasswordProtected = cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]
 			if "linux" in sys.platform:
 				self.isPasswordProtected = unicodedata.normalize('NFKD', cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]).encode('ascii','ignore')
+			#for i in cur.execute('SELECT * FROM prefs'):
+			#	print i
 			con.close() 
                 except sqlite3.OperationalError:
 			cur.execute('DROP TABLE IF EXISTS prefs')
@@ -265,7 +274,9 @@ class MyFrame(wx.Frame):
 			cur.execute('INSERT INTO prefs VALUES(4,"false")')
 			cur.execute('INSERT INTO prefs VALUES(5,"false")')
 			cur.execute('INSERT INTO prefs VALUES(6,"password")')
-			cur.execute('INSERT INTO prefs VALUES(7,"None")')
+			cur.execute('INSERT INTO prefs VALUES(7,"False")')
+			cur.execute('INSERT INTO prefs VALUES(8,"None")')
+			cur.execute('INSERT INTO prefs VALUES(9,"0")')
 			con.commit()
 			prefs = panels.Preferences(None,0,"Your Details").ShowModal()
 			#self.qrText = ""
@@ -278,12 +289,16 @@ class MyFrame(wx.Frame):
 			if "linux" in sys.platform:
 				self.isPasswordProtected = unicodedata.normalize('NFKD', cur.execute('SELECT * FROM prefs where id = 5').fetchone()[1]).encode('ascii','ignore')
 			con.close()
+			self.hasDefaultWorkspace = "False"
 		
 #First of all asked whether to encode or deocode so display a dialog to ask him what he wants to do
 		#self.ask =  panels.chooseDialog(None,101,"Welcome to DNA-CLOUD!")
 		#self.ask.encodeBut.Bind(wx.EVT_BUTTON,self.encode)
 		#self.ask.decodeBut.Bind(wx.EVT_BUTTON,self.decode)
 		#self.ask.ShowModal()
+
+		if self.hasDefaultWorkspace == "False":
+			panels.workspaceLauncher(None,101,"Workspace Launcher!").ShowModal()
 		
 		if self.isPasswordProtected == 'true':
 			self.prefMenu.Check(self.prefItem1.GetId(), True)
@@ -382,7 +397,7 @@ class MyFrame(wx.Frame):
                 con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
 			cur = con.cursor()
-                        string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
+                        string = (cur.execute('SELECT * FROM prefs where id = 8').fetchone())[1]
                         if "linux" in sys.platform:
                                 string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
                 except:
@@ -422,10 +437,10 @@ class MyFrame(wx.Frame):
 			if not terminated:
 				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 		elif not self.pnl.txt.IsEmpty() and string != "None":
-                        xtime = datetime.now().timetuple()
-                        self.savePath = string + "_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]` 
-                        p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
-                        terminated = False
+			xtime = datetime.now().timetuple()
+			self.savePath = string + "/dCloud_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]` 
+			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
+			terminated = False
 			if not terminated:
 				p.start()
 				temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
@@ -533,7 +548,7 @@ class MyFrame(wx.Frame):
                 con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
 			cur = con.cursor()
-                        string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
+                        string = (cur.execute('SELECT * FROM prefs where id = 8').fetchone())[1]
                         if "linux" in sys.platform:
                                 string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
                 except:
@@ -577,7 +592,7 @@ class MyFrame(wx.Frame):
 
                         terminated = False
                         xtime = datetime.now().timetuple()
-                        self.savePath = string + "_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+                        self.savePath = string + "/dCloud_decodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
                         
                         if not terminated:
 				p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Encode Process")
@@ -670,6 +685,9 @@ class MyFrame(wx.Frame):
 
 	def followQuora(self,e):
 		webbrowser.open(QUORA_LINK)
+
+	def switchWork(self,e):
+		panels.workspaceLauncher(None,102,"Switch Workspace!").ShowModal()
 
 	def credits(self,e):
 		if "win" in sys.platform:

@@ -43,9 +43,9 @@ elif "linux" in sys.platform:
 	BARCODE_HEIGHT = 96
 	BARCODE_WIDTH = 600
 
-FOLDER_DISCLAIMER = "It is not mandatory for you to select default folder. If you don't then every time you save .dnac file you would be asked to save a location"	
+FOLDER_DISCLAIMER = "It is not mandatory for you to select default folder. If you don't then every time you save .dnac file you would be asked to save a location"
 PREF_DISCLAIMER = "Disclaimer : Please note that this details will be used to identify user of the DNA strings by Bio Companies hence these are mandatory to be filled."
-
+HEADER_TEXT = "Please select your workspace where you would work in. All your files(including temporary files) will be stored in this working directory, can be changed later also from preferences."
 SOFTWARE_DETAILS = "\n\n  Version 1.0\n\n  Visit us at www.guptalab.org/dnacloud\n\n  Contact us at dnacloud@guptalab.org"
 
 class encodePanel(wx.Panel):
@@ -177,7 +177,7 @@ class encodePanel(wx.Panel):
 		font = wx.Font(11, wx.DEFAULT, wx.NORMAL, wx.BOLD,underline = True)
 		head.SetFont(font)
 		self.v1Box.Add(head,flag = wx.ALIGN_CENTER_VERTICAL | wx.TOP | wx.LEFT,border = 25)
-                head =  wx.StaticText(self,label = SOFTWARE_DETAILS)
+		head =  wx.StaticText(self,label = SOFTWARE_DETAILS)
 		font = wx.Font(9, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		head.SetFont(font)
 		self.v1Box.Add(head,flag = wx.LEFT | wx.EXPAND , border = 20)
@@ -240,27 +240,27 @@ class decodePanel(wx.Panel):
 
                 
 		head = wx.StaticText(self ,label = "Try DNA String just for fun",style = wx.CENTER)
-                font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-                head.SetFont(font)
-                self.vBox2.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
+		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+		head.SetFont(font)
+		self.vBox2.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
 
-                line1 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
-                self.vBox2.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
+		line1 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
+		self.vBox2.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
 
-                
-                self.hBox21 = wx.BoxSizer(wx.HORIZONTAL)
-                path = wx.StaticText(self, label = "  Please Write DNA String :", style = wx.ALIGN_CENTRE)
-                self.txt21 = wx.TextCtrl(self,name = "hBox") 
-                self.hBox21.Add(path, 2,flag = wx.EXPAND)
-                self.hBox21.Add(self.txt21, 8,flag = wx.EXPAND | wx.RIGHT , border = 20)
-                self.vBox2.Add(self.hBox21 , flag = wx.EXPAND)
+		
+		self.hBox21 = wx.BoxSizer(wx.HORIZONTAL)
+		path = wx.StaticText(self, label = "  Please Write DNA String :", style = wx.ALIGN_CENTRE)
+		self.txt21 = wx.TextCtrl(self,name = "hBox") 
+		self.hBox21.Add(path, 2,flag = wx.EXPAND)
+		self.hBox21.Add(self.txt21, 8,flag = wx.EXPAND | wx.RIGHT , border = 20)
+		self.vBox2.Add(self.hBox21 , flag = wx.EXPAND)
 
-                self.hBox22 = wx.BoxSizer(wx.HORIZONTAL)
-                self.decodeBut = wx.Button(self,label = "Decode",size = (150,30))
-                self.resetBut = wx.Button(self,label = "Reset",size = (150,30))
-                self.hBox22.Add(self.decodeBut ,flag = wx.LEFT ,border = 20)
-                self.hBox22.Add(self.resetBut ,flag = wx.EXPAND | wx.LEFT , border = 20)
-                self.vBox2.Add(self.hBox22 ,flag = wx.EXPAND | wx.TOP | wx.ALIGN_CENTER, border = 15)   
+		self.hBox22 = wx.BoxSizer(wx.HORIZONTAL)
+		self.decodeBut = wx.Button(self,label = "Decode",size = (150,30))
+		self.resetBut = wx.Button(self,label = "Reset",size = (150,30))
+		self.hBox22.Add(self.decodeBut ,flag = wx.LEFT ,border = 20)
+		self.hBox22.Add(self.resetBut ,flag = wx.EXPAND | wx.LEFT , border = 20)
+		self.vBox2.Add(self.hBox22 ,flag = wx.EXPAND | wx.TOP | wx.ALIGN_CENTER, border = 15)   
 
                 """
 		head =  wx.StaticText(self,label = "© QR Code generated for given User Details")
@@ -308,6 +308,7 @@ class Preferences(wx.Dialog):
 		self.SetIcon(ico)
 			
 		if "win" in sys.platform:  
+			"""
 			head = wx.StaticText(self ,label = "Select Your Default Folder",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 			head.SetFont(font)
@@ -328,7 +329,7 @@ class Preferences(wx.Dialog):
 			head.SetFont(font)
 			head.Wrap(450)
 			self.vBox.Add(head ,flag = wx.EXPAND | wx.LEFT | wx.RIGHT , border = 10)
-
+			"""
                         head = wx.StaticText(self ,label = "Enter your details",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 			head.SetFont(font)
@@ -370,12 +371,12 @@ class Preferences(wx.Dialog):
 			
 			img = Image.open(PATH + '/../icons/barcode.png')
 			img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
-                        try:
-                                img.save(PATH + '/../.temp/barcode', "PNG")
-                        except IOError:
-                                """Permission Error"""
-                                wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
-                                sys.exit(0)
+			try:
+				img.save(PATH + '/../.temp/barcode', "PNG")
+			except IOError:
+				"""Permission Error"""
+				wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+				sys.exit(0)
 			img = wx.Image(PATH + '/../.temp/barcode', wx.BITMAP_TYPE_ANY)
 			self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.BitmapFromImage(img))
 			self.vBox.Add(self.imageCtrl,flag = wx.LEFT | wx.RIGHT |wx.BOTTOM , border = 10)
@@ -400,7 +401,7 @@ class Preferences(wx.Dialog):
 
 			self.SetSizerAndFit(self.vBox)
 		elif "linux" in sys.platform:
-                        
+                        """
                         head = wx.StaticText(self ,label = "Select Your Default Folder",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 			head.SetFont(font)
@@ -421,7 +422,7 @@ class Preferences(wx.Dialog):
 			head.SetFont(font)
 			head.Wrap(450)
 			self.vBox.Add(head ,flag = wx.EXPAND | wx.LEFT | wx.RIGHT , border = 10)
-			  
+			"""
 			head = wx.StaticText(self ,label = "Enter your details",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 			head.SetFont(font)
@@ -467,8 +468,8 @@ class Preferences(wx.Dialog):
                                 img.save(PATH + '/../.temp/barcode', "PNG")
 			except IOError:
                                 """Permission Error"""
-                                wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
-                                sys.exit(0)
+				wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+				sys.exit(0)
 			img = wx.Image(PATH + '/../.temp/barcode', wx.BITMAP_TYPE_ANY)
 			self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.BitmapFromImage(img))
 			self.vBox.Add(self.imageCtrl,flag = wx.LEFT | wx.ALIGN_CENTER_HORIZONTAL , border = 10)
@@ -495,10 +496,10 @@ class Preferences(wx.Dialog):
 			self.SetSizerAndFit(self.vBox)
 			self.Layout()
 
-                self.saveBut.Bind(wx.EVT_BUTTON,self.save)
+		self.saveBut.Bind(wx.EVT_BUTTON,self.save)
 		self.barcodeBut.Bind(wx.EVT_BUTTON,self.generate)
 		self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
-		self.browBut.Bind(wx.EVT_BUTTON,self.onChoose)
+		#self.browBut.Bind(wx.EVT_BUTTON,self.onChoose)
 			
 		con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
@@ -515,16 +516,17 @@ class Preferences(wx.Dialog):
 			if "linux" in sys.platform:
 				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 			self.txtd.WriteText(string)
+			"""
 			string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
                         if "linux" in sys.platform:
 				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 			self.txtf.WriteText(string)
-			
+			"""
 			con.commit()
 		except sqlite3.OperationalError:
 			DATABASE_ERROR = True
 		if con:
-			con.close()	
+			con.close()
 			
 		#self.SetSize((500,450))
 
@@ -549,10 +551,10 @@ class Preferences(wx.Dialog):
 			cur.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.txtc.GetString(0,self.txtc.GetLastPosition()),len("xy")))
 			cur.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.txtd.GetString(0,self.txtd.GetLastPosition()),len("xyz")))
 			cur.execute('UPDATE prefs SET details = "true" WHERE id = 4')
-			if not self.txtf.IsEmpty():
-                                cur.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.txtf.GetString(0,self.txtf.GetLastPosition()),7))
-                        else:
-                                cur.execute('UPDATE prefs SET details = "None" WHERE id = 7')
+			#if not self.txtf.IsEmpty():
+                         #       cur.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.txtf.GetString(0,self.txtf.GetLastPosition()),7))
+			#else:
+                         #       cur.execute('UPDATE prefs SET details = "None" WHERE id = 7')
 			con.commit()
 		except sqlite3.OperationalError:
 			DATABASE_ERROR = True
@@ -778,6 +780,160 @@ class chooseDialog(wx.Dialog):
 		self.SetSizer(self.vBox)
 		self.SetSize((300,150))
 		
+class workspaceLauncher(wx.Dialog):
+	def __init__(self,parent,id,title):
+		wx.Dialog.__init__(self,parent,id,title)
+		self.vBox = wx.BoxSizer(wx.VERTICAL)
+		
+		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
+		self.SetIcon(ico)
+		header = wx.TextCtrl(self,name = "hBox",size = (350,60),style= wx.TE_READONLY | wx.TE_MULTILINE)
+		self.vBox.Add(header,flag = wx.EXPAND | wx.ALL , border = 10)
+		header.WriteText(HEADER_TEXT)
+		
+		head = wx.StaticText(self ,label = "Select your Workspace",style = wx.ALIGN_CENTER_HORIZONTAL)
+		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+		head.SetFont(font)
+		self.vBox.Add(head, flag = wx.EXPAND | wx.TOP | wx.LEFT, border = 10)
+		line1 = wx.StaticLine(self, size=(350,1) , style = wx.ALIGN_CENTRE)
+		self.vBox.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
+		
+		self.cbList = []
+		if "win" in sys.platform:
+			con = sqlite3.connect(PATH + '\..\database\workspace.db')
+		elif "linux" in sys.platform:
+			con = sqlite3.connect(PATH + '/../database/workspace.db')
+		try:
+			cur = con.cursor()
+			for i in cur.execute('SELECT * FROM workspace'):
+				if "linux" in sys.platform:
+					self.cbList.append(unicodedata.normalize('NFKD', i[1]).encode('ascii','ignore'))
+				elif "win" in sys.platform:
+					self.cbList.append(i[1])
+		except:
+			print "ERROR_LIST"
+		
+		con = sqlite3.connect(PATH + '/../database/prefs.db')
+		with con:
+			cur = con.cursor()
+			self.defaultWorkspace = cur.execute('SELECT * FROM prefs WHERE id = 7').fetchone()[1]
+			if "linux" in sys.platform:
+				self.defaultWorkspace = unicodedata.normalize('NFKD', self.defaultWorkspace).encode('ascii','ignore')
+			if self.defaultWorkspace == "True":
+				self.defaultWorkspace = True
+			else:
+				self.defaultWorkspace = False
+		con.close()
+		
+		self.hBox = wx.BoxSizer(wx.HORIZONTAL)
+		self.cb = wx.ComboBox(self, -1, size = (350,30), choices = self.cbList, style = wx.CB_DROPDOWN)
+		self.hBox.Add(self.cb, proportion = 4, flag = wx.LEFT | wx.TOP, border = 5)
+		self.browBut = wx.Button(self , label = "Browse")
+		self.hBox.Add(self.browBut, proportion = 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.RIGHT | wx.TOP , border = 5)
+		self.vBox.Add(self.hBox)
+		
+		self.hBox1 = wx.BoxSizer(wx.HORIZONTAL)
+		self.defCheckBox = wx.CheckBox(self, -1, label = "Set this workspace as default and don't ask me again", style = wx.CHK_2STATE)
+		self.hBox1.Add(self.defCheckBox)
+		self.vBox.Add(self.hBox1, proportion = 1, flag = wx.ALIGN_CENTER_VERTICAL | wx.TOP | wx.BOTTOM, border = 20)
+		self.defCheckBox.SetValue(self.defaultWorkspace)
+		
+		self.hBox2 = wx.BoxSizer(wx.HORIZONTAL)
+		self.okBut = wx.Button(self, wx.ID_OK,size = (100,30))
+		self.cancelBut = wx.Button(self, wx.ID_CANCEL, size = (100,30))
+		self.hBox2.Add(self.okBut, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.RIGHT | wx.BOTTOM, border = 10)
+		self.hBox2.Add(self.cancelBut, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.LEFT | wx.BOTTOM, border = 10)
+		self.vBox.Add(self.hBox2,flag = wx.ALIGN_CENTER)
+		
+		self.SetSizerAndFit(self.vBox)
+		
+		self.browBut.Bind(wx.EVT_BUTTON,self.onChoose)
+		self.okBut.Bind(wx.EVT_BUTTON,self.okay)
+		self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
+		self.isNew = False
+		self.savePath = None
+		
+		#This is necessary since we dont want to close software when cancel button is pressed in case of SWITCH WORKSPACE
+		if id == 102:
+			self.cancelBut.Disable()
+		
+	def onChoose(self,e):
+		locationSelector = wx.DirDialog(self,"Please select some location to save all your file",style = wx.DD_DIR_MUST_EXIST)
+		if locationSelector.ShowModal() == wx.ID_OK:
+			paths = locationSelector.GetPath()
+			if "win" in sys.platform:
+				self.savePath = paths
+			elif "linux" in sys.platform:
+				self.savePath = unicodedata.normalize('NFKD', paths).encode('ascii','ignore')
+			self.cb.SetValue(self.savePath)
+		else:
+			self.savePath = None
+			
+	def okay(self,e):
+		if self.savePath == None:
+			if "win" in sys.platform:
+				if self.cb.GetValue() == "":
+					wx.MessageDialog(self,'Please select some Folder for Workspace', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+					return
+				else:
+					self.savePath = self.cb.GetValue()
+			elif "linux" in sys.platform:
+				if unicodedata.normalize('NFKD', self.cb.GetValue()).encode('ascii','ignore') == "":
+					wx.MessageDialog(self,'Please select some Folder for Workspace', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+					return
+				else:
+					self.savePath = unicodedata.normalize('NFKD', self.cb.GetValue()).encode('ascii','ignore')
+		
+		if self.savePath in self.cbList:
+			self.isNew = False
+		else:
+			self.isNew = True
+		
+		if self.defCheckBox.IsChecked():
+			self.defaultWorkspace = True
+		else:
+			self.defaultWorkspace = False
+			
+		if "win" in sys.platform:
+			con1 = sqlite3.connect(PATH + '\..\database\prefs.db')
+			con = sqlite3.connect(PATH + '\..\database\workspace.db')
+		elif "linux" in sys.platform:
+			con1 = sqlite3.connect(PATH + '/../database/prefs.db')
+			con = sqlite3.connect(PATH + '/../database/workspace.db')
+		try:
+			cur1 = con1.cursor()
+			cur1.execute('UPDATE prefs SET details = ? WHERE id = ?',(str(self.defaultWorkspace),7))
+			cur1.execute('UPDATE prefs SET details = ? WHERE id = ?',(self.savePath,8))
+			count = cur1.execute('SELECT * FROM prefs WHERE id = 9').fetchone()[1]
+			if "linux" in sys.platform:
+				count = unicodedata.normalize('NFKD', count).encode('ascii','ignore')
+			if self.isNew:
+				print count
+				count = `(int(count) + 1)`
+				cur1.execute('UPDATE prefs SET details = ? WHERE id = ?',(count,9))
+			con1.commit()
+		except:
+			print "DB_ERROR_PREFS"
+		con1.close()
+		
+		if self.isNew:
+			try:
+				cur = con.cursor()
+				cur.execute('INSERT INTO workspace VALUES(?,?)',(int(count),self.savePath))
+				con.commit()
+				con.close()
+			except:
+				#print "ahiya ?s"
+				cur = con.cursor()
+				cur.execute('DROP TABLE IF EXISTS workspace')
+				cur.execute('CREATE TABLE workspace(id INT,path TEXT NOT NULL)') 
+				cur.execute('INSERT INTO workspace VALUES(?,?)',(1,self.savePath))
+				con.commit()
+				con.close()
+		self.Destroy()
+				
+	def cancel(self,e):
+		sys.exit(0)
 		
 class memEstimator(wx.Dialog):
 	def __init__(self,parent,id,title):
