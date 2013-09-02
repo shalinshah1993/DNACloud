@@ -31,18 +31,27 @@ else:
 #print PATH , "decode"
 
 def decode(readPath,savePath):
-	degenrateDNAList(readPath)
-	degenrateDNAString(readPath,savePath)
+        con = sqlite3.connect(PATH + '/../database/prefs.db')
+        with con:
+                cur = con.cursor()
+                WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                if "linux" in sys.platform:
+                        WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                        os.mkdir(WORKSPACE_PATH +  '/.temp')
+                        
+	degenrateDNAList(readPath,WORKSPACE_PATH)
+	degenrateDNAString(readPath,savePath,WORKSPACE_PATH)
 	
-def degenrateDNAString(readPath,savePath):
+def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
 	try:
 		xtemp = readPath.split(".")
 		if "win" in sys.platform:
-			dnaFile = open(PATH + '\..\.temp\dnaString.txt',"rb")
-			fileSize = os.path.getsize(PATH + '\..\.temp\dnaString.txt')
+			dnaFile = open(WORKSPACE_PATH + '\.temp\dnaString.txt',"rb")
+			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt')
 		elif "linux" in sys.platform:
-			dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
-			fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
+			dnaFile = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
+			fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
 		#decodedFile = file(PATH + '\\..\\decodedFiles\\decode','wb')
 		if len(xtemp) == 3:
 			decodedFile = file(savePath+ "." + xtemp[1],'wb')
@@ -155,13 +164,13 @@ def degenrateDNAString(readPath,savePath):
 	except MemoryError:
 		return -1
 
-def degenrateDNAList(readPath):
+def degenrateDNAList(readPath,WORKSPACE_PATH):
 	try:
 		fileOpened = open(readPath,"rb")
 		if "win" in sys.platform:
-			dnaFile = file(PATH + "\..\.temp\dnaString.txt","wb")
+			dnaFile = file(WORKSPACE_PATH + "\.temp\dnaString.txt","wb")
 		elif "linux" in sys.platform:
-			dnaFile = file(PATH + "/../.temp/dnaString.txt","wb")
+			dnaFile = file(WORKSPACE_PATH + "/.temp/dnaString.txt","wb")
 		
 		dnaLength = 0
 		#fileSize = os.path.getsize(PATH + "/../.temp/dnaList.txt")
@@ -351,13 +360,13 @@ def degenrateDNAList(readPath):
 	except MemoryError:
 		return -1
 
-def degenrateDNAListWithGCCount(readPath):
+def degenrateDNAListWithGCCount(readPath,WORKSPACE_PATH):
 	try:
 		fileOpened = open(readPath,"rb")
 		if "win" in sys.platform:
-			dnaFile = file(PATH + "\..\.temp\dnaString.txt","wb")
+			dnaFile = file(WORKSPACE_PATH + "\.temp\dnaString.txt","wb")
 		elif "linux" in sys.platform:
-			dnaFile = file(PATH + "/../.temp/dnaString.txt","w")
+			dnaFile = file(WORKSPACE_PATH + "/.temp/dnaString.txt","w")
 		
 		dnaLength = 0
 		fileSize = os.path.getsize(readPath)

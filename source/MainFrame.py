@@ -32,6 +32,9 @@ import encode
 import decode
 import pytxt2pdf
 from datetime import datetime
+if "win" in sys.platform:
+        import win32com.shell.shell as shell
+        ASADMIN = 'asadmin'
 
 ############################################
 #Preferences database has 6 rows:-
@@ -221,6 +224,7 @@ class MyFrame(wx.Frame):
                 p = wx.Point(200,200)
                 super(MyFrame,self).Move(p)
 
+                self.prefs = False
 		if "win" in sys.platform:
 			con = sqlite3.connect(PATH + '\..\database\prefs.db')
 		elif "linux" in sys.platform:
@@ -234,7 +238,7 @@ class MyFrame(wx.Frame):
 				self.hasDefaultWorkspace = unicodedata.normalize('NFKD', self.hasDefaultWorkspace).encode('ascii','ignore')
 
 			if string == "false":
-				prefs = panels.Preferences(None,0,"Your Details").ShowModal()
+				self.prefs = True
 			
 			string = (cur.execute('SELECT * FROM prefs WHERE id = 5').fetchone())[1]
 			if string == 'true':
@@ -278,7 +282,7 @@ class MyFrame(wx.Frame):
 			cur.execute('INSERT INTO prefs VALUES(8,"None")')
 			cur.execute('INSERT INTO prefs VALUES(9,"0")')
 			con.commit()
-			prefs = panels.Preferences(None,0,"Your Details").ShowModal()
+			self.prefs = True
 			#self.qrText = ""
 			#for i in cur.execute('SELECT * FROM prefs where id < 4'):
 			#	if "win" in sys.platform:
@@ -299,6 +303,8 @@ class MyFrame(wx.Frame):
 
 		if self.hasDefaultWorkspace == "False":
 			panels.workspaceLauncher(None,101,"Workspace Launcher!").ShowModal()
+                if self.prefs:
+                        panels.Preferences(None,0,"Your Details").ShowModal()
 		
 		if self.isPasswordProtected == 'true':
 			self.prefMenu.Check(self.prefItem1.GetId(), True)
@@ -620,8 +626,17 @@ class MyFrame(wx.Frame):
 
         def onClear(self,e):
 		size = 0
+                con = sqlite3.connect(PATH + '/../database/prefs.db')
+                with con:
+                        cur = con.cursor()
+                        WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                        if "linux" in sys.platform:
+                                WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                        if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                                os.mkdir(WORKSPACE_PATH +  '/.temp')
+		
 		if "win" in sys.platform:
-			os.chdir(PATH + '\..\.temp')
+			os.chdir(WORKSPACE_PATH + '\.temp')
 			try:
 				size += os.path.getsize("dnaString.txt") 
 				os.system("del dnaString.txt")
@@ -642,7 +657,7 @@ class MyFrame(wx.Frame):
 			      EXIST_DETAILS = False
 		
 		elif "linux" in sys.platform:
-			os.chdir(PATH + '/../.temp')
+			os.chdir(WORKSPACE_PATH + '/.temp')
 			try:
 				size += os.path.getsize("dnaString.txt") 
 				os.system("rm dnaString.txt")
@@ -1003,16 +1018,27 @@ class MyFrame(wx.Frame):
 		panels.estimator(None,103,"Approximate the Values").ShowModal()
 
 	def exportBarcode(self,e):
+                con = sqlite3.connect(PATH + '/../database/prefs.db')
+                with con:
+                        cur = con.cursor()
+                        WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                        if "linux" in sys.platform:
+                                WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                        if not os.path.isdir(WORKSPACE_PATH + '/barcode'):
+                                os.mkdir(WORKSPACE_PATH +  '/barcode')
+                                wx.MessageDialog(self,'Software cannot find barcode please go to prefrences and generate a barcode!', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+                                return
+                        
                 fileSelector = wx.FileDialog(self, message="Choose a location to save barcode",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
 			if "win" in sys.platform:
 				barcodeFile = file(paths[0] + ".png","wb")
-				barcodeFile.write(open(PATH + '\\..\\icons\\barcode.png',"rb").read())
+				barcodeFile.write(open(WORKSPACE_PATH + '\\barcode\\barcode.png',"rb").read())
 			elif "linux" in sys.platform:
 				paths = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
 				barcodeFile = file(paths + ".png","wb")
-				barcodeFile.write(open(PATH + '/../icons/barcode.png',"rb").read())
+				barcodeFile.write(open(PATH + '/barcode/barcode.png',"rb").read())
 			barcodeFile.close()
 			wx.MessageDialog(self,'Last generated barcode Saved to specified location', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
                 fileSelector.Destroy()
@@ -1052,7 +1078,18 @@ class MySplashScreen(wx.SplashScreen):
 ###############################################################
 
 if __name__ == "__main__":
+##        if sys.argv[-1] != ASADMIN:
+##                script = os.path.abspath(sys.argv[0])
+##                params = ' '.join([script] + sys.argv[1:] + [ASADMIN])
+##                shell.ShellExecuteEx(lpVerb='runas', lpFile=sys.executable, lpParameters=params)
+##                app = wx.App()
+##                multiprocessing.freeze_support()
+##                Splash = MySplashScreen()
+##                app.MainLoop()
+##                sys.exit(0)                
         app = wx.App()
         multiprocessing.freeze_support()
         Splash = MySplashScreen()
         app.MainLoop()
+        sys.exit(0)
+                

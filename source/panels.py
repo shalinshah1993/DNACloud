@@ -27,6 +27,7 @@ import extraModules
 import multiprocessing
 import time
 from datetime import datetime
+import shutil
 
 CHUNK_SIZE = 1000000
 if hasattr(sys, "frozen"):
@@ -306,6 +307,16 @@ class Preferences(wx.Dialog):
 		self.vBox = wx.BoxSizer(wx.VERTICAL)
 		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(ico)
+                con = sqlite3.connect(PATH + '/../database/prefs.db')
+                with con:
+                        cur = con.cursor()
+                        self.WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                        if "linux" in sys.platform:
+                                self.WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                        if not os.path.isdir(self.WORKSPACE_PATH + '/barcode'):
+                                os.mkdir(self.WORKSPACE_PATH +  '/barcode')
+                if con:
+                        con.close()
 			
 		if "win" in sys.platform:  
 			"""
@@ -369,15 +380,22 @@ class Preferences(wx.Dialog):
 			line2 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
 			self.vBox.Add(line2, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 15)
 			
-			img = Image.open(PATH + '/../icons/barcode.png')
-			img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
 			try:
-				img.save(PATH + '/../.temp/barcode', "PNG")
+                                img = Image.open(self.WORKSPACE_PATH + '/barcode/barcode.png')
+                                img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
+				img.save(self.WORKSPACE_PATH + '/.temp/barcode', "PNG")
 			except IOError:
-				"""Permission Error"""
-				wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
-				sys.exit(0)
-			img = wx.Image(PATH + '/../.temp/barcode', wx.BITMAP_TYPE_ANY)
+				#"""Permission Error"""
+				#wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+				#sys.exit(0)
+                                shutil.copyfile(PATH + '/../icons/barcode.png',self.WORKSPACE_PATH + '/barcode/barcode.png')
+                                img = Image.open(self.WORKSPACE_PATH + '/barcode/barcode.png')
+                                img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
+                                if not os.path.isdir(self.WORKSPACE_PATH + '/.temp'):
+                                        os.mkdir(self.WORKSPACE_PATH +'/.temp')
+				img.save(self.WORKSPACE_PATH + '/.temp/barcode', "PNG")
+				
+			img = wx.Image(self.WORKSPACE_PATH + '/.temp/barcode', wx.BITMAP_TYPE_ANY)
 			self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.BitmapFromImage(img))
 			self.vBox.Add(self.imageCtrl,flag = wx.LEFT | wx.RIGHT |wx.BOTTOM , border = 10)
 			
@@ -462,15 +480,22 @@ class Preferences(wx.Dialog):
 			line2 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
 			self.vBox.Add(line2, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 15)
 			
-			img = Image.open(PATH + '/../icons/barcode.png')
-			img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
 			try:
-                                img.save(PATH + '/../.temp/barcode', "PNG")
+                                img = Image.open(self.WORKSPACE_PATH + '/barcode/barcode.png')
+                                img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
+				img.save(self.WORKSPACE_PATH + '/.temp/barcode', "PNG")
 			except IOError:
-                                """Permission Error"""
-				wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
-				sys.exit(0)
-			img = wx.Image(PATH + '/../.temp/barcode', wx.BITMAP_TYPE_ANY)
+				#"""Permission Error"""
+				#wx.MessageDialog(self,'Permission Denied. Please start the software in administrator mode.', 'Error',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
+				#sys.exit(0)
+                                shutil.copyfile(PATH + '/../icons/barcode.png',self.WORKSPACE_PATH + '/barcode/barcode.png')
+                                img = Image.open(self.WORKSPACE_PATH + '/barcode/barcode.png')
+                                img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
+                                if not os.path.isdir(self.WORKSPACE_PATH + '/.temp'):
+                                        os.mkdir(self.WORKSPACE_PATH +'/.temp')
+				img.save(self.WORKSPACE_PATH + '/.temp/barcode', "PNG")
+				
+			img = wx.Image(self.WORKSPACE_PATH + '/.temp/barcode', wx.BITMAP_TYPE_ANY)
 			self.imageCtrl = wx.StaticBitmap(self, wx.ID_ANY,wx.BitmapFromImage(img))
 			self.vBox.Add(self.imageCtrl,flag = wx.LEFT | wx.ALIGN_CENTER_HORIZONTAL , border = 10)
 			
@@ -499,12 +524,12 @@ class Preferences(wx.Dialog):
 		self.saveBut.Bind(wx.EVT_BUTTON,self.save)
 		self.barcodeBut.Bind(wx.EVT_BUTTON,self.generate)
 		self.cancelBut.Bind(wx.EVT_BUTTON,self.cancel)
-		#self.browBut.Bind(wx.EVT_BUTTON,self.onChoose)
-			
-		con = sqlite3.connect(PATH + '/../database/prefs.db')
-		try:
-			cur = con.cursor()
-			string = (cur.execute('SELECT * FROM prefs where id = 1').fetchone())[1]
+		#self.browBut.Bind(wx.EVT_BUTTON,self.onChoose)	
+		#self.SetSize((500,450))
+                con = sqlite3.connect(PATH + '/../database/prefs.db')
+                with con:
+                        cur = con.cursor()
+                        string = (cur.execute('SELECT * FROM prefs where id = 1').fetchone())[1]
 			if "linux" in sys.platform:
 				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 			self.txta.WriteText(string)
@@ -516,19 +541,8 @@ class Preferences(wx.Dialog):
 			if "linux" in sys.platform:
 				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
 			self.txtd.WriteText(string)
-			"""
-			string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
-                        if "linux" in sys.platform:
-				string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
-			self.txtf.WriteText(string)
-			"""
-			con.commit()
-		except sqlite3.OperationalError:
-			DATABASE_ERROR = True
-		if con:
-			con.close()
-			
-		#self.SetSize((500,450))
+                if con:
+                        con.close()
 
         def onChoose(self,e):
                 locationSelector = wx.DirDialog(self,"Please select default location to save all your file",style = wx.DD_DEFAULT_STYLE)
@@ -564,13 +578,13 @@ class Preferences(wx.Dialog):
 		self.Destroy()
 		
 	def generate(self,e):
-		barcodeGenerator.generate(self.txta.GetString(0,self.txta.GetLastPosition()) + "-" + self.txtb.GetString(0,self.txtb.GetLastPosition())+ "-" + self.txtc.GetString(0,self.txtc.GetLastPosition()) + "-" + self.txtd.GetString(0,self.txtd.GetLastPosition()),PATH + "/../icons/")
+		barcodeGenerator.generate(self.txta.GetString(0,self.txta.GetLastPosition()) + "-" + self.txtb.GetString(0,self.txtb.GetLastPosition())+ "-" + self.txtc.GetString(0,self.txtc.GetLastPosition()) + "-" + self.txtd.GetString(0,self.txtd.GetLastPosition()),self.WORKSPACE_PATH + "/barcode/")
 		
-		img = Image.open(PATH + '/../icons/barcode.png')
+		img = Image.open(self.WORKSPACE_PATH + '/barcode/barcode.png')
 		img.thumbnail((BARCODE_WIDTH,BARCODE_HEIGHT),Image.BICUBIC)
-		img.save(PATH + '/../.temp/barcode', "PNG")
+		img.save(self.WORKSPACE_PATH + '/.temp/barcode', "PNG")
 		
-		img = wx.Image(PATH + '/../.temp/barcode', wx.BITMAP_TYPE_ANY)
+		img = wx.Image(self.WORKSPACE_PATH + '/.temp/barcode', wx.BITMAP_TYPE_ANY)
 		self.imageCtrl.SetBitmap(wx.BitmapFromImage(img))
 		self.Refresh()
 
@@ -811,7 +825,7 @@ class workspaceLauncher(wx.Dialog):
 				elif "win" in sys.platform:
 					self.cbList.append(i[1])
 		except:
-			print "ERROR_LIST"
+			LIST_ERROR = True
 		
 		con = sqlite3.connect(PATH + '/../database/prefs.db')
 		with con:
@@ -834,7 +848,7 @@ class workspaceLauncher(wx.Dialog):
 		
 		self.hBox1 = wx.BoxSizer(wx.HORIZONTAL)
 		self.defCheckBox = wx.CheckBox(self, -1, label = "Set this workspace as default and don't ask me again", style = wx.CHK_2STATE)
-		self.hBox1.Add(self.defCheckBox)
+		self.hBox1.Add(self.defCheckBox, wx.EXPAND | wx.LEFT | wx.RIGHT, border = 10)
 		self.vBox.Add(self.hBox1, proportion = 1, flag = wx.ALIGN_CENTER_VERTICAL | wx.TOP | wx.BOTTOM, border = 20)
 		self.defCheckBox.SetValue(self.defaultWorkspace)
 		
@@ -908,24 +922,23 @@ class workspaceLauncher(wx.Dialog):
 			if "linux" in sys.platform:
 				count = unicodedata.normalize('NFKD', count).encode('ascii','ignore')
 			if self.isNew:
-				print count
 				count = `(int(count) + 1)`
 				cur1.execute('UPDATE prefs SET details = ? WHERE id = ?',(count,9))
 			con1.commit()
 		except:
-			print "DB_ERROR_PREFS"
+                        print "PREF_ERROR"
+			DB_ERROR_PREFS = True
 		con1.close()
 		
 		if self.isNew:
 			try:
+                                cur = con.cursor()
+                                cur.execute('INSERT INTO workspace VALUES(?,?)',(int(count),self.savePath))
+                                con.commit()
+                                con.close()
+			except sqlite3.OperationalError:
 				cur = con.cursor()
-				cur.execute('INSERT INTO workspace VALUES(?,?)',(int(count),self.savePath))
-				con.commit()
-				con.close()
-			except:
-				#print "ahiya ?s"
-				cur = con.cursor()
-				cur.execute('DROP TABLE IF EXISTS workspace')
+				#cur.execute('DROP TABLE IF EXISTS workspace')
 				cur.execute('CREATE TABLE workspace(id INT,path TEXT NOT NULL)') 
 				cur.execute('INSERT INTO workspace VALUES(?,?)',(1,self.savePath))
 				con.commit()
@@ -1170,6 +1183,15 @@ class estimator(wx.Dialog):
 				
 				self.details = "#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + `self.GCContent` + "\n-  Total Cost($ of DNA String):\t\t\t" + `self.totalCost` + "\n-   Min Melting Point(℃/nucleotide):\t" + str(self.minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t" + str(self.maxMeltingPoint)
 				"""
+				con = sqlite3.connect(PATH + '/../database/prefs.db')
+                                with con:
+                                        cur = con.cursor()
+                                        WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                                        if "linux" in sys.platform:
+                                                WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                                        if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                                                os.mkdir(WORKSPACE_PATH +  '/.temp')
+                                                
 				try:
 					float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
 					float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
@@ -1196,7 +1218,7 @@ class estimator(wx.Dialog):
 				p.terminate()
 				
 				if not terminated:
-					tempFile = open(PATH + "/../.temp/details.txt","rb")
+					tempFile = open(WORKSPACE_PATH + "/.temp/details.txt","rb")
 					self.details = tempFile.read()
 					self.txt.WriteText(self.details)
 					tempFile.close()
@@ -1208,35 +1230,34 @@ class estimator(wx.Dialog):
 		
 	def onSave(self,e):
                 con = sqlite3.connect(PATH + '/../database/prefs.db')
-		try:
-			cur = con.cursor()
-                        string = (cur.execute('SELECT * FROM prefs where id = 7').fetchone())[1]
+                with con:
+                        cur = con.cursor()
+                        WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
                         if "linux" in sys.platform:
-                                string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
-                except:
-                        string = 'None'
+                                WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                        if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                                os.mkdir(WORKSPACE_PATH +'/.temp')
 
-                if string == 'None':
-                        locationSelector = wx.FileDialog(self,"Please select location to save your details",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-                        if locationSelector.ShowModal() == wx.ID_OK:
-                                paths = locationSelector.GetPath()
-                                self.savePath = paths
-                                
-                                propFile = file(self.savePath + ".txt","w")
-                                propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t" + str(self.costPerBase) + "\n\n" + self.details)
-                                #propFile.write("\n\n\n © 2013 - GUPTA RESEARCH LABS - Generated by DNA-CLOUD")		
-                                
-                                wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
-                        else:
-                                locationSelector.Destroy()
-                                del locationSelector
-                elif string != 'None':
-                         xtime = datetime.now().timetuple()
-                         self.savePath = string + "_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
-                         propFile = file(self.savePath + ".txt","w")
-                         propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t" + str(self.costPerBase) + "\n\n" + self.details)
-                                
-                         wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
+##                if string == 'None':
+##                        locationSelector = wx.FileDialog(self,"Please select location to save your details",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+##                        if locationSelector.ShowModal() == wx.ID_OK:
+##                                paths = locationSelector.GetPath()
+##                                self.savePath = paths
+##                                
+##                                propFile = file(self.savePath + ".txt","w")
+##                                propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t" + str(self.costPerBase) + "\n\n" + self.details)
+##                                #propFile.write("\n\n\n © 2013 - GUPTA RESEARCH LABS - Generated by DNA-CLOUD")		
+##                                
+##                                wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
+##                        else:
+##                                locationSelector.Destroy()
+##                                del locationSelector
+                xtime = datetime.now().timetuple()
+                self.savePath = WORKSPACE_PATH + "/details_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+                propFile = file(self.savePath + ".txt","w")
+                propFile.write("#Input Details:-\n\n- Salt Concentration :\t\t" + str(self.naContent) + "\n- Cost per Base :\t\t" + str(self.costPerBase) + "\n\n" + self.details)
+                        
+                wx.MessageDialog(self,'Details written to file', 'Info',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal() 
 		
 	def onCancel(self,e):
 		self.Destroy()

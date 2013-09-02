@@ -633,10 +633,19 @@ def readStringFromCsv(filePath,path):
 ######################################################################################################
 
 def getGCContent(path,costPerBase,naContent):
-	minMaxGC = decode.degenrateDNAListWithGCCount(path)
+        con = sqlite3.connect(PATH + '/../database/prefs.db')
+        with con:
+                cur = con.cursor()
+                WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                if "linux" in sys.platform:
+                        WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                        os.mkdir(WORKSPACE_PATH +  '/.temp')
+                        
+	minMaxGC = decode.degenrateDNAListWithGCCount(path,WORKSPACE_PATH)
 	try:
-		dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
-		fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
+		dnaFile = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
+		fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
 		CHUNK_SIZE = 10000000
 		if (fileSize % CHUNK_SIZE) == 0:
 			if (fileSize/CHUNK_SIZE) == 0:
@@ -683,7 +692,7 @@ def getGCContent(path,costPerBase,naContent):
 		dnaFile.close()
 		
 		noOfGCPairs = noOfGCPairs; minGC = (minMaxGC[0] * 100)/OLIGO_SIZE; maxGC = (minMaxGC[1] * 100)/OLIGO_SIZE
-		totalPairs = os.path.getsize(PATH + "/../.temp/dnaString.txt")
+		totalPairs = os.path.getsize(WORKSPACE_PATH + "/.temp/dnaString.txt")
 		GCContent = (noOfGCPairs * 100.0)/totalPairs
 		totalCost = costPerBase * totalPairs
 			
@@ -692,17 +701,26 @@ def getGCContent(path,costPerBase,naContent):
 			
 		details = "File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-   Min Melting Point(℃/nucleotide):\t\t" + str(minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t\t" + str(maxMeltingPoint)
 	
-		detailsFile = file(PATH + '/../.temp/details.txt',"wb")
+		detailsFile = file(WORKSPACE_PATH + '/.temp/details.txt',"wb")
 		detailsFile.write(details + "\n\n ©2013 Generated using DNA-CLOUD." )
 		detailsFile.close()
 	except MemoryError:
 		return None
 
-def exportToPdf(filePath,savePath):        
-	minMaxGC = decode.degenrateDNAListWithGCCount(filePath)
+def exportToPdf(filePath,savePath):
+        con = sqlite3.connect(PATH + '/../database/prefs.db')
+        with con:
+                cur = con.cursor()
+                WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                if "linux" in sys.platform:
+                        WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                        os.mkdir(WORKSPACE_PATH +  '/.temp')
+                        
+	minMaxGC = decode.degenrateDNAListWithGCCount(filePath,WORKSPACE_PATH)
 	try:
-		dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
-		fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
+		dnaFile = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
+		fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
 		CHUNK_SIZE = 10000000
 		if (fileSize % CHUNK_SIZE) == 0:
 			if (fileSize/CHUNK_SIZE) == 0:
@@ -751,8 +769,8 @@ def exportToPdf(filePath,savePath):
 	except MemoryError:
 		return None
 	
-	detailsFile = file(PATH + '/../.temp/details.txt',"wb")
-	string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + str(os.path.getsize(filePath)) + "\n\n\n\n#DNA CHUNKS :- \n\nSeq_ID\t\t\t\tSequence\n\n"
+	detailsFile = file(WORKSPACE_PATH + '/.temp/details.txt',"wb")
+	string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + str(os.path.getsize(filePath)) + "\n\n\n\n#DNA CHUNKS :- \n\nSeq_ID\t\t\t\tSequence\n\n"
 	detailsFile.write(string)
 	
 	fileOpened = open(filePath,"rb")
@@ -859,14 +877,23 @@ def exportToPdf(filePath,savePath):
 	detailsFile.close()
 	fileOpened.close()
 	
-	txt2pdf = pytxt2pdf.pyText2Pdf(PATH + '/../.temp/details.txt',savePath + ".pdf")
+	txt2pdf = pytxt2pdf.pyText2Pdf(WORKSPACE_PATH + '/.temp/details.txt',savePath + ".pdf")
 	txt2pdf.Convert()
 
-def exportToLatex(filePath,savePath):        
-        minMaxGC = decode.degenrateDNAListWithGCCount(filePath)
+def exportToLatex(filePath,savePath):
+        con = sqlite3.connect(PATH + '/../database/prefs.db')
+        with con:
+                cur = con.cursor()
+                WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                if "linux" in sys.platform:
+                        WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                        os.mkdir(WORKSPACE_PATH +  '/.temp')
+                        
+        minMaxGC = decode.degenrateDNAListWithGCCount(filePath,WORKSPACE_PATH)
         try:
-		dnaFile = open(PATH + '/../.temp/dnaString.txt',"rb")
-		fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
+		dnaFile = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
+		fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
 		CHUNK_SIZE = 10000000
 		if (fileSize % CHUNK_SIZE) == 0:
 			if (fileSize/CHUNK_SIZE) == 0:

@@ -33,16 +33,25 @@ else:
 #print PATH , "encode"
 
 def encode(readPath,savePath):
-	genDNAString(readPath)
-	genDNAChunks(readPath,savePath)
+        con = sqlite3.connect(PATH + '/../database/prefs.db')
+        with con:
+                cur = con.cursor()
+                WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                if "linux" in sys.platform:
+                        WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                        os.mkdir(WORKSPACE_PATH +  '/.temp')
+                                
+	genDNAString(readPath,WORKSPACE_PATH)
+	genDNAChunks(readPath,savePath,WORKSPACE_PATH)
 		
-def genDNAString(readPath):
-	 try:
+def genDNAString(readPath,WORKSPACE_PATH):
+         try:                      
 		fileOpened = open(readPath,"rb")
 		if "win" in sys.platform:
-			dnaFile = file(PATH + '\..\.temp\dnaString.txt','wb')
+			dnaFile = file(WORKSPACE_PATH + '\.temp\dnaString.txt','wb')
 		elif "linux" in sys.platform:
-			dnaFile = file(PATH + '/../.temp/dnaString.txt','wb')
+			dnaFile = file(WORKSPACE_PATH + '/.temp/dnaString.txt','wb')
 		
 		dnaLength = 0
 		fileSize = os.path.getsize(readPath)
@@ -151,15 +160,15 @@ def genDNAString(readPath):
 	 except MemoryError:
 		return -1
 
-def genDNAChunks(readPath,path):
+def genDNAChunks(readPath,path,WORKSPACE_PATH):
 	try:
 		xtemp = readPath.split(".")
 		if "win" in sys.platform:
-			fileOpened = open(PATH + '\..\.temp\dnaString.txt',"rb")
-			fileSize = os.path.getsize(PATH + '\..\.temp\dnaString.txt')
+			fileOpened = open(WORKSPACE_PATH + '\.temp\dnaString.txt',"rb")
+			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt')
 		elif "linux" in sys.platform:
-			fileOpened = open(PATH + '/../.temp/dnaString.txt',"rb")
-			fileSize = os.path.getsize(PATH + '/../.temp/dnaString.txt')
+			fileOpened = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
+			fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
 		dnaFile = file(path + "." + xtemp[len(xtemp) - 1] + FILE_EXT,'wb')
 		
 		dnaListLength = 0
