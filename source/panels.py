@@ -545,7 +545,7 @@ class Preferences(wx.Dialog):
                         con.close()
 
         def onChoose(self,e):
-                locationSelector = wx.DirDialog(self,"Please select default location to save all your file",style = wx.DD_DEFAULT_STYLE)
+                locationSelector = wx.DirDialog(self,"Please select default location to save all your file",style = wx.DD_DEFAULT_STYLE |  wx.DD_NEW_DIR_BUTTON)
 		if locationSelector.ShowModal() == wx.ID_OK:
 			paths = locationSelector.GetPath()
 			if "win" in sys.platform:
@@ -872,7 +872,7 @@ class workspaceLauncher(wx.Dialog):
 			self.cancelBut.Disable()
 		
 	def onChoose(self,e):
-		locationSelector = wx.DirDialog(self,"Please select some location to save all your file",style = wx.DD_DIR_MUST_EXIST)
+		locationSelector = wx.DirDialog(self,"Please select some location to save all your file",style = wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
 		if locationSelector.ShowModal() == wx.ID_OK:
 			paths = locationSelector.GetPath()
 			if "win" in sys.platform:
