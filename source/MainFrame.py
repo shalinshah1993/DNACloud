@@ -131,6 +131,7 @@ class MyFrame(wx.Frame):
                 
 #Add items to the menues by using the Append option after creating the item or using the builtin item                
                 fileItem1 = wx.MenuItem(fileMenu,1,"File to &DNA (Encoder)")
+<<<<<<< HEAD
                 #fileItem1.SetBitmap(wx.Bitmap(PATH + '/../icons/encode.png'))
                 fileMenu.AppendItem(fileItem1)
                 fileItem2 = wx.MenuItem(fileMenu,2,"DNA to &File (Decoder)")
@@ -157,6 +158,7 @@ class MyFrame(wx.Frame):
                 #fileMenu.AppendMenu(wx.ID_ANY,'E&xport to CSV',exportMenu)
                 #fileMenu.AppendMenu(wx.ID_ANY,'&Import from CSV',importMenu)
                 fileItem6 = wx.MenuItem(fileMenu,6,"&Clear Temporary Files")
+
                 #fileItem6.SetBitmap(wx.Bitmap(PATH + '/../icons/clearFiles.png'))
                 fileMenu.AppendItem(fileItem6)
                 fileMenu.AppendSeparator()
@@ -167,6 +169,7 @@ class MyFrame(wx.Frame):
                 self.prefItem1 = wx.MenuItem(self.prefMenu,11,"Password Protection",kind= wx.ITEM_CHECK);    #Item check makes this pref checkable
                 self.prefMenu.AppendItem(self.prefItem1);         
                 prefItem3 = wx.MenuItem(self.prefMenu,13,"Change Password");
+
                 #prefItem3.SetBitmap(wx.Bitmap(PATH + '/../icons/changePassword.png'))
                 self.prefMenu.AppendItem(prefItem3);
                 self.prefMenu.AppendSeparator()
