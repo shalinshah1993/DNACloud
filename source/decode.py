@@ -3,7 +3,7 @@ Author: Shalin Shah
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
-Date: 28 July 2013
+Date: 5 November 2013
 Website: www.guptalab.org/dnacloud
 This module contains method to decode the given dnac file.
 """
@@ -18,7 +18,7 @@ import csv
 import sys
 import HuffmanDictionary
 import wx
-import psutil
+#import psutil
 import thread
 import os
 import gc
@@ -46,10 +46,10 @@ def decode(readPath,savePath):
 def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
 	try:
 		xtemp = readPath.split(".")
-		if "win" in sys.platform:
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			dnaFile = open(WORKSPACE_PATH + '\.temp\dnaString.txt',"rb")
 			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt')
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			dnaFile = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
 			fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
 		#decodedFile = file(PATH + '\\..\\decodedFiles\\decode','wb')
@@ -167,11 +167,12 @@ def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
 def degenrateDNAList(readPath,WORKSPACE_PATH):
 	try:
 		fileOpened = open(readPath,"rb")
-		if "win" in sys.platform:
+		#dnaFile = None
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + "\.temp\dnaString.txt","wb")
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + "/.temp/dnaString.txt","wb")
-		
+
 		dnaLength = 0
 		#fileSize = os.path.getsize(PATH + "/../.temp/dnaList.txt")
 		fileSize = os.path.getsize(readPath)
@@ -363,9 +364,9 @@ def degenrateDNAList(readPath,WORKSPACE_PATH):
 def degenrateDNAListWithGCCount(readPath,WORKSPACE_PATH):
 	try:
 		fileOpened = open(readPath,"rb")
-		if "win" in sys.platform:
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + "\.temp\dnaString.txt","wb")
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + "/.temp/dnaString.txt","w")
 		
 		dnaLength = 0
@@ -592,6 +593,7 @@ def degenrateDNAListWithGCCount(readPath,WORKSPACE_PATH):
 		return (minGC, maxGC, listLength)
 	except MemoryError:
 		return -1
+#decode('/Users/administrator/Desktop/abcd.rtf.dnac','/Users/administrator/Desktop/abcd')
 """
 #This is the trivial decode method where in entire dna list containing dna file is take as input on a whole instead of dividing it to chunks
 		try:

@@ -5,7 +5,7 @@ Author: Shalin Shah
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
-Date: 28 July 2013
+Date: 5 November 2013
 Website: www.guptalab.org/dnacloud
 This module contains all the required and necessary methods used else where in the code.
 #########################################################################
@@ -21,11 +21,11 @@ import csv
 import sys
 import HuffmanDictionary
 import wx
-import psutil
+#import psutil
 import thread
 import os
 import gc
-import decode
+#import decode
 import pytxt2pdf
 
 OLIGO_SIZE = 117
@@ -520,7 +520,7 @@ def s4ToS1S2S3(base3String):
         return -1
 
 ##############################################################################################################
-#These are import export csv module which are not yet used in version 1.0
+#These methos include import/export csv modules and some other fucntions which are not yet used in version 1.0
 def writeListToCsv(dnaList,path):
     dnaList = unicodedata.normalize('NFKD', dnaList).encode('ascii','ignore')
     lists = dnaList.split(",")
@@ -633,6 +633,7 @@ def readStringFromCsv(filePath,path):
 ######################################################################################################
 
 def getGCContent(path,costPerBase,naContent):
+        import decode
         con = sqlite3.connect(PATH + '/../database/prefs.db')
         with con:
                 cur = con.cursor()
@@ -699,7 +700,10 @@ def getGCContent(path,costPerBase,naContent):
 		minMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (minGC) - 600)/OLIGO_SIZE 
 		maxMeltingPoint = (81.5 + 16.6 * math.log10(naContent) + 0.41 * (maxGC) - 600)/OLIGO_SIZE 
 			
-		details = "File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-   Min Melting Point(℃/nucleotide):\t\t" + str(minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t\t" + str(maxMeltingPoint)
+		if 'darwin' in sys.platform:
+			details = "File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-  Min Melting Point(deg. C/nucleotide):\t\t" + str(minMeltingPoint) + "\n-  Max Melting Point(deg. C/nucleotide):\t\t" + str(maxMeltingPoint)
+		else:
+			details = "File Selected : " + path + "\n\n#Details for the DNA :\n\n-  GC Content(% in DNA String):\t\t\t" + str(GCContent) + "\n-  Total Cost($ of DNA String):\t\t\t" + str(totalCost) + "\n-   Min Melting Point(℃/nucleotide):\t\t" + str(minMeltingPoint) + "\n-   Max Melting Point(℃/nucleotide):\t\t" + str(maxMeltingPoint)
 	
 		detailsFile = file(WORKSPACE_PATH + '/.temp/details.txt',"wb")
 		detailsFile.write(details + "\n\n ©2013 Generated using DNA-CLOUD." )
@@ -708,6 +712,7 @@ def getGCContent(path,costPerBase,naContent):
 		return None
 
 def exportToPdf(filePath,savePath):
+        import decode
         con = sqlite3.connect(PATH + '/../database/prefs.db')
         with con:
                 cur = con.cursor()
@@ -869,18 +874,19 @@ def exportToPdf(filePath,savePath):
 			counter += 1 
 		detailsFile.write(dnaString.getvalue())
 		detailsFile.flush()
-		fileOpened.flush()
+		#fileOpened.flush()
 		
 		del tempList
 		del dnaString
 
 	detailsFile.close()
 	fileOpened.close()
-	
+
 	txt2pdf = pytxt2pdf.pyText2Pdf(WORKSPACE_PATH + '/.temp/details.txt',savePath + ".pdf")
 	txt2pdf.Convert()
 
 def exportToLatex(filePath,savePath):
+        import decode
         con = sqlite3.connect(PATH + '/../database/prefs.db')
         with con:
                 cur = con.cursor()
@@ -927,7 +933,7 @@ def exportToLatex(filePath,savePath):
 			tempString = dnaFile.read(fileSize - (noOfFileChunks - 1) * CHUNK_SIZE)
 			noOfGCPairs += tempString.count('C')
 			noOfGCPairs += tempString.count('G')
-			dnaFile.flush()
+			#dnaFile.flush()
 		
 			del tempString
 			#print  "Pairs :" ,noOfGCPairs
@@ -941,10 +947,11 @@ def exportToLatex(filePath,savePath):
 		dnaFile.close()
 	except MemoryError:
 		return None
-	
-        detailsFile = file(savePath + '.tex',"wb")
+
+	detailsFile = file(savePath + '.tex',"wb")
+	#print filePath
         #string = "\n\n#DETAILS :- \n- Number of DNA  Chunks :- \t\t\t" + str(minMaxGC[2]) + "\n- Length of DNA String :- \t\t\t" + str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +  "\n- GC Content of DNA String :- \t\t" + str((noOfGCPairs * 100.0)/fileSize) + "\n- Amount of DNA required :-\t\t\t" + str(fileSize/10.0 ** 20) + " gms\n- File Size (Bytes) :- \t\t\t\t" + str(os.path.getsize(filePath)) + "\n\n\n\n#DNA CHUNKS :- \n\nSeq_ID\t\t\t\tSequence\n\n"
-        string = """\documentclass[12pt]{article}
+	string = """\documentclass[12pt]{article}
 \usepackage{pdflscape}
 \usepackage{longtable}
 %  ############################# Generated using DNA-Cloud
@@ -966,9 +973,9 @@ def exportToLatex(filePath,savePath):
  \mbox{\\bf DNA Properties} & \mbox{\\bf Value} \\\\\hline\hline
 \mbox{Number of DNA  Chunks} & """ + str(minMaxGC[2]) +"""\\\\
 \mbox{Length of Each DNA  Chunk} & 117 \\\\ 
-\mbox{Length of Entire DNA String} & """+ str(os.path.getsize(PATH + '/../.temp/dnaString.txt')) +""" \\\\
+\mbox{Length of Entire DNA String} &""" + str(os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')) +""" \\\\
 \mbox{GC Content of DNA String} & """ + str((noOfGCPairs * 100.0)/fileSize) +"""\\\\
-\mbox{Amount of DNA required} &"""+ str(fileSize/10.0 ** 20) +"""\mbox{gms} \\\\
+\mbox{Amount of DNA required} &"""+ str(fileSize/455.0 * (10 ** 18)) +"""\mbox{gms} \\\\
 \mbox{File Size (Bytes)} & """+ str(os.path.getsize(filePath)) +"""\\\\
 \hline
 \end{array}
@@ -1086,7 +1093,7 @@ def exportToLatex(filePath,savePath):
 			counter += 1 
 		detailsFile.write(dnaString.getvalue())
 		detailsFile.flush()
-		fileOpened.flush()
+		#fileOpened.flush()
 		
 		del tempList
 		del dnaString
@@ -1100,7 +1107,7 @@ def exportToLatex(filePath,savePath):
 	fileOpened.close()
 
 """   
-#This are the older version of these modules
+#This are the older version of some modules
 def genIndexList(length,ID):
     #i3List = []
     print length

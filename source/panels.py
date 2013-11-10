@@ -5,7 +5,7 @@ Author: Shalin Shah
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
-Date: 28 July 2013
+Date: 5 November 2013
 Website: www.guptalab.org/dnacloud
 This module contains both the panels for encoding and decoding.
 #########################################################################
@@ -15,7 +15,7 @@ import sys
 from PIL import Image
 if "win" in sys.platform:
 	from PIL import PngImagePlugin
-if "linux" in sys.platform:
+if "linux" in sys.platform or 'darwin' in sys.platform:
 	import unicodedata
 import barcodeGenerator
 import math
@@ -28,6 +28,7 @@ import multiprocessing
 import time
 from datetime import datetime
 import shutil
+import threading
 
 CHUNK_SIZE = 1000000
 if hasattr(sys, "frozen"):
@@ -37,10 +38,10 @@ else:
 #print PATH , "panels"
 
 FILE_EXT = '.dnac'
-if "win" in sys.platform:
+if "win" in sys.platform and not "darwin" in sys.platform:
 	BARCODE_HEIGHT = 96
 	BARCODE_WIDTH = 470
-elif "linux" in sys.platform:
+elif "linux" in sys.platform or 'darwin' in sys.platform:
 	BARCODE_HEIGHT = 96
 	BARCODE_WIDTH = 600
 
@@ -55,13 +56,21 @@ class encodePanel(wx.Panel):
 		
 		self.vBox1 = wx.BoxSizer(wx.VERTICAL)
 		head = wx.StaticText(self ,label = "DNA-ENCODER",style = wx.CENTER)
-		font = wx.Font(pointSize = 14, family = wx.DEFAULT,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
-		head.SetFont(font)
+                if 'darwin' in sys.platform:
+        		font = wx.Font(pointSize = 19, family = wx.FONTFAMILY_ROMAN,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
+        		head.SetFont(font)
+        	else:
+                        font = wx.Font(pointSize = 14, family = wx.DEFAULT,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
+        		head.SetFont(font)
 		self.vBox1.Add(head ,flag = wx.ALIGN_CENTER | wx.TOP | wx.LEFT , border = 10)
 #This is the adjustment of the Basic BUI text and textCtrl panels along with save to DataBase and Discard Button Options
 		head = wx.StaticText(self ,label = "Encode data file into DNA String",style = wx.CENTER)
-		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-		head.SetFont(font)
+                if 'darwin' in sys.platform:
+        		font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
+        	else:
+                        font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
 		self.vBox1.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
 		line1 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
 		self.vBox1.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
@@ -73,9 +82,13 @@ class encodePanel(wx.Panel):
 		self.hBox1.Add(path,flag = wx.ALIGN_CENTER_VERTICAL | wx.LEFT , border = 20)
 		self.vBox1.Add(self.hBox1)
 
-		head =  wx.StaticText(self,label = "Details (approx.)")
-		font = wx.Font(9, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-		head.SetFont(font)
+        	head =  wx.StaticText(self,label = "Details (approx.)")
+        	if 'darwin' in sys.platform:
+        		font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
+        	else:
+                        font = wx.Font(9, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
 		self.vBox1.Add(head,flag = wx.TOP | wx.LEFT,border =20)
 
 		line2 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
@@ -196,13 +209,21 @@ class decodePanel(wx.Panel):
 
 		self.vBox2 = wx.BoxSizer(wx.VERTICAL)
 		head = wx.StaticText(self ,label = "DNA-DECODER",style = wx.CENTER)
-		font = wx.Font(pointSize = 14, family = wx.FONTFAMILY_ROMAN,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
-		head.SetFont(font)
+		if 'darwin' in sys.platform:
+        		font = wx.Font(pointSize = 19, family = wx.FONTFAMILY_ROMAN,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
+        		head.SetFont(font)
+        	else:
+                        font = wx.Font(pointSize = 14, family = wx.FONTFAMILY_ROMAN,style = wx.NORMAL, weight = wx.FONTWEIGHT_BOLD, underline = True)
+        		head.SetFont(font)
 		self.vBox2.Add(head ,flag = wx.ALIGN_CENTER | wx.LEFT | wx.TOP , border = 10)
 		
 		head = wx.StaticText(self ,label = "Generate data file from already encoded DNA files",style = wx.CENTER)
-		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-		head.SetFont(font)
+		if 'darwin' in sys.platform:
+        		font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
+        	else:
+                        font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
 		self.vBox2.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT, border = 10)
 		line2 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
 		self.vBox2.Add(line2, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
@@ -241,8 +262,12 @@ class decodePanel(wx.Panel):
 
                 
 		head = wx.StaticText(self ,label = "Try DNA String just for fun",style = wx.CENTER)
-		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-		head.SetFont(font)
+		if 'darwin' in sys.platform:
+        		font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+                	head.SetFont(font)
+                else:
+                        font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+                	head.SetFont(font)
 		self.vBox2.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 10)
 
 		line1 = wx.StaticLine(self, size=(1000,1) , style = wx.ALIGN_CENTRE)
@@ -307,18 +332,19 @@ class Preferences(wx.Dialog):
 		self.vBox = wx.BoxSizer(wx.VERTICAL)
 		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(ico)
-                con = sqlite3.connect(PATH + '/../database/prefs.db')
-                with con:
-                        cur = con.cursor()
-                        self.WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
-                        if "linux" in sys.platform:
-                                self.WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
-                        if not os.path.isdir(self.WORKSPACE_PATH + '/barcode'):
-                                os.mkdir(self.WORKSPACE_PATH +  '/barcode')
-                if con:
-                        con.close()
+		con = sqlite3.connect(PATH + '/../database/prefs.db')
+		with con:
+			cur = con.cursor()
+			self.WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+			#print self.WORKSPACE_PATH
+			if "linux" in sys.platform:
+				self.WORKSPACE_PATH = unicodedata.normalize('NFKD', self.WORKSPACE_PATH).encode('ascii','ignore')
+			if not os.path.isdir(self.WORKSPACE_PATH + '/barcode'):
+				os.mkdir(self.WORKSPACE_PATH +  '/barcode')
+		if con:
+			con.close()
 			
-		if "win" in sys.platform:  
+		if "win" in sys.platform and not 'darwin' in sys.platform:  
 			"""
 			head = wx.StaticText(self ,label = "Select Your Default Folder",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
@@ -418,7 +444,8 @@ class Preferences(wx.Dialog):
 			self.vBox.Add(self.hBoxe, flag = wx.TOP | wx.ALIGN_CENTER_HORIZONTAL | wx.ALIGN_CENTRE_VERTICAL |wx.BOTTOM, border = 10)
 
 			self.SetSizerAndFit(self.vBox)
-		elif "linux" in sys.platform:
+			
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
                         """
                         head = wx.StaticText(self ,label = "Select Your Default Folder",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
@@ -500,23 +527,29 @@ class Preferences(wx.Dialog):
 			self.vBox.Add(self.imageCtrl,flag = wx.LEFT | wx.ALIGN_CENTER_HORIZONTAL , border = 10)
 			
 			head = wx.StaticText(self ,label = PREF_DISCLAIMER,style = wx.ALIGN_CENTER_HORIZONTAL)
-			font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-			head.SetFont(font)
-			head.Wrap(550)
-			self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 5)
+			if 'darwin' in sys.platform:
+				font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+				head.SetFont(font)
+				head.Wrap(570)
+				self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 8)
+			else:
+				font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+				head.SetFont(font)
+				head.Wrap(550)
+				self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 5)
 
 			line3 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
 			self.vBox.Add(line3, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
 
 			self.hBoxe = wx.BoxSizer(wx.HORIZONTAL)
-			self.saveBut = wx.Button(self,label="  Save  ")
-			self.barcodeBut = wx.Button(self,label="  Generate Barcode  ")
-			self.cancelBut = wx.Button(self,label="  Close  ")
+			self.saveBut = wx.Button(self,label="Save")
+			self.barcodeBut = wx.Button(self,label="Generate Barcode")
+			self.cancelBut = wx.Button(self,label="Close")
 			self.hBoxe.Add(self.saveBut, flag = wx.RIGHT , border = 10)
 			self.hBoxe.Add(self.barcodeBut, flag = wx.RIGHT | wx.wx.LEFT , border = 10)
 			self.hBoxe.Add(self.cancelBut, flag = wx.RIGHT , border = 10)
 			
-			self.vBox.Add(self.hBoxe, flag = wx.TOP | wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, border = 5)
+			self.vBox.Add(self.hBoxe, flag = wx.TOP | wx.ALIGN_CENTER_HORIZONTAL | wx.BOTTOM, border = 10)
 
 			self.SetSizerAndFit(self.vBox)
 			self.Layout()
@@ -545,7 +578,7 @@ class Preferences(wx.Dialog):
                         con.close()
 
         def onChoose(self,e):
-                locationSelector = wx.DirDialog(self,"Please select default location to save all your file",style = wx.DD_DEFAULT_STYLE)
+                locationSelector = wx.DirDialog(self,"Please select default location to save all your file",style = wx.DD_DEFAULT_STYLE |  wx.DD_NEW_DIR_BUTTON)
 		if locationSelector.ShowModal() == wx.ID_OK:
 			paths = locationSelector.GetPath()
 			if "win" in sys.platform:
@@ -602,8 +635,8 @@ class setPasswordDialog(wx.Dialog):
 		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(ico)
 		
-		if "win" in sys.platform:
-
+		if "win" in sys.platform and not 'darwin' in sys.platform:
+                        
 			head = wx.StaticText(self ,label = "Please Enter your password",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 			head.SetFont(font)
@@ -665,7 +698,7 @@ class setPasswordDialog(wx.Dialog):
 			
 			self.SetSizerAndFit(self.vBox)
 
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 		
 			head = wx.StaticText(self ,label = "Please Enter your password",style = wx.CENTER)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
@@ -711,8 +744,9 @@ class setPasswordDialog(wx.Dialog):
 			self.vBox.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
 			
 			head = wx.StaticText(self ,label = "It is recommended that you use password to keep your data private")
-			font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-			head.SetFont(font)
+                        if not 'darwin' in sys.platform:
+        			font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        			head.SetFont(font)
 			self.vBox.Add(head ,flag = wx.ALIGN_CENTER_HORIZONTAL)
 			
 			line3 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
@@ -730,7 +764,6 @@ class setPasswordDialog(wx.Dialog):
 			
 			self.SetSizer(self.vBox)
 			self.SetSize((570,250))
-
 
 	def save(self,e):
 		con = sqlite3.connect(PATH + '/../database/prefs.db')
@@ -813,9 +846,9 @@ class workspaceLauncher(wx.Dialog):
 		self.vBox.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
 		
 		self.cbList = []
-		if "win" in sys.platform:
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			con = sqlite3.connect(PATH + '\..\database\workspace.db')
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			con = sqlite3.connect(PATH + '/../database/workspace.db')
 		try:
 			cur = con.cursor()
@@ -872,7 +905,7 @@ class workspaceLauncher(wx.Dialog):
 			self.cancelBut.Disable()
 		
 	def onChoose(self,e):
-		locationSelector = wx.DirDialog(self,"Please select some location to save all your file",style = wx.DD_DIR_MUST_EXIST)
+		locationSelector = wx.DirDialog(self,"Please select some location to save all your file",style = wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
 		if locationSelector.ShowModal() == wx.ID_OK:
 			paths = locationSelector.GetPath()
 			if "win" in sys.platform:
@@ -908,10 +941,10 @@ class workspaceLauncher(wx.Dialog):
 		else:
 			self.defaultWorkspace = False
 			
-		if "win" in sys.platform:
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			con1 = sqlite3.connect(PATH + '\..\database\prefs.db')
 			con = sqlite3.connect(PATH + '\..\database\workspace.db')
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			con1 = sqlite3.connect(PATH + '/../database/prefs.db')
 			con = sqlite3.connect(PATH + '/../database/workspace.db')
 		try:
@@ -955,10 +988,17 @@ class memEstimator(wx.Dialog):
 		
 		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(ico)
-		head = wx.StaticText(self ,label = "Memory Estimation",style = wx.ALIGN_CENTER_HORIZONTAL)
-		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-		head.SetFont(font)
-		self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 5)
+
+		if not 'darwin' in sys.platform:
+        		head = wx.StaticText(self ,label = "Memory Estimation",style = wx.ALIGN_CENTER_HORIZONTAL)
+        		font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
+        	else:
+                        head = wx.StaticText(self ,label = "Memory Estimation",style = wx.ALIGN_CENTER_HORIZONTAL)
+        		font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
+        		
+		self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 8)
 		
 		line1 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
 		self.vBox.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 15)
@@ -972,10 +1012,15 @@ class memEstimator(wx.Dialog):
 		
 		self.txt = wx.TextCtrl(self,name = "hBox",size = (200,250),style= wx.TE_READONLY | wx.TE_MULTILINE)
 		self.vBox.Add(self.txt,flag = wx.EXPAND | wx.ALL , border = 10)
-		
-		head = wx.StaticText(self ,label = "Disclaimer:This values are just an approximation,the actual\nvalues may vary",style = wx.ALIGN_CENTRE_HORIZONTAL)
-		font = wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
-		head.SetFont(font)
+
+		if not 'darwin' in sys.platform: 
+        		head = wx.StaticText(self ,label = "Disclaimer:This values are just an approximation,the actual\nvalues may vary",style = wx.ALIGN_CENTRE_HORIZONTAL)
+        		font =   wx.Font(8, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
+        	else:
+                        head = wx.StaticText(self ,label = "Disclaimer:This values are just an approximation,the actual\nvalues may vary",style = wx.ALIGN_CENTRE_HORIZONTAL)
+        		font =   wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+        		head.SetFont(font)
 		#head.Wrap(440)
 		self.vBox.Add(head ,flag = wx.TOP | wx.LEFT | wx.RIGHT, border = 10)
 		
@@ -996,9 +1041,9 @@ class memEstimator(wx.Dialog):
 		fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
-			if "win" in sys.platform:
+			if "win" in sys.platform and not 'darwin' in sys.platform:
 				path = paths[0]
-			elif "linux" in sys.platform:
+			elif "linux" in sys.platform or 'darwin' in sys.platform:
 				path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
 			length = os.path.getsize(path)
 			dnaLength = int(5.5 * length)
@@ -1014,7 +1059,7 @@ class memEstimator(wx.Dialog):
 			line1 = "File Size(bytes) : \t\t" +  str(length)
 			line2 = "Size of DNA String : \t" + str(dnaLength)
 			line3 = "Free Memory Required : \n" + "To genrate DNA String :\t" +  str(dnaStringMem) + " MB\n" + "To generate DNA Chunks :\t" + str(dnaListMem) + " MB\n"
-			line4 = "Amount of DNA Required : \t" + str(length / (10.0 ** 20))
+			line4 = "Amount of DNA Required : \t" + str(length / (455 * (10.0 ** 18)))
 			text = line1 + "\n\n" + line2 + "\n\n" + line3 + "\n\n" + line4 + " gms\n\n" + "File Selected : " + path
 			self.txt.WriteText(text)
 		fileSelector.Destroy()
@@ -1031,7 +1076,7 @@ class estimator(wx.Dialog):
 		ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
 		self.SetIcon(ico)
 		
-		if "win" in sys.platform:
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			head = wx.StaticText(self ,label = "Biochemical Property Estimator",style = wx.ALIGN_CENTER_HORIZONTAL)
 			font = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 			head.SetFont(font)
@@ -1141,6 +1186,63 @@ class estimator(wx.Dialog):
 			
 			self.SetSizer(self.vBox)
 			self.SetSize((500,580))
+			
+		elif "darwin" in sys.platform:
+                        
+                        head = wx.StaticText(self ,label = "Estimate properties",style = wx.ALIGN_CENTER_HORIZONTAL)
+			font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+			head.SetFont(font)
+			self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT , border = 8)
+			
+			line1 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
+			self.vBox.Add(line1, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 10)
+			
+			self.hBox = wx.BoxSizer(wx.HORIZONTAL)
+			self.butChoose = wx.Button(self , label = "Choose File")
+			self.hBox.Add(self.butChoose,flag = wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_VERTICAL , border = 10,proportion = 1)
+			path = wx.StaticText(self, label = "Select a DNA File from your File System",style = wx.ALIGN_CENTER_VERTICAL)
+			self.hBox.Add(path,flag = wx.ALIGN_CENTER_VERTICAL,proportion = 2)
+			self.vBox.Add(self.hBox)
+			
+			self.hBox1 = wx.BoxSizer(wx.HORIZONTAL)
+			text1 = wx.StaticText(self, label = "  Enter Na+ salt concentration (mM) :\t",style = wx.ALIGN_CENTER)
+			self.saltText = wx.TextCtrl(self,name = "Salt Concentration",size = (200,25))
+			self.hBox1.Add(text1)
+			self.hBox1.Add(self.saltText)
+			self.vBox.Add(self.hBox1,flag = wx.TOP | wx.BOTTOM , border = 8)
+
+			self.hBox2 = wx.BoxSizer(wx.HORIZONTAL)
+			text1 = wx.StaticText(self, label = "  Enter base pair cost ($) :\t\t\t\t",style = wx.ALIGN_CENTER)
+			self.priceText = wx.TextCtrl(self,name = "Price",size = (200,25))
+			self.hBox2.Add(text1)
+			self.hBox2.Add(self.priceText)
+			self.vBox.Add(self.hBox2,flag = wx.TOP | wx.BOTTOM , border = 8)
+			
+			line2 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
+			self.vBox.Add(line2, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 15)
+			
+			self.txt = wx.TextCtrl(self,name = "hBox",size = (200,250),style= wx.TE_READONLY | wx.TE_MULTILINE)
+			self.vBox.Add(self.txt,flag = wx.EXPAND | wx.ALL , border = 10)
+			
+			head = wx.StaticText(self ,label = "Disclaimer:This values are just an approximation and the actual values may vary",style = wx.ALIGN_CENTER_HORIZONTAL)
+			font = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.BOLD)
+			head.SetFont(font)
+			self.vBox.Add(head ,flag = wx.EXPAND | wx.TOP | wx.LEFT |wx.ALIGN_CENTER_HORIZONTAL | wx.RIGHT, border = 10)
+			
+			line2 = wx.StaticLine(self, size=(300,1) , style = wx.ALIGN_CENTRE)
+			self.vBox.Add(line2, flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 15)
+			
+			self.hBox3 = wx.BoxSizer(wx.HORIZONTAL)
+			self.butCalc = wx.Button(self , label = "Calculate")
+			self.butCancel = wx.Button(self, label = "Close")
+			self.butSave = wx.Button(self , label = "Save")
+			self.hBox3.Add(self.butCalc,proportion = 1, flag = wx.LEFT | wx.RIGHT , border = 5)
+			self.hBox3.Add(self.butSave,proportion = 1, flag = wx.LEFT | wx.RIGHT , border = 5)
+			self.hBox3.Add(self.butCancel,proportion = 1, flag = wx.LEFT | wx.RIGHT , border = 5)
+			self.vBox.Add(self.hBox3,flag = wx.ALIGN_CENTER_HORIZONTAL | wx.TOP | wx.BOTTOM, border = 5)
+			
+			self.SetSizer(self.vBox)
+			self.SetSize((500,580))
 		
 		self.butChoose.Bind(wx.EVT_BUTTON,self.onChoose)
 		self.butCancel.Bind(wx.EVT_BUTTON,self.onCancel)
@@ -1158,9 +1260,9 @@ class estimator(wx.Dialog):
 		fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
-			if "win" in sys.platform:
+			if "win" in sys.platform and not 'darwin' in sys.platform:
 				self.path = paths[0]
-			elif "linux" in sys.platform:
+			elif "linux" in sys.platform or 'darwin' in sys.platform:
 				self.path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
 			self.txt.WriteText("#File Selected : " + self.path)
 		fileSelector.Destroy()
@@ -1202,20 +1304,32 @@ class estimator(wx.Dialog):
 				self.naContent = float(self.saltText.GetString(0,self.saltText.GetLastPosition()))
 				self.costPerBase = float(self.priceText.GetString(0,self.priceText.GetLastPosition()))
 				
-				p = multiprocessing.Process(target = extraModules.getGCContent , args = (self.path,self.costPerBase,self.naContent,) , name = "Checking Details Process")
+				if 'darwin' in sys.platform:
+					p = threading.Thread(name = "GC Content Grabber", target = extraModules.getGCContent, args = (self.path,self.costPerBase,self.naContent,))
+				else:
+					p = multiprocessing.Process(target = extraModules.getGCContent , args = (self.path,self.costPerBase,self.naContent,) , name = "Checking Details Process")
 				p.start()
 				temp = wx.ProgressDialog('Please wait...','Analysing the String....This may take a while....' ,parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 				terminated = False
 				temp.SetSize((450,180))
-				while len(multiprocessing.active_children()) != 0:
-					time.sleep(0.1)
-					if not temp.UpdatePulse("Analysing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-						p.terminate()
-						terminated = True
-						break
-				p.join()
-				temp.Destroy()
-				p.terminate()
+				if 'darwin' in sys.platform:
+					while p.isAlive():
+						time.sleep(0.1)
+						if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+							wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+					temp.Destroy()
+					if not p.isAlive():
+						p.join()
+				else:
+					while len(multiprocessing.active_children()) != 0:
+						time.sleep(0.1)
+						if not temp.UpdatePulse("Analysing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+							p.terminate()
+							terminated = True
+							break
+					p.join()
+					temp.Destroy()
+					p.terminate()
 				
 				if not terminated:
 					tempFile = open(WORKSPACE_PATH + "/.temp/details.txt","rb")

@@ -9,11 +9,15 @@ Website: www.guptalab.org/dnacloud
 This module is used to create a bracode.
 #########################################################################
 """
-
+import sys
 import barcode
 from barcode import generate
 from barcode.writer import ImageWriter
 from PIL import PngImagePlugin
+#if 'darwin' in sys.platform:
+#	from PIL import Image
+#	from PIL import ImageFont
+#	from PIL import ImageDraw
 
 def generate(details,path):
 	  EAN = barcode.get_barcode_class('code128')

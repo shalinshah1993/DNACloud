@@ -4,7 +4,7 @@ Author: Shalin Shah
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
-Date: 28 July 2013
+Date: 5 November 2013
 Website: www.guptalab.org/dnacloud
 This module contains method to encode a given data file into corrosponding dnac file.
 #########################################################################
@@ -19,7 +19,7 @@ import csv
 import sys
 import HuffmanDictionary
 import wx
-import psutil
+#import psutil
 import thread
 import os
 import gc
@@ -37,20 +37,23 @@ def encode(readPath,savePath):
         with con:
                 cur = con.cursor()
                 WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
-                if "linux" in sys.platform:
+                #print WORKSPACE_PATH
+                if "linux" in sys.platform or 'darwin' in sys.platform:
                         WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+        
                 if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
                         os.mkdir(WORKSPACE_PATH +  '/.temp')
-                                
+
 	genDNAString(readPath,WORKSPACE_PATH)
 	genDNAChunks(readPath,savePath,WORKSPACE_PATH)
+	#print "created"
 		
 def genDNAString(readPath,WORKSPACE_PATH):
          try:                      
 		fileOpened = open(readPath,"rb")
-		if "win" in sys.platform:
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + '\.temp\dnaString.txt','wb')
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + '/.temp/dnaString.txt','wb')
 		
 		dnaLength = 0
@@ -131,7 +134,7 @@ def genDNAString(readPath,WORKSPACE_PATH):
 			dnaString = extraModules.base3ToDNABase(S1)
 			dnaFile.write(dnaString)
 			dnaLength = dnaLength + len(S1)
-			fileOpened.flush()
+			#fileOpened.flush()
 			
 			del tempString
 			del S1
@@ -163,10 +166,10 @@ def genDNAString(readPath,WORKSPACE_PATH):
 def genDNAChunks(readPath,path,WORKSPACE_PATH):
 	try:
 		xtemp = readPath.split(".")
-		if "win" in sys.platform:
+		if "win" in sys.platform and not 'darwin' in sys.platform:
 			fileOpened = open(WORKSPACE_PATH + '\.temp\dnaString.txt',"rb")
 			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt')
-		elif "linux" in sys.platform:
+		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			fileOpened = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
 			fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
 		dnaFile = file(path + "." + xtemp[len(xtemp) - 1] + FILE_EXT,'wb')
@@ -276,6 +279,7 @@ def genDNAChunks(readPath,path,WORKSPACE_PATH):
 		return
 	except MemoryError:
 		return -1
+#encode('/Users/administrator/Desktop/Mac Pro.rtf','/Users/administrator/Desktop/abcd')
 """
 		#Trivial method to encode where in the entire file is taken as input on a whole if want to try this just copy paste this one in onChoose method of mainFrame.py
 		try:

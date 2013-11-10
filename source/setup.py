@@ -4,7 +4,7 @@ Author: Shalin Shah
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
-Date: 28 July 2013
+Date: 5 November 2013
 Website: www.guptalab.org/dnacloud
 This module is used to freeze the application.
 #########################################################################
@@ -19,7 +19,9 @@ excludes = [
     'pywin.debugger.dbgcon', 'pywin.dialogs', 'tcl',
     'Tkconstants', 'Tkinter'
 ]
-include_files = ['barcode/','PIL/',"registryFile.py"]
+include_files = ['PIL/','barcode/']
+if 'win' in sys.platform and not 'darwin' in sys.platform:
+	include_files = ['barcode/','PIL/',"registryFile.py"]
 
 build_exe_options = {
                      "includes":includes, 
@@ -28,7 +30,7 @@ build_exe_options = {
 }
 
 base = None
-if "win" in sys.platform:
+if "win" in sys.platform and not 'darwin' in sys.platform:
 	base = "Win32GUI"
 
 exe = Executable(

@@ -235,7 +235,7 @@ class pyText2Pdf:
                         self._pageHt=842
                     else:
                         psz=o[1]+a
-                        print self._progname, ': ignoring unknown paper size ', psz
+##                        print setlf._progname, ': ignoring unknown paper size ', psz
                 elif o == '-s':
                     self._ptSize=int(a)
                     if self._ptSize<1:
@@ -267,7 +267,8 @@ class pyText2Pdf:
                 elif o in ('-o', '-O'):
                     self._ofile=a
                 else:
-                    print self._progname, ': ignoring invalid switch: ', o
+                    ERROR = True
+##                    print self._progname, ': ignoring invalid switch: ', o
 
             x += 1
 
@@ -295,15 +296,15 @@ class pyText2Pdf:
         else:
             self.argsCallBack( args )
 
-        if self._landscape:
-            print 'Landscape option on...'
-        if self._columns==2:
-            print 'Printing in two columns...'
-        if self._doFFs:
-            print 'Ignoring form feed character...'
-        if self._IsoEnc:
-            print 'Using ISO Latin Encoding...'
-        print 'Using font', self._font[1:], ' size =', self._ptSize
+##        if self._landscape:
+##            print 'Landscape option on...'
+##        if self._columns==2:
+##            print 'Printing in two columns...'
+##        if self._doFFs:
+##            print 'Ignoring form feed character...'
+##        if self._IsoEnc:
+##            print 'Using ISO Latin Encoding...'
+##        print 'Using font', self._font[1:], ' size =', self._ptSize
             
 
     def writestr(self, str):
@@ -353,13 +354,13 @@ class pyText2Pdf:
             print 'Error: Could not open file to write --->', self._ofile
             sys.exit(3)
 
-        print 'Input file =>', self._ifile
-        print 'Writing pdf file', self._ofile, '...'
+##        print 'Input file =>', self._ifile
+##        print 'Writing pdf file', self._ofile, '...'
         self.WriteHeader(self._ifile)
         self.WritePages()
         self.WriteRest()
 
-        print 'Wrote file', self._ofile
+##        print 'Wrote file', self._ofile
         self._ifs.close()
         self._ofs.close()
         return 0
