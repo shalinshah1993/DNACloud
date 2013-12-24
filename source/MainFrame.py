@@ -32,9 +32,9 @@ import encode
 import decode
 import pytxt2pdf
 from datetime import datetime
-if "win" in sys.platform and 'darwin' not in sys.platform:
-        import win32com.shell.shell as shell
-        ASADMIN = 'asadmin'
+#if "win" in sys.platform and 'darwin' not in sys.platform:
+#        import win32com.shell.shell as shell
+#        ASADMIN = 'asadmin'
 
 ############################################
 #Preferences database has 6 rows:-
@@ -68,6 +68,7 @@ ICON_ARTIST = 'Foram Joshi - DNA Cloud Icon Artist'
 ICON_IDEA = 'Dixita Limbachiya - DNA Cloud Icon Idea'
 FB_LINK = "http://www.facebook.com/dnacloud"
 TWITTER_LINK = "http://www.twitter.com/guptalab"
+YOUTUBE_LINK = "http://www.youtube.com/channel/UC6JJtSNWpGlA9uIFVxEczag"
 QUORA_LINK = "http://www.quora.com/Dna-Cloud"
 
 if "linux" in sys.platform:
@@ -131,7 +132,6 @@ class MyFrame(wx.Frame):
                 
 #Add items to the menues by using the Append option after creating the item or using the builtin item                
                 fileItem1 = wx.MenuItem(fileMenu,1,"File to &DNA (Encoder)")
-<<<<<<< HEAD
                 #fileItem1.SetBitmap(wx.Bitmap(PATH + '/../icons/encode.png'))
                 fileMenu.AppendItem(fileItem1)
                 fileItem2 = wx.MenuItem(fileMenu,2,"DNA to &File (Decoder)")
@@ -203,9 +203,11 @@ class MyFrame(wx.Frame):
                 #socialMediaItem2.SetBitmap(wx.Bitmap(PATH + '/../icons/twitter.bmp'))
                 socialMediaItem3 = wx.MenuItem(socialMediaMenu,43,"Quora")
                 #socialMediaItem3.SetBitmap(wx.Bitmap(PATH + '/../icons/quora.bmp'))
+		socialMediaItem4 = wx.MenuItem(socialMediaMenu,44,"Youtube Channel")
                 socialMediaMenu.AppendItem(socialMediaItem1)
                 socialMediaMenu.AppendItem(socialMediaItem2)
                 socialMediaMenu.AppendItem(socialMediaItem3)
+		socialMediaMenu.AppendItem(socialMediaItem4)
                                                 
                 menuBar.Append(fileMenu,'&File')
                 menuBar.Append(self.prefMenu,'&Preferences')
@@ -245,6 +247,7 @@ class MyFrame(wx.Frame):
                 self.Bind(wx.EVT_MENU,self.followFB,id = 41)
                 self.Bind(wx.EVT_MENU,self.followTwitter,id = 42)
                 self.Bind(wx.EVT_MENU,self.followQuora,id = 43)
+                self.Bind(wx.EVT_MENU,self.followYoutube,id = 44)
                 self.Bind(wx.EVT_MENU,self.switchWork,id = 14)
                 
                 super(MyFrame,self).SetSize((1000,1000))
@@ -405,23 +408,22 @@ class MyFrame(wx.Frame):
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
 			#print paths
-			if "win" in sys.platform and not 'darwin' in sys.platform:
-				self.path = paths[0]
-			elif "linux" in sys.platform or 'darwin' in sys.platform:
-				self.path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')                
+			self.path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')                
                 else:
                         self.path = None
 		fileSelector.Destroy()
 		del fileSelector
-		
-		if self.pnl.IsShown() and isinstance(self.path,str):
+
+		#print self.pnl.IsShown(), self.pnl1.IsShown(), type(self.path)
+                
+		if self.pnl.IsShown() and isinstance(self.path, str):
                         #print "Encode"
 			self.pnl.txt.WriteText(self.path)
 			self.pnl.txt5.WriteText(str(os.path.getsize(self.path)))
 			self.pnl.txt4.WriteText("117")
 			self.pnl.txt2.WriteText(str(int(5.5 * os.path.getsize(self.path))))
 			self.pnl.txt3.WriteText(str(int(5.5 * os.path.getsize(self.path))/25 - 3))
-		elif self.pnl1.IsShown() and isinstance(self.path,str):
+		elif self.pnl1.IsShown() and isinstance(self.path, str):
                         #print "Decode"
 			self.clear()
 			self.pnl1.txt.WriteText(self.path)
@@ -650,7 +652,8 @@ class MyFrame(wx.Frame):
                                 string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
                 except:
                         string = 'None'
-                        
+
+        
 		if (not self.pnl1.txt.IsEmpty()) and (FILE_EXT in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())) and string == 'None':
 
 			locationSelector = wx.FileDialog(self,"Please select location to save your decoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -846,6 +849,9 @@ class MyFrame(wx.Frame):
 
 	def followQuora(self,e):
 		webbrowser.open(QUORA_LINK)
+		
+	def followYoutube(self,e):
+		webbrowser.open(YOUTUBE_LINK)
 
 	def switchWork(self,e):
 		panels.workspaceLauncher(None,102,"Switch Workspace!").ShowModal()

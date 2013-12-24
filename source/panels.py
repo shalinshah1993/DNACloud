@@ -15,8 +15,7 @@ import sys
 from PIL import Image
 if "win" in sys.platform:
 	from PIL import PngImagePlugin
-if "linux" in sys.platform or 'darwin' in sys.platform:
-	import unicodedata
+import unicodedata
 import barcodeGenerator
 import math
 import os
@@ -1260,10 +1259,7 @@ class estimator(wx.Dialog):
 		fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
-			if "win" in sys.platform and not 'darwin' in sys.platform:
-				self.path = paths[0]
-			elif "linux" in sys.platform or 'darwin' in sys.platform:
-				self.path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
+			self.path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
 			self.txt.WriteText("#File Selected : " + self.path)
 		fileSelector.Destroy()
 		
