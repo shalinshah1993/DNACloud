@@ -35,13 +35,15 @@ if "win" in sys.platform and not 'darwin' in sys.platform:
 
 exe = Executable(
     script="MainFrame.py",
+    icon = "DNAicon.ico",
+    targetName="DNACloud.exe",
     base=base
 )
  
 setup(
-    name = "Dna-Cloud",
+    name = "DNACloud",
     version = "1",
-    description = "Dna Cloud - A software to manage DNA Files",
+    description = "An software to store Data",
     options = {"build_exe": build_exe_options},
     executables = [exe]
 )
