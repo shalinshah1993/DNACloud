@@ -29,14 +29,14 @@ Build Instructions
 
 - If it doesn't work showing error that barcode module or wx module not found then you will have to first download python distribution of those modules.
 
-- You can either install them using pip or by downloading their .zip distributions(caontaining setup.py file) available.
+- You can either install them using pip or by downloading their .zip distributions(containing setup.py file) available.
 
 - To install pip type following command or download its distribution folder from internet and run `python setup.py instal`. Note that pip is payloaded with python if you install python using brew:- 
 
         sudo apt-get install python-pip (Linux)
         sudo easy_install pip or brew install python (MAC OSX)
 
-- After installing pip you should install wxpython 32 bit v2.8 using following command.
+- After installing pip you should install wxpython 32 bit v2.8 using following command. Make sure you are using python of 32bit or force 64bit python interpreter to run in 32 bit mode.
 
         sudo pip install wxpython==2.8
 
