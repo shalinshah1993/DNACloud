@@ -5,10 +5,11 @@ DNACloud README
 
 -It also decodes the original file from the DNA string or DNA list. Since this conversion process is quiet heavy it comes with a build in estimator which approximates the physical memory used by the software when converting a particular file.
 
--This software is developed by SHALIN SHAH at Laboratory of Natural Information Processing, DA-IICT (Gupta Lab).
+-This software is developed by [`Shalin Shah`](www.guptalab.org/shalinshah) at Laboratory of Natural Information Processing, DA-IICT (Gupta Lab). It has been presented as a poster at [FNANO'14](http://www.cs.duke.edu/FNANO/). 
 
-You could report bugs and feedback at :- `dnacloud@guptalab.org`.
-To know more you can also visit our website :- `www.guptalab.org/dnacloud`.
+You could report bugs and feedback at :- `dnacloud@guptalab.org`                     
+To know more you can also visit our website :- `www.guptalab.org/dnacloud`                        
+You can also find our extended paper on [Cornell's archive](arxiv.org) :- `http://arxiv.org/pdf/1310.6992v2.pdf`        
 
 **(C) - 2013 Gupta Lab**
 
