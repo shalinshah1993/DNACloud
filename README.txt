@@ -1,5 +1,5 @@
-----------------------------------------------------------------------------------------------------------------------------DNACloud
-----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------DNACloud
+------------------------------------------------------------------------------------------------------------
 
 -This software take any computer file as input and provides you its corresponding DNA string as well as small chunks of DNA String of length 117 which can be easily synthesized.
 
@@ -13,10 +13,12 @@ www.guptalab.org/dnacloud
 (C) - 2013 Gupta Lab
 
 
-----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
 Build Instructions
-----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+
 a) For MAC/Linux :- 
+
 - Download the source code(as .zip) from git or clone it using following command :-
 
 git clone https://github.com/shalinshah1993/DNACloud.git
@@ -42,14 +44,16 @@ sudo pip install wxpython==2.8
 To install it simply download it as .zip and run "python setup.py install".
 
 b) For Windows :-
-- Donwload the command line tools for git hub and setup file for pip. Install them and set their path as environent variable. Once this is done you can follow the same process as above using CMD.
+
+- Download the command line tools for git hub and setup file for pip. Install them and set their path as environment variable. Once this is done you can follow the same process as above using CMD.
 
 - Hope that helps you to install DNACloud. In case any doubt please mail @ dnacloud@guptalab.org
 
 
-----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
 Folder Info:-
-----------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+
  .temp - Contains temporary files which can be cleaned from the software.
  
  database - This folder contains all the encoded DNA Lists and your preferences. Please do not change or delete these files.
@@ -58,7 +62,7 @@ Folder Info:-
  
  scripts - Contains scripts to convert software to .exe and .app file.
  
- help - Contains PDF files for CREDITS and USER MANUAL. You may refer the last document to undertand the software.
+ help - Contains PDF files for CREDITS and USER MANUAL. You may refer the last document to understand the software.
  
  icons - Contains all the icons used in the software.
  
