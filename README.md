@@ -41,7 +41,7 @@ Build Instructions
         sudo pip install wxpython==2.8
 
 - Lastly, you need to install Whitie's pyBarcode module which is available [here](https://bitbucket.org/whitie/python-barcode "here") .
-To install it simply download it as .zip and run `python setup.py install`.
+To install it simply download it as .zip and run `sudo python setup.py install`.
 
 **b) For Windows :-**
 
