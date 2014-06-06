@@ -1,6 +1,5 @@
----------------------------------------------------------
-DNACloud
----------------------------------------------------------
+DNACloud README
+========================================================
 
 -This software take any computer file as input and provides you its corresponding DNA string as well as small chunks of DNA String of length 117 which can be easily synthesized.
 
@@ -8,50 +7,48 @@ DNACloud
 
 -This software is developed by SHALIN SHAH at Laboratory of Natural Information Processing, DA-IICT (Gupta Lab).
 
-You could report bugs and feedback at:- dnacloud@guptalab.org
-www.guptalab.org/dnacloud
+You could report bugs and feedback at :- `dnacloud@guptalab.org`.
+To know more you can also visit our website :- `www.guptalab.org/dnacloud`.
 
-(C) - 2013 Gupta Lab
+**(C) - 2013 Gupta Lab**
 
 
----------------------------------------------------------
 Build Instructions
 ---------------------------------------------------------
 
-a) For MAC/Linux :- 
+**a) For MAC/Linux :-** 
 
 - Download the source code(as .zip) from git or clone it using following command :-
 
-git clone https://github.com/shalinshah1993/DNACloud.git
+        git clone https://github.com/shalinshah1993/DNACloud.git
 
-- Open terminal and move to DNACloud directory containing dnacloud.sh file. Try to run this shell file using following command :-
+- Open terminal and move to DNACloud directory containing `dnacloud.sh` file. Try to run this shell file using following command :-
 
-sh dnacloud.sh
+        sh dnacloud.sh
 
 - If it doesn't work showing error that barcode module or wx module not found then you will have to first download python distribution of those modules.
 
 - You can either install them using pip or by downloading their .zip distributions(caontaining setup.py file) available.
 
-- To install pip type following command or download its distribution folder from internet and run "python setup.py instal". Note that pip is payloaded with python if you install python using brew:- 
+- To install pip type following command or download its distribution folder from internet and run `python setup.py instal`. Note that pip is payloaded with python if you install python using brew:- 
 
-sudo apt-get install python-pip (Linux)
-sudo easy_install pip or brew install python (MAC OSX)
+        sudo apt-get install python-pip (Linux)
+        sudo easy_install pip or brew install python (MAC OSX)
 
 - After installing pip you should install wxpython 32 bit v2.8 using following command.
 
-sudo pip install wxpython==2.8
+        sudo pip install wxpython==2.8
 
-- Lastly, you need to install Whitie's pyBarcode module which is available at https://bitbucket.org/whitie/python-barcode.
-To install it simply download it as .zip and run "python setup.py install".
+- Lastly, you need to install Whitie's pyBarcode module which is available [here](https://bitbucket.org/whitie/python-barcode "here") .
+To install it simply download it as .zip and run `python setup.py install`.
 
-b) For Windows :-
+**b) For Windows :-**
 
 - Download the command line tools for git hub and setup file for pip. Install them and set their path as environment variable. Once this is done you can follow the same process as above using CMD.
 
-- Hope that helps you to install DNACloud. In case any doubt please mail @ dnacloud@guptalab.org
+- Hope that helps you to install DNACloud. In case any doubt please mail @ `dnacloud@guptalab.org`
 
 
----------------------------------------------------------
 Folder Info:-
 ---------------------------------------------------------
 
@@ -59,11 +56,11 @@ Folder Info:-
  
  database - This folder contains all the encoded DNA Lists and your preferences. Please do not change or delete these files.
  
- source - All the python files. MainFrame.py is the main GUI file.
+ source - All the python files. `MainFrame.py` is the main GUI file.
  
- scripts - Contains scripts to convert software to .exe and .app file.
+ scripts - Contains scripts to convert software to `.exe` and `.app` file.
  
- help - Contains PDF files for CREDITS and USER MANUAL. You may refer the last document to understand the software.
+ help - Contains PDF files for `CREDITS` and `USER MANUAL`. You may refer the last document to understand the software.
  
  icons - Contains all the icons used in the software.
  
