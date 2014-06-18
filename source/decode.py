@@ -59,11 +59,38 @@ def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
                         decodedFile = file(savePath,'wb')
 		
 		
-		dnaFile.seek(fileSize - 21,0)
-		temp = dnaFile.read()
-		temp = extraModules.DNABaseToBase3WithChar(temp[1:],temp[0])
-		dnaLength = extraModules.base3ToDecimal(temp)
-		
+		# dnaFile.seek(fileSize - 21,0)
+		# temp = dnaFile.read()
+		# temp = extraModules.DNABaseToBase3WithChar(temp[1:],temp[0])
+		# dnaLength = extraModules.base3ToDecimal(temp)
+
+		i=1
+		dnaFile.seek(fileSize - 100,0)
+		mtemp = dnaFile.read()
+		#print mtemp
+		#temp = extraModules.DNABaseToBase3WithChar(temp[1:],temp[0])
+		base3String = extraModules.DNABaseToBase3(mtemp)
+		while '22022' not in base3String:
+			i=i+1;
+			if(fileSize > 100*i):
+				dnaFile.seek(fileSize - (100*i),0)
+				mtemp = dnaFile.read()
+				base3String = extraModules.DNABaseToBase3(mtemp)
+			else:
+				dnaFile.seek(0,0)
+				mtemp = dnaFile.read()
+				base3String = extraModules.DNABaseToBase3(mtemp)
+				break;		
+		tempList = base3String.split('22022')
+		result = tempList[len(tempList)-1]
+		dnaLength = extraModules.base3ToDecimal(result)
+		# print dnaLength
+
+		del mtemp
+		del base3String
+		del tempList
+		del result
+
 		fileSize = dnaLength
 		dnaFile.seek(0,0)
 		CHUNK_SIZE = 5000000
@@ -200,7 +227,7 @@ def degenrateDNAList(readPath,WORKSPACE_PATH):
 			tempList = dnaList[:j].split(",")
 			dnaString = StringIO()
 			for i in xrange(len(tempList)):
-                                if tempList[i][0] != " ":
+				if tempList[i][0] != " ":
 					if tempList[i][1] == "T":
 						dnaString.write(extraModules.reverseCompliment(tempList[i][2:27]))
 						dnaLength += 25

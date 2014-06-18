@@ -74,7 +74,7 @@ def genDNAString(readPath,WORKSPACE_PATH):
                         tempString = StringIO()
 			tempString.write(fileOpened.read(CHUNK_SIZE))
 			a = extraModules.stringToAscii(tempString.getvalue())
-                        huffmanDictionary = HuffmanDictionary.stringToBase3(a)
+			huffmanDictionary = HuffmanDictionary.stringToBase3(a)
 			S1 = extraModules.HuffmanToString(huffmanDictionary)
 			dnaString = extraModules.base3ToDNABase(S1)
 			dnaFile.write(dnaString)
@@ -143,23 +143,25 @@ def genDNAString(readPath,WORKSPACE_PATH):
 		fileOpened.close()
 		gc.collect()
 		length = extraModules.decimalToBase3(dnaLength)
-		S2 = extraModules.decimalOfLength20(length)
-		length = dnaLength + len(S2)
+		#S2 = extraModules.decimalOfLength20(length)
+		S2 = str(length)
+		mtemp = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(","))
+		commaBase3 = ''.join(mtemp)
+		length = dnaLength + len(S2) + len(commaBase3)
 		temp = length
 		sx = ""
 		while temp % 25 != 0:
 			sx = sx + "0"
 			temp = temp + 1
 		S3 = sx
-			
-		S4 = S3 + S2
+		S4 =  commaBase3 + S3 + S2
+		# print S4
+		# print extraModules.base3ToDNABaseWithChar(S4,dnaString[-1])
 		dnaFile.write(extraModules.base3ToDNABaseWithChar(S4,dnaString[-1]))
+		# dnaFile.write("\n")
+		# dnaFile.write(S4)
 		dnaFile.flush()
 		dnaFile.close()
-
-		#print "DNA length", dnaLength
-		#print "List" , (dnaLength + len(S4))/25 - 3
-		#print "List" , os.path.getsize(PATH + '/../.temp/dnaString.txt')/25 - 3
 	 except MemoryError:
 		return -1
 
