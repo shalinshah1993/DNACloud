@@ -32,7 +32,7 @@ else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 #print PATH , "encode"
 
-def encode(readPath,savePath):
+def encode(readPath, savePath, compType ):
         con = sqlite3.connect(PATH + '/../database/prefs.db')
         with con:
                 cur = con.cursor()

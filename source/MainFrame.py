@@ -440,17 +440,17 @@ class MyFrame(wx.Frame):
                 con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
 			cur = con.cursor()
-                        string = (cur.execute('SELECT * FROM prefs where id = 8').fetchone())[1]
-                        if "linux" in sys.platform:
-                                string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
-                except:
-                        string = 'None'
+			workspacePath = (cur.execute('SELECT * FROM prefs where id = 8').fetchone())[1]
+			if "linux" in sys.platform:
+				workspacePath = unicodedata.normalize('NFKD', workspacePath).encode('ascii','ignore')
+		except:
+			workspacePath = 'None'
 		
 		if self.pnl.txt.IsEmpty() :
 			wx.MessageDialog(self,'Please Select a file from you file system before Converting', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 			return 
 			
-		if string == "None":
+		if workspacePath == "None":
 			locationSelector = wx.FileDialog(self,"Please select location to save your encoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
 				paths = locationSelector.GetPath()
@@ -462,21 +462,16 @@ class MyFrame(wx.Frame):
 			else:
 				terminated = True
 			locationSelector.Destroy()
-			del locationSelector
-
-                        if 'darwin' in sys.platform:
-                                p = threading.Thread(name = "encode", target = encode.encode, args = (self.path,self.savePath,))
-                        else:
-        			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")	
+			del locationSelector	
 		else:
 			xtime = datetime.now().timetuple()
-			self.savePath = string + "/dCloud_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
-
-                        if 'darwin' in sys.platform:
-                                p = threading.Thread(name = "encode", target = encode.encode, args = (self.path,self.savePath,))
-                        else:
-        			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
-                        terminated = False
+			self.savePath = workspacePath + "/dCloud_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+			terminated = False
+		
+		if 'darwin' in sys.platform:
+			p = threading.Thread(name = "encode", target = encode.encode, args = (self.path, self.savePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ))
+		else:
+			p = multiprocessing.Process(target = encode.encode , args = (self.path, self.savePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ) , name = "Encode Process")
 		
 		if not terminated:
 			p.start()
