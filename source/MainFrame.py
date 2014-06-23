@@ -17,6 +17,7 @@ import wx
 import sys
 import extraModules
 import HuffmanDictionary
+import compression
 import sqlite3 as lite
 import sqlite3
 import gzip
@@ -32,6 +33,7 @@ import encode
 import decode
 import pytxt2pdf
 from datetime import datetime
+
 #if "win" in sys.platform and 'darwin' not in sys.platform:
 #        import win32com.shell.shell as shell
 #        ASADMIN = 'asadmin'
@@ -106,11 +108,11 @@ class MyFrame(wx.Frame):
                 self.Layout()
                 
                 if "linux" in sys.platform or 'darwin' in sys.platform:
-		  ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
-		  self.SetIcon(ico)
+			ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(ico)
                 elif "win" in sys.platform and not 'darwin' in sys.platform:
-		  ico = wx.Icon(PATH + '\..\icons\DNAicon.ico', wx.BITMAP_TYPE_ICO)
-		  self.SetIcon(ico)
+			ico = wx.Icon(PATH + '\..\icons\DNAicon.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(ico)
 #Create an instance of Menu bar and instances of menues you want in menuBar
                 menuBar = wx.MenuBar()
                 fileMenu = wx.Menu()
@@ -404,7 +406,10 @@ class MyFrame(wx.Frame):
            
 #When the choose file button is clicked then we come here
 	def onChoose(self,e):
-                fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
+		#clear fields
+		self.clear()
+		
+		fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
 			#print paths
@@ -436,8 +441,7 @@ class MyFrame(wx.Frame):
 #This are the save cancel button modules
 
 	def save(self,e):
-
-                con = sqlite3.connect(PATH + '/../database/prefs.db')
+		con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
 			cur = con.cursor()
 			workspacePath = (cur.execute('SELECT * FROM prefs where id = 8').fetchone())[1]
@@ -446,10 +450,10 @@ class MyFrame(wx.Frame):
 		except:
 			workspacePath = 'None'
 		
-		if self.pnl.txt.IsEmpty() :
+		if not self.path :
 			wx.MessageDialog(self,'Please Select a file from you file system before Converting', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-			return 
-			
+			return
+		
 		if workspacePath == "None":
 			locationSelector = wx.FileDialog(self,"Please select location to save your encoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
@@ -467,6 +471,14 @@ class MyFrame(wx.Frame):
 			xtime = datetime.now().timetuple()
 			self.savePath = workspacePath + "/dCloud_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
 			terminated = False
+		
+		if not hasattr( self, 'savePath' ):
+			wx.MessageDialog(self,'Output file path is not given', 'Error!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			return
+		
+		inputFilename = os.path.basename( self.path )
+		inputFilenameNoExtension = os.path.splitext( inputFilename )[0]
+		self.savePath += "_" + inputFilenameNoExtension
 		
 		if 'darwin' in sys.platform:
 			p = threading.Thread(name = "encode", target = encode.encode, args = (self.path, self.savePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ))

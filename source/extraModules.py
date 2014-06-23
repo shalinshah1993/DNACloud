@@ -25,7 +25,7 @@ import wx
 import thread
 import os
 import gc
-#import decode
+import mimetypes
 import pytxt2pdf
 
 OLIGO_SIZE = 117
@@ -1117,47 +1117,9 @@ def exportToLatex(filePath,savePath):
 \\end{document}""")
 	detailsFile.close()
 	fileOpened.close()
+	
+###################################################################
+#File related modules
 
-"""   
-#This are the older version of some modules
-def genIndexList(length,ID):
-    #i3List = []
-    print length
-    #P = []
-    indexInfoList = []
-    id = list(str(ID))
-    for i in xrange(length):
-        i3 = (str(decimalToBase3(i)))
-        while len(i3) <= 12:
-            i3 = '0' + i3
-        i3String = i3
-        #for j in i3:
-        #    i3String = i3String + str(j)
-        p = (int(str(ID)[0]) + int(i3[0]) + int(i3[2]) + int(i3[4]) + int(i3[6]) + int(i3[8]) + int(i3[10]))%3
-        #P.append(p)
-        #i3List.append(i3String)
-        indexInfoList.append(str(ID)+i3String+str(p))
-    #print indexInfoList
-    print "Index list made"
-    return indexInfoList    
-
-#@profile
-def divideStringIntoChunks(string):
-    length = len(string)
-    count = 100
-    seg = 0
-    listx = []
-    while length - count > 100:
-        temp = ''
-        for i in xrange(100):
-            temp = temp + str(string[i + 100 * seg])
-        listx.append(temp)
-        seg = seg + 1
-        count = count + 100
-    temp = ''
-    for i in xrange(length - count + 1):
-        temp = temp + str(string[i + 100 * seg])
-    listx.append(temp)
-    #print listx
-    return listx
-"""
+def getFileType( inputPath ):
+	return mimetypes.guess_type( inputPath )[0]
