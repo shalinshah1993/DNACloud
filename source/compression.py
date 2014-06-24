@@ -18,6 +18,7 @@ import time
 import Image
 import threading
 import subprocess
+import extraModules
 from cStringIO import StringIO
 
 FFMPEG_BIN = ""
@@ -40,6 +41,49 @@ class RepeatingTimer(threading._Timer):
 			else:
 				self.function(*self.args, **self.kwargs)
 				
+def compress( readPath, WORKSPACE_PATH, compType):
+	
+	inputFilename = os.path.basename( readPath )
+	inputFilenameNoExtension = os.path.splitext( inputFilename )[0]
+	inputFileExtension = os.path.splitext( inputFilename )[1]
+		
+	compressFilePath = ''
+	if "win" in sys.platform and not 'darwin' in sys.platform:
+		compressFilePath = WORKSPACE_PATH + '\.temp\comp_'
+	elif "linux" in sys.platform or 'darwin' in sys.platform:
+		compressFilePath = WORKSPACE_PATH + '/.temp/comp_'
+	
+	if compType == 1:
+		compressFilePath += inputFilename + '.bz2'
+		if os.path.isfile( compressFilePath ):
+			return compressFilePath
+		compressFileToBz2( readPath, compressFilePath )
+		return compressFilePath
+	elif compType == 2:
+		if not extraModules.getFileType( readPath ):
+			print "Lossy compression not possible for selected file type"
+			return None
+		elif "image" in extraModules.getFileType( readPath ):
+			compressFilePath += inputFilenameNoExtension + ".jpeg"
+			if os.path.isfile( compressFilePath ):
+				return compressFilePath
+			compressImageFile( readPath, compressFilePath )
+			return compressFilePath
+		elif "video" in extraModules.getFileType( readPath ):
+			compressFilePath += inputFilename
+			if os.path.isfile( compressFilePath ):
+				return compressFilePath
+			compressMediaFile( readPath, compressFilePath, "video" )
+			return compressFilePath
+		elif "music" in extraModules.getFileType( readPath ):
+			compressFilePath += inputFilename
+			if os.path.isfile( compressFilePath ):
+				return compressFilePath
+			compressMediaFile( readPath, compressFilePath, "audio" )
+			return compressFilePath
+			
+	return None
+	
 def progressBarStatus( progressBar ):
 	progressBar.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")
     
@@ -82,6 +126,8 @@ def compressMediaFile( filePath, storePath , mediaType, compressRatio = -1 ):
 	elif "video" in mediaType:
 		command = [ FFMPEG_BIN, '-i', filePath, '-b:v', str(compressRatio) + 'k' , storePath]
 	
+	proc = subprocess.call( command, stdout = subprocess.PIPE, bufsize=10**8 )
+	'''
 	progressBar = wx.ProgressDialog('Please wait...', 'Compressing the File....This may take several minutes....\n\t....so sit back and relax....', style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 	progressBar.SetSize((450,180))
 			
@@ -95,3 +141,4 @@ def compressMediaFile( filePath, storePath , mediaType, compressRatio = -1 ):
 	
 	progressBar.Destroy()
 	timer.cancel()
+	'''

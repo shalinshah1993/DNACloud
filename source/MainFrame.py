@@ -11,27 +11,28 @@ This module contains code for the main GUI Frame.
 #########################################################################
 """
 
-import webbrowser
+
 import os
 import wx
-import sys
-import extraModules
-import HuffmanDictionary
-import compression
-import sqlite3 as lite
-import sqlite3
-import gzip
-import unicodedata
 import gc
+import sys
+import gzip
 import time
 import thread
-import threading
-import multiprocessing
-import panels
-from multiprocessing.pool import ThreadPool
 import encode
 import decode
+import panels
+import sqlite3
+import threading
 import pytxt2pdf
+import webbrowser
+import compression
+import unicodedata
+import extraModules
+import multiprocessing
+import HuffmanDictionary
+import sqlite3 as lite
+from multiprocessing.pool import ThreadPool
 from datetime import datetime
 
 #if "win" in sys.platform and 'darwin' not in sys.platform:
@@ -454,6 +455,8 @@ class MyFrame(wx.Frame):
 			wx.MessageDialog(self,'Please Select a file from you file system before Converting', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 			return
 		
+		#variable terminated keeps track if dna file is created or not
+		#Let's set path to save output file
 		if workspacePath == "None":
 			locationSelector = wx.FileDialog(self,"Please select location to save your encoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
@@ -473,44 +476,75 @@ class MyFrame(wx.Frame):
 			terminated = False
 		
 		if not hasattr( self, 'savePath' ):
-			wx.MessageDialog(self,'Output file path is not given', 'Error!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			wx.MessageDialog( self,'Output file path is not given', 'Error!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 			return
 		
 		inputFilename = os.path.basename( self.path )
 		inputFilenameNoExtension = os.path.splitext( inputFilename )[0]
 		self.savePath += "_" + inputFilenameNoExtension
 		
+		#compression starts here
+		
 		if 'darwin' in sys.platform:
-			p = threading.Thread(name = "encode", target = encode.encode, args = (self.path, self.savePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ))
+			compressionThread = threading.Thread(name = "compression", target = compression.compress, args = ( self.path, workspacePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ))
 		else:
-			p = multiprocessing.Process(target = encode.encode , args = (self.path, self.savePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ) , name = "Encode Process")
+			compressionThread = multiprocessing.Process(target = compression.compress , args = ( self.path, workspacePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ) , name = "Compression Process")
+		
+		compressionThread.start()
+		progressDialog = wx.ProgressDialog('Please wait...', 'Compressing the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+		progressDialog.SetSize((450,180))
+		if 'darwin' in sys.platform:
+			while compressionThread.isAlive():
+				time.sleep(0.1)
+				if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+					compressionThread.terminate()
+					terminated = True
+					wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+					break
+		else:        
+			while len(multiprocessing.active_children()) != 0:
+				time.sleep(0.1)
+				if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+					compressionThread.terminate()
+					terminated = True
+					self.clear()
+					break
+					
+		progressDialog.Destroy()
+		compressionThread.join()
+		
+		#encoding starts here
+		
+		if 'darwin' in sys.platform:
+			encodingThread = threading.Thread(name = "encode", target = encode.encode, args = ( self.path, self.savePath, ))
+		else:
+			encodingThread = multiprocessing.Process(target = encode.encode , args = ( self.path, self.savePath, ) , name = "Encode Process")
 		
 		if not terminated:
-			p.start()
-			temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-			temp.SetSize((450,180))
+			encodingThread.start()
+			progressDialog = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+			progressDialog.SetSize((450,180))
 			if 'darwin' in sys.platform:
-				while p.isAlive():
+				while encodingThread.isAlive():
 					time.sleep(0.1)
-					if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-						#p.terminate()
-						#terminated = True
+					if not progressDialog.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						encodingThread.terminate()
+						terminated = True
 						wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-						#break
-				temp.Destroy()
-				if not p.isAlive():
-					p.join()
+						break
+				if not encodingThread.isAlive():
+					encodingThread.join()
 			else:        
 				while len(multiprocessing.active_children()) != 0:
 					time.sleep(0.1)
-					if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-						p.terminate()
+					if not progressDialog.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						encodingThread.terminate()
 						terminated = True
 						self.clear()
 						break
-				temp.Destroy()
-				p.join()
-				p.terminate()
+				encodingThread.join()
+				encodingThread.terminate()
+			progressDialog.Destroy()
 		
 		if not terminated:
 			wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()

@@ -24,7 +24,6 @@ import thread
 import os
 import gc
 import extraModules
-import compression
 
 FILE_EXT = '.dnac'
 if hasattr(sys, "frozen"):
@@ -33,7 +32,7 @@ else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 #print PATH , "encode"
 
-def encode(readPath, savePath, compType ):
+def encode( readPath, savePath ):
         con = sqlite3.connect(PATH + '/../database/prefs.db')
         with con:
                 cur = con.cursor()
@@ -44,25 +43,9 @@ def encode(readPath, savePath, compType ):
         
                 if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
                         os.mkdir(WORKSPACE_PATH +  '/.temp')
-	
-	inputFilename = os.path.basename( readPath )
-	inputFilenameNoExtension = os.path.splitext( inputFilename )[0]
-	inputFileExtension = os.path.splitext( inputFilename )[1]
-		
-	compressFilePath = ''
-	if compType == 1:
-		if "win" in sys.platform and not 'darwin' in sys.platform:
-			compressFilePath = WORKSPACE_PATH + '\.temp\comp_'+ inputFilename + '.bz2'
-		elif "linux" in sys.platform or 'darwin' in sys.platform:
-			compressFilePath = WORKSPACE_PATH + '/.temp/comp_' + inputFilename + '.bz2'
-		compression.compressFileToBz2( readPath, compressFilePath )
-		readPath = compressFilePath
 		
 	genDNAString(readPath,WORKSPACE_PATH)
 	genDNAChunks(readPath,savePath,WORKSPACE_PATH)
-	
-	if os.path.isfile(compressFilePath):
-		os.remove(compressFilePath)
 		
 		
 def genDNAString(readPath,WORKSPACE_PATH):
@@ -181,17 +164,17 @@ def genDNAChunks(readPath,path,WORKSPACE_PATH):
 	try:
 		if "." in readPath:
 			temp = readPath.split( "." )
-			readFileExtension = +"." + temp[ len( temp ) - 1 ]
+			readFileExtension = "." + temp[ len( temp ) - 1 ]
 		else:
 			readFileExtension = "" 
 		
 		if "win" in sys.platform and not 'darwin' in sys.platform:
-			fileOpened = open(WORKSPACE_PATH + '\.temp\dnaString.txt',"rb")
-			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt')
+			fileOpened = open( WORKSPACE_PATH + '\.temp\dnaString.txt', "rb" )
+			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt' )
 		elif "linux" in sys.platform or 'darwin' in sys.platform:
-			fileOpened = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
-			fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
-		dnaFile = file(path + readFileExtension + FILE_EXT,'wb')
+			fileOpened = open( WORKSPACE_PATH + '/.temp/dnaString.txt',"rb" )
+			fileSize = os.path.getsize( WORKSPACE_PATH + '/.temp/dnaString.txt' )
+		dnaFile = file( path + readFileExtension + FILE_EXT, 'wb' )
 		
 		dnaListLength = 0
 		
