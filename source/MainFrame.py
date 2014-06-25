@@ -18,6 +18,7 @@ import gc
 import sys
 import gzip
 import time
+import Queue
 import thread
 import encode
 import decode
@@ -80,7 +81,7 @@ if "linux" in sys.platform:
   DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license\nagreement and may be used only in accordance with the terms of the agreement.Any selling or distribution of the\nprogram or it parts,original or modified, is prohibited without a written permission from Manish K Gupta."
 
 elif "win" in sys.platform and not 'darwin' in sys.platform:  
-  ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77–80). For more information visit us at "
+  ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77Â–80). For more information visit us at "
   
   DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license agreement and may be used only in accordance with the terms of the agreement.\n\nAny selling or distribution of the program or its parts,original or modified, is prohibited without a written permission from Manish K Gupta."
 elif 'darwin' in sys.platform:
@@ -483,42 +484,49 @@ class MyFrame(wx.Frame):
 		inputFilenameNoExtension = os.path.splitext( inputFilename )[0]
 		self.savePath += "_" + inputFilenameNoExtension
 		
-		#compression starts here
+		self.compressFilePath = compression.compressedFilePath( self.path, workspacePath, self.pnl.compOptionsComboBox.GetCurrentSelection() )
 		
-		if 'darwin' in sys.platform:
-			compressionThread = threading.Thread(name = "compression", target = compression.compress, args = ( self.path, workspacePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ))
+		# compression thread is called only if compression is possible
+		if self.compressFilePath:
+			if 'darwin' in sys.platform:
+				compressionThread = threading.Thread(name = "compression", target = compression.compress, args = ( self.path, self.compressFilePath, self.pnl.compOptionsComboBox.GetCurrentSelection() ))
+			else:
+				compressionThread = multiprocessing.Process(target = compression.compress , args = ( self.path, self.compressFilePath, self.pnl.compOptionsComboBox.GetCurrentSelection() ) , name = "Compression Process")
+			
+			compressionThread.daemon = True
+			compressionThread.start()
+			
+			progressDialog = wx.ProgressDialog('Please wait...', 'Compressing the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+			progressDialog.SetSize((450,180))
+			if 'darwin' in sys.platform:
+				while compressionThread.isAlive():
+					time.sleep(0.1)
+					if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						compressionThread.terminate()
+						terminated = True
+						wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+						break
+			else:        
+				while len(multiprocessing.active_children()) != 0:
+					time.sleep(0.1)
+					if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						compressionThread.terminate()
+						terminated = True
+						self.clear()
+						break
+						
+			progressDialog.Destroy()
+			compressionThread.join()
+			self.readPath = self.compressFilePath
 		else:
-			compressionThread = multiprocessing.Process(target = compression.compress , args = ( self.path, workspacePath, self.pnl.compOptionsComboBox.GetCurrentSelection(), ) , name = "Compression Process")
-		
-		compressionThread.start()
-		progressDialog = wx.ProgressDialog('Please wait...', 'Compressing the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-		progressDialog.SetSize((450,180))
-		if 'darwin' in sys.platform:
-			while compressionThread.isAlive():
-				time.sleep(0.1)
-				if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-					compressionThread.terminate()
-					terminated = True
-					wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-					break
-		else:        
-			while len(multiprocessing.active_children()) != 0:
-				time.sleep(0.1)
-				if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-					compressionThread.terminate()
-					terminated = True
-					self.clear()
-					break
-					
-		progressDialog.Destroy()
-		compressionThread.join()
+			self.readPath = self.path
 		
 		#encoding starts here
 		
 		if 'darwin' in sys.platform:
-			encodingThread = threading.Thread(name = "encode", target = encode.encode, args = ( self.path, self.savePath, ))
+			encodingThread = threading.Thread(name = "encode", target = encode.encode, args = ( self.readPath, self.savePath, ))
 		else:
-			encodingThread = multiprocessing.Process(target = encode.encode , args = ( self.path, self.savePath, ) , name = "Encode Process")
+			encodingThread = multiprocessing.Process(target = encode.encode , args = ( self.readPath, self.savePath, ) , name = "Encode Process")
 		
 		if not terminated:
 			encodingThread.start()
@@ -739,7 +747,7 @@ class MyFrame(wx.Frame):
 
 		else:
 			wx.MessageDialog(self,'Please Select a .dnac file', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-
+	
         def discard1(self,e):
                 self.pnl1.txt21.Clear()
 

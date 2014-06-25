@@ -16,6 +16,7 @@ import os
 import sys
 import time
 import Image
+import Queue
 import threading
 import subprocess
 import extraModules
@@ -31,17 +32,10 @@ if "linux" in sys.platform or 'darwin' in sys.platform:
 		FFMPEG_BIN = PATH + "/../scripts/ffmpeg"
 elif "win" in sys.platform and not 'darwin' in sys.platform:
 		FFMPEG_BIN = PATH + "\..\scripts\ffmpeg.exe"
-		
-class RepeatingTimer(threading._Timer):
-	def run(self):
-		while True:
-			self.finished.wait(self.interval)
-			if self.finished.is_set():
-				return
-			else:
-				self.function(*self.args, **self.kwargs)
-				
-def compress( readPath, WORKSPACE_PATH, compType):
+
+# returns path of compressed file, this function is called before compressing any file
+# so write path can be passed to compress funtion
+def compressedFilePath (readPath, WORKSPACE_PATH, compType):
 	
 	inputFilename = os.path.basename( readPath )
 	inputFilenameNoExtension = os.path.splitext( inputFilename )[0]
@@ -55,37 +49,40 @@ def compress( readPath, WORKSPACE_PATH, compType):
 	
 	if compType == 1:
 		compressFilePath += inputFilename + '.bz2'
-		if os.path.isfile( compressFilePath ):
-			return compressFilePath
-		compressFileToBz2( readPath, compressFilePath )
-		return compressFilePath
+	elif compType == 2:
+		if not extraModules.getFileType( readPath ):
+			compressFilePath = None
+		elif "image" in extraModules.getFileType( readPath ):
+			compressFilePath += inputFilenameNoExtension + ".jpeg"
+		elif "video" in extraModules.getFileType( readPath ):
+			compressFilePath += inputFilename
+		elif "music" in extraModules.getFileType( readPath ):
+			compressFilePath += inputFilename
+		else:
+			compressFilePath = None
+	else:
+		compressFilePath = None
+			
+	return compressFilePath
+	
+# reads file from readPath and compress it according to compType and stores it at savePath
+def compress( readPath, savePath, compType ):
+	
+	if compType == 1:
+		if not os.path.isfile( savePath ):
+			compressFileToBz2( readPath, savePath )
 	elif compType == 2:
 		if not extraModules.getFileType( readPath ):
 			print "Lossy compression not possible for selected file type"
-			return None
 		elif "image" in extraModules.getFileType( readPath ):
-			compressFilePath += inputFilenameNoExtension + ".jpeg"
-			if os.path.isfile( compressFilePath ):
-				return compressFilePath
-			compressImageFile( readPath, compressFilePath )
-			return compressFilePath
+			if not os.path.isfile( savePath ):\
+				compressImageFile( readPath, savePath )
 		elif "video" in extraModules.getFileType( readPath ):
-			compressFilePath += inputFilename
-			if os.path.isfile( compressFilePath ):
-				return compressFilePath
-			compressMediaFile( readPath, compressFilePath, "video" )
-			return compressFilePath
+			if not os.path.isfile( savePath ):
+				compressMediaFile( readPath, savePath, "video" )
 		elif "music" in extraModules.getFileType( readPath ):
-			compressFilePath += inputFilename
-			if os.path.isfile( compressFilePath ):
-				return compressFilePath
-			compressMediaFile( readPath, compressFilePath, "audio" )
-			return compressFilePath
-			
-	return None
-	
-def progressBarStatus( progressBar ):
-	progressBar.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")
+			if not os.path.isfile( savePath ):
+				compressMediaFile( readPath, savePath, "audio" )
     
 def compressFileToBz2( filePath, storePath ):
 	fileOpened = open( filePath, "rb" )
@@ -127,18 +124,3 @@ def compressMediaFile( filePath, storePath , mediaType, compressRatio = -1 ):
 		command = [ FFMPEG_BIN, '-i', filePath, '-b:v', str(compressRatio) + 'k' , storePath]
 	
 	proc = subprocess.call( command, stdout = subprocess.PIPE, bufsize=10**8 )
-	'''
-	progressBar = wx.ProgressDialog('Please wait...', 'Compressing the File....This may take several minutes....\n\t....so sit back and relax....', style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-	progressBar.SetSize((450,180))
-			
-	timer = RepeatingTimer(0.1, progressBarStatus, [ progressBar ])
-	timer.daemon = True # Allows program to exit if only the thread is alive
-	timer.start()
-	
-	#subprocess.call blocks till command is executed while subprocess.Popen creates subprocess and returns
-	proc = subprocess.Popen( command, stdout = subprocess.PIPE, bufsize=10**8 )
-	proc.wait()
-	
-	progressBar.Destroy()
-	timer.cancel()
-	'''
