@@ -51,11 +51,31 @@ def encode( readPath, savePath ):
 def genDNAString(readPath,WORKSPACE_PATH):
          try:                      
 		fileOpened = open(readPath,"rb")
+		seperator = ""
 		if "win" in sys.platform and not 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + '\.temp\dnaString.txt','wb')
+			seperator = "\\"
 		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + '/.temp/dnaString.txt','wb')
+			seperator = "/"
 		
+		file_type = ""
+		ext_type = ""
+		mtemp1 = readPath.split(seperator)
+		file_name = mtemp1[len(mtemp1)-1]
+		mtemp2 = file_name.split(".")
+		if(len(mtemp2) == 3):
+			file_type = mtemp2[len(mtemp2)-2]
+			ext_type = mtemp2[len(mtemp2)-1]
+		else:
+			file_type = mtemp2[len(mtemp2)-1]
+
+		del mtemp1
+		del mtemp2
+		del seperator
+		# print file_type
+		# print ext_type
+
 		dnaLength = 0
 		fileSize = os.path.getsize(readPath)
 		fileOpened.seek(0,0)
@@ -145,15 +165,22 @@ def genDNAString(readPath,WORKSPACE_PATH):
 		length = extraModules.decimalToBase3(dnaLength)
 		S2 = str(length)
 		mtemp = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(","))
+		mfile_type_temp = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(file_type))
+		mext_type_temp = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(ext_type))
+		mtemp1 = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(":"))
 		commaBase3 = ''.join(mtemp)
-		length = dnaLength + len(S2) + len(commaBase3)
+		colonBase3 = ''.join(mtemp1)
+		mfile_type = ''.join(mfile_type_temp)
+		mext_type = ''.join(mext_type_temp)
+		length = dnaLength + len(S2) + len(commaBase3) + len(colonBase3) + len(mfile_type) + len(mext_type) + len(colonBase3)
 		temp = length
 		sx = ""
 		while temp % 25 != 0:
 			sx = sx + "0"
 			temp = temp + 1
 		S3 = sx
-		S4 =  commaBase3 + S3 + S2
+		S4 =  commaBase3 + mfile_type + colonBase3 + mext_type + colonBase3 + S3 + S2
+		# print S4
 		dnaFile.write(extraModules.base3ToDNABaseWithChar(S4,dnaString[-1]))
 		dnaFile.flush()
 		dnaFile.close()

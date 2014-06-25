@@ -82,7 +82,11 @@ def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
 				base3String = extraModules.DNABaseToBase3(mtemp)
 				break;		
 		tempList = base3String.split('22022')
-		result = tempList[len(tempList)-1]
+		tempresult = tempList[len(tempList)-1]
+		mtemp1 = tempresult.split('20021')
+		result = mtemp1[2]
+		file_type = extraModules.asciiToString(HuffmanDictionary.base3ToAscii(mtemp1[0]))
+		ext_type = extraModules.asciiToString(HuffmanDictionary.base3ToAscii(mtemp1[1]))
 		dnaLength = extraModules.base3ToDecimal(result)
 		# print dnaLength
 
@@ -90,6 +94,14 @@ def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
 		del base3String
 		del tempList
 		del result
+
+		print file_type
+		print ext_type
+
+		if(ext_type == ""):
+			# No compresssion and Lossy compression
+		elif(ext_type == "bz2"):
+			# Lossless Compression
 
 		fileSize = dnaLength
 		dnaFile.seek(0,0)
