@@ -473,7 +473,7 @@ class MyFrame(wx.Frame):
 			del locationSelector	
 		else:
 			xtime = datetime.now().timetuple()
-			self.savePath = workspacePath + "/dCloud_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+			self.savePath = workspacePath + "/encoded"
 			terminated = False
 		
 		if not hasattr( self, 'savePath' ):
@@ -707,7 +707,7 @@ class MyFrame(wx.Frame):
 
                         terminated = False
                         xtime = datetime.now().timetuple()
-                        self.savePath = string + "/dCloud_decodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+                        self.savePath = string + "/decoded_"
                         
                         if 'darwin' in sys.platform:
                                 p = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))

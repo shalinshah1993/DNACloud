@@ -45,24 +45,12 @@ def decode(readPath,savePath):
 	
 def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
 	try:
-		xtemp = readPath.split(".")
 		if "win" in sys.platform and not 'darwin' in sys.platform:
 			dnaFile = open(WORKSPACE_PATH + '\.temp\dnaString.txt',"rb")
 			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt')
 		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			dnaFile = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
 			fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
-		#decodedFile = file(PATH + '\\..\\decodedFiles\\decode','wb')
-		if len(xtemp) == 3:
-			decodedFile = file(savePath+ "." + xtemp[1],'wb')
-		else:
-                        decodedFile = file(savePath,'wb')
-		
-		
-		# dnaFile.seek(fileSize - 21,0)
-		# temp = dnaFile.read()
-		# temp = extraModules.DNABaseToBase3WithChar(temp[1:],temp[0])
-		# dnaLength = extraModules.base3ToDecimal(temp)
 
 		i=1
 		dnaFile.seek(fileSize - 100,0)
@@ -95,13 +83,13 @@ def degenrateDNAString(readPath,savePath,WORKSPACE_PATH):
 		del tempList
 		del result
 
-		print file_type
-		print ext_type
+		saveFile = savePath+ "." + file_type
+		
 
-		if(ext_type == ""):
-			# No compresssion and Lossy compression
-		elif(ext_type == "bz2"):
-			# Lossless Compression
+		if( ext_type == "bz2" ):
+			saveFile += "." + "bz2"
+
+		decodedFile = file( saveFile ,'wb')
 
 		fileSize = dnaLength
 		dnaFile.seek(0,0)
