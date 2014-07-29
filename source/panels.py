@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 #########################################################################
-Author: Shalin Shah
+Author: Shalin Shah, Vijay Dhameliya, Madhav Khakhar
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
@@ -128,12 +128,16 @@ class encodePanel(wx.Panel):
 		self.hBox5.Add(self.txt5, 8, flag = wx.EXPAND | wx.RIGHT , border = 20)
 		self.vBox1.Add(self.hBox5,flag = wx.EXPAND | wx.TOP | wx.BOTTOM , border = 5)
 
+		algoOptions = [ "Golay Encoding", "Huffman Encoding" ]
 		compOptions = [ "No Compression", "Lossless Compression", "Lossy Compression" ]
 		self.hBox11 = wx.BoxSizer(wx.HORIZONTAL)
+		self.algoOptionsComboBox = wx.ComboBox(self, size = wx.DefaultSize, choices = algoOptions)
+		self.algoOptionsComboBox.SetStringSelection( "Golay Encoding" )
 		self.saveBut = wx.Button(self,label = "Encode  your  File",size = (160,30))
 		self.discardBut = wx.Button(self,label = "Reset  file  Selected",size = (160,30))
 		self.compOptionsComboBox = wx.ComboBox(self, size = wx.DefaultSize, choices = compOptions)
 		self.compOptionsComboBox.SetStringSelection( "No Compression" )
+		self.hBox11.Add(self.algoOptionsComboBox, flag = wx.EXPAND | wx.LEFT ,border = 20)
 		self.hBox11.Add(self.saveBut, flag = wx.EXPAND | wx.LEFT  , border = 20)
 		self.hBox11.Add(self.discardBut, flag = wx.EXPAND | wx.LEFT ,border = 20)
 		self.hBox11.Add(self.compOptionsComboBox, flag = wx.EXPAND | wx.LEFT ,border = 20)
@@ -243,9 +247,13 @@ class decodePanel(wx.Panel):
 		self.hBox21.Add(self.txt21, 8,flag = wx.EXPAND | wx.RIGHT , border = 20)
 		self.vBox2.Add(self.hBox21 , flag = wx.EXPAND)
 
+		algoOptionsDecode = [ "Golay Decoding", "Huffman Decoding" ]
 		self.hBox22 = wx.BoxSizer(wx.HORIZONTAL)
+		self.algoDecodeOptionsComboBox = wx.ComboBox(self, size = wx.DefaultSize, choices = algoOptionsDecode)
+		self.algoDecodeOptionsComboBox.SetStringSelection( "Golay Decoding" )
 		self.decodeBut = wx.Button(self,label = "Decode",size = (150,30))
 		self.resetBut = wx.Button(self,label = "Reset",size = (150,30))
+		self.hBox22.Add(self.algoDecodeOptionsComboBox, flag = wx.EXPAND | wx.LEFT ,border = 20)
 		self.hBox22.Add(self.decodeBut ,flag = wx.LEFT ,border = 20)
 		self.hBox22.Add(self.resetBut ,flag = wx.EXPAND | wx.LEFT , border = 20)
 		self.vBox2.Add(self.hBox22 ,flag = wx.EXPAND | wx.TOP | wx.ALIGN_CENTER, border = 15)   
