@@ -39,6 +39,9 @@ else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 
 def encode( readPath, tempPath, savePath ):
+	
+	if not os.path.isdir(tempPath + '/.temp'):
+		os.mkdir(tempPath +  '/.temp')
 	if "win" in sys.platform and not 'darwin' in sys.platform:
 		tempFilePath = tempPath + '\.temp\dnaString.txt'
 	elif "linux" in sys.platform or 'darwin' in sys.platform:

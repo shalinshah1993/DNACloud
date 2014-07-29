@@ -19,7 +19,6 @@ if hasattr(sys, "frozen"):
 else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 
-chunkDict = {}
 
 def decode(readPath,tempPath,savePath):
 	if "win" in sys.platform and not 'darwin' in sys.platform:
