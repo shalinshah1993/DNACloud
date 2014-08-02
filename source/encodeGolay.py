@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 #########################################################################
-Author: Madhav Khakhar, Vijay Dhameliya,
+Author: Madhav Khakhar, Vijay Dhameliya
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta

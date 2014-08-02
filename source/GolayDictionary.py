@@ -1,4 +1,7 @@
 import gc
+import extraModules
+
+prevChar = ''
 
 def getGolayTable():
 	golayDict = {	"0" : "00000000000" ,
@@ -272,7 +275,7 @@ def stringToBase3(asciiVal):
     temp = ''.join(listx)
     return temp
 
-def base3ToAscii(string):
+def base3ToAsciiWithoutError(string):
 	x = getGolayTable()
 	listKeys = []
 	listVal = []
@@ -290,10 +293,6 @@ def base3ToAscii(string):
 			indexList.append(listVal.index(temp))
 			i = i + 11
 		else:
-			#error correction function
-			print temp
-			print len(string)
-			print "error correction needed"
 			i = i + 11
 
 	for i in indexList:
@@ -305,3 +304,90 @@ def base3ToAscii(string):
 	del indexList
 	gc.collect()
 	return asciiList
+
+def base3ToAscii(string, dnaString, lastChar):
+	global prevChar
+	x = getGolayTable()
+	listKeys = []
+	listVal = []
+	temp = ""
+	indexList = []
+	asciiList = []
+	for i in x.iterkeys():
+		listKeys.append(i)
+	for i in x.itervalues():
+		listVal.append(i)
+	i = 0
+	while i < len(string):
+		temp = string[i:i+11]   
+		if temp in listVal:
+			indexList.append(listVal.index(temp))
+			prevChar = dnaString[i+10]
+			
+		else:
+			print "error correction needed"
+			res = errorCorrection(temp,dnaString[i:i+11],prevChar)
+			indexList.append(res)
+			if not prevChar == '0':
+				temp = extraModules.base3ToDNABaseWithChar(listVal[res],prevChar)
+			else:
+				temp = extraModules.base3ToDNABase(listVal[res])
+			prevChar = temp[-1]
+		
+		i = i + 11
+
+	for i in indexList:
+		asciiList.append(int(listKeys[int(i)]))
+	del x
+	del listKeys
+	del listVal 
+	del temp
+	del indexList
+	gc.collect()
+	return asciiList
+
+def errorCorrection(base3String, dnaString, lastChar):
+	x = getGolayTable()
+	listVal = []
+	for i in x.itervalues():
+		listVal.append(i)
+	resList = []
+	for i in listVal:
+		dist = hammingDistanceCodewords(base3String,i)
+		if dist <= 4:
+			resList.append(i)
+	listDna = []
+	if lastChar == '0':
+		for i in resList:
+			listDna.append(extraModules.base3ToDNABase(i))
+	else:
+		for i in resList:
+			listDna.append(extraModules.base3ToDNABaseWithChar(i,lastChar))
+	dnaResList = minimumDistanceCode(dnaString,listDna)
+	return listVal.index(resList[listDna.index(dnaResList[0])])
+
+def minimumDistanceCode(base3String, listVal):
+	minDistance = 11
+	resList = []
+	for i in listVal:
+		dist = hammingDistanceCodewords(base3String,i)
+		if dist== minDistance:
+			resList.append(i)
+		elif dist<minDistance:
+			minDistance = dist
+			resList[:] = []
+			resList.append(i)
+	return resList
+
+def hammingDistanceKey( key1, key2 ):
+	if key1 == key2 :
+		return 0
+	else:
+		return 1
+
+def hammingDistanceCodewords( code1, code2 ):
+	distance = 0
+	prev = 0
+	for i in range( len( code1 ) ):
+		distance += hammingDistanceKey( code1[i], code2[i] )
+	return distance
