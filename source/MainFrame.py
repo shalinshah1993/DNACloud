@@ -1,7 +1,7 @@
 # -*- coding: cp1252 -*-
 """
 #########################################################################
-Author: Shalin Shah
+Author: Shalin Shah, Vijay Dhameliya, Madhav Khakhar
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
@@ -11,27 +11,33 @@ This module contains code for the main GUI Frame.
 #########################################################################
 """
 
-import webbrowser
+
 import os
 import wx
-import sys
-import extraModules
-import HuffmanDictionary
-import sqlite3 as lite
-import sqlite3
-import gzip
-import unicodedata
 import gc
+import sys
+import gzip
 import time
+import Queue
 import thread
-import threading
-import multiprocessing
-import panels
-from multiprocessing.pool import ThreadPool
 import encode
 import decode
+import panels
+import sqlite3
+import threading
 import pytxt2pdf
+import webbrowser
+import compression
+import unicodedata
+import encodeGolay
+import decodeGolay
+import extraModules
+import multiprocessing
+import HuffmanDictionary
+import sqlite3 as lite
+from multiprocessing.pool import ThreadPool
 from datetime import datetime
+
 #if "win" in sys.platform and 'darwin' not in sys.platform:
 #        import win32com.shell.shell as shell
 #        ASADMIN = 'asadmin'
@@ -77,7 +83,7 @@ if "linux" in sys.platform:
   DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license\nagreement and may be used only in accordance with the terms of the agreement.Any selling or distribution of the\nprogram or it parts,original or modified, is prohibited without a written permission from Manish K Gupta."
 
 elif "win" in sys.platform and not 'darwin' in sys.platform:  
-  ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77–80). For more information visit us at "
+  ABOUT_DESCRIPTION = "This software acts as a tool to store any file (inlcuding audio, video or picture) into DNA. Currently the software uses algorithms of Goldman et.al.\n(Goldman, N.; Bertone, P.; Chen, S.; Dessimoz, C.; Leproust, E. M.; Sipos, B.; Birney, E. (2013). Towards practical, high-capacity, low-\n-maintenance information storage in synthesized DNA. Nature 494 (7435): 77Â–80). For more information visit us at "
   
   DETAILED_LICENSE = "(C) 2013 Manish K Gupta,Laboratory of Natural Information Processing\nDA-IICT, Gandhinagar, Gujarat 382007\nhttp://www.guptalab.org/dnacloud\nEmail: dnacloud@guptalab.org\n\nThis software is available as an open source to academic, non-profit institutions etc. under an open source license agreement and may be used only in accordance with the terms of the agreement.\n\nAny selling or distribution of the program or its parts,original or modified, is prohibited without a written permission from Manish K Gupta."
 elif 'darwin' in sys.platform:
@@ -106,11 +112,11 @@ class MyFrame(wx.Frame):
                 self.Layout()
                 
                 if "linux" in sys.platform or 'darwin' in sys.platform:
-		  ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
-		  self.SetIcon(ico)
+			ico = wx.Icon(PATH + '/../icons/DNAicon.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(ico)
                 elif "win" in sys.platform and not 'darwin' in sys.platform:
-		  ico = wx.Icon(PATH + '\..\icons\DNAicon.ico', wx.BITMAP_TYPE_ICO)
-		  self.SetIcon(ico)
+			ico = wx.Icon(PATH + '\..\icons\DNAicon.ico', wx.BITMAP_TYPE_ICO)
+			self.SetIcon(ico)
 #Create an instance of Menu bar and instances of menues you want in menuBar
                 menuBar = wx.MenuBar()
                 fileMenu = wx.Menu()
@@ -404,7 +410,10 @@ class MyFrame(wx.Frame):
            
 #When the choose file button is clicked then we come here
 	def onChoose(self,e):
-                fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
+		#clear fields
+		self.clear()
+		
+		fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
 		if fileSelector.ShowModal() == wx.ID_OK:
 			paths = fileSelector.GetPaths()
 			#print paths
@@ -436,18 +445,22 @@ class MyFrame(wx.Frame):
 #This are the save cancel button modules
 
 	def save(self,e):
-
-                con = sqlite3.connect(PATH + '/../database/prefs.db')
+		con = sqlite3.connect(PATH + '/../database/prefs.db')
 		try:
 			cur = con.cursor()
-                        string = (cur.execute('SELECT * FROM prefs where id = 8').fetchone())[1]
-                        if "linux" in sys.platform:
-                                string = unicodedata.normalize('NFKD', string).encode('ascii','ignore')
-                except:
-                        string = 'None'
-                        
-		if not self.pnl.txt.IsEmpty() and string == "None":
-
+			workspacePath = (cur.execute('SELECT * FROM prefs where id = 8').fetchone())[1]
+			if "linux" in sys.platform:
+				workspacePath = unicodedata.normalize('NFKD', workspacePath).encode('ascii','ignore')
+		except:
+			workspacePath = 'None'
+		
+		if not self.path :
+			wx.MessageDialog(self,'Please Select a file from you file system before Converting', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			return
+		
+		#variable terminated keeps track if dna file is created or not
+		#Let's set path to save output file
+		if workspacePath == "None":
 			locationSelector = wx.FileDialog(self,"Please select location to save your encoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
 			if locationSelector.ShowModal() == wx.ID_OK:
 				paths = locationSelector.GetPath()
@@ -459,106 +472,100 @@ class MyFrame(wx.Frame):
 			else:
 				terminated = True
 			locationSelector.Destroy()
-			del locationSelector
-
-                        if 'darwin' in sys.platform:
-                                p = threading.Thread(name = "encode", target = encode.encode, args = (self.path,self.savePath,))
-                        else:
-        			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
-			if not terminated:
-				p.start()
-				temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-				temp.SetSize((450,180))
-				if 'darwin' in sys.platform:
-                                        while p.isAlive():
-                                		time.sleep(0.1)
-                                		if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-                                			#p.terminate()
-                                                        #terminated = True
-                                                        wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-                                			#break
-                                	temp.Destroy()
-                                        if not p.isAlive():
-                                        	p.join()
-                                else:        
-        				while len(multiprocessing.active_children()) != 0:
-                                                time.sleep(0.1)
-        					if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-        						p.terminate()
-        						terminated = True
-        						self.clear()
-        						break
-               				temp.Destroy()
-        				p.join()
-        				p.terminate()
-			
-			if not terminated:
-				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-				
-		elif not self.pnl.txt.IsEmpty() and string != "None":
+			del locationSelector	
+		else:
 			xtime = datetime.now().timetuple()
-			self.savePath = string + "/dCloud_encodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
-
-                        if 'darwin' in sys.platform:
-                                p = threading.Thread(name = "encode", target = encode.encode, args = (self.path,self.savePath,))
-                        else:
-        			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
-                        terminated = False
-			if not terminated:
-				p.start()
-				temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-				temp.SetSize((450,180))
-				if 'darwin' in sys.platform:
-                                        while p.isAlive():
-                                		time.sleep(0.1)
-                                		if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-                                			#p.terminate()
-                                                        #terminated = True
-                                                        wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-                                			#break
-                                	temp.Destroy()
-                                        if not p.isAlive():
-                                        	p.join()
-                                else:        
-        				while len(multiprocessing.active_children()) != 0:
-                                                time.sleep(0.1)
-        					if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-        						p.terminate()
-        						terminated = True
-        						self.clear()
-        						break
-               				temp.Destroy()
-        				p.join()
-        				p.terminate()
-			
-			if not terminated:
-				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-				
-
-
-			"""
-			p = multiprocessing.Process(target = encode.encode , args = (self.path,self.savePath,) , name = "Encode Process")
+			self.savePath = workspacePath + "/encoded"
 			terminated = False
-			if not terminated:
-				p.start()
-				temp = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-				temp.SetSize((450,180))
+		
+		if not hasattr( self, 'savePath' ):
+			wx.MessageDialog( self,'Output file path is not given', 'Error!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			return
+		
+		inputFilename = os.path.basename( self.path )
+		inputFilenameNoExtension = os.path.splitext( inputFilename )[0]
+		self.savePath += "_" + inputFilenameNoExtension
+		
+		self.compressFilePath = compression.compressedFilePath( self.path, workspacePath, self.pnl.compOptionsComboBox.GetCurrentSelection() )
+		
+		self.encodingScheme = self.pnl.algoOptionsComboBox.GetCurrentSelection()
+		
+		# compression thread is called only if compression is possible
+		if self.compressFilePath:
+			if 'darwin' in sys.platform:
+				compressionThread = threading.Thread(name = "compression", target = compression.compress, args = ( self.path, self.compressFilePath, self.pnl.compOptionsComboBox.GetCurrentSelection() ))
+			else:
+				compressionThread = multiprocessing.Process(target = compression.compress , args = ( self.path, self.compressFilePath, self.pnl.compOptionsComboBox.GetCurrentSelection() ) , name = "Compression Process")
+			
+			compressionThread.daemon = True
+			compressionThread.start()
+			
+			progressDialog = wx.ProgressDialog('Please wait...', 'Compressing the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+			progressDialog.SetSize((450,180))
+			if 'darwin' in sys.platform:
+				while compressionThread.isAlive():
+					time.sleep(0.1)
+					if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						compressionThread.terminate()
+						terminated = True
+						wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+						break
+			else:        
 				while len(multiprocessing.active_children()) != 0:
 					time.sleep(0.1)
-					if not temp.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-						p.terminate()
+					if not progressDialog.UpdatePulse("Compressing the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						compressionThread.terminate()
 						terminated = True
 						self.clear()
 						break
-				temp.Destroy()
-				p.join()
-				p.terminate()
-			
-			if not terminated:
-				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-			"""
+						
+			progressDialog.Destroy()
+			compressionThread.join()
+			self.readPath = self.compressFilePath
 		else:
-			wx.MessageDialog(self,'Please Select a file from you file system before Converting', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+			self.readPath = self.path
+		
+		#encoding starts here
+		
+		if 'darwin' in sys.platform:
+			if self.encodingScheme == 0:
+				encodingThread = threading.Thread(name = "encode", target = encodeGolay.encode, args = ( self.readPath, workspacePath, self.savePath, ))
+			else:
+				encodingThread = threading.Thread(name = "encode", target = encode.encode, args = ( self.readPath, self.savePath, ))
+		else:
+			if self.encodingScheme == 0:
+				encodingThread = multiprocessing.Process(target = encodeGolay.encode , args = ( self.readPath, workspacePath, self.savePath, ) , name = "Encode Process")
+			else:
+				encodingThread = multiprocessing.Process(target = encode.encode , args = ( self.readPath, self.savePath, ) , name = "Encode Process")
+		
+		if not terminated:
+			encodingThread.start()
+			progressDialog = wx.ProgressDialog('Please wait...', 'Encoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
+			progressDialog.SetSize((450,180))
+			if 'darwin' in sys.platform:
+				while encodingThread.isAlive():
+					time.sleep(0.1)
+					if not progressDialog.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						encodingThread.terminate()
+						terminated = True
+						wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
+						break
+				if not encodingThread.isAlive():
+					encodingThread.join()
+			else:        
+				while len(multiprocessing.active_children()) != 0:
+					time.sleep(0.1)
+					if not progressDialog.UpdatePulse("Encoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
+						encodingThread.terminate()
+						terminated = True
+						self.clear()
+						break
+				encodingThread.join()
+				encodingThread.terminate()
+			progressDialog.Destroy()
+		
+		if not terminated:
+			wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
                               
         def discard(self,e):
                 if not self.pnl.txt.IsEmpty():
@@ -567,6 +574,7 @@ class MyFrame(wx.Frame):
                         wx.MessageDialog(self,'Please Select a file from you file system before Reseting', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 
         def clear(self):
+		self.pnl.compOptionsComboBox.SetStringSelection( "No Compression" )
                 if self.pnl.IsShown():
                         self.pnl.txt.Clear()
                         self.pnl.txt2.Clear()
@@ -668,68 +676,53 @@ class MyFrame(wx.Frame):
 				terminated = True
 			locationSelector.Destroy()
 			del locationSelector
-
+			
+			self.decodingScheme = self.pnl.algoDecodeOptionsComboBox.GetCurrentSelection()
+			print self.savePath
 			if 'darwin' in sys.platform:
-                                p = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
+				if self.decodingScheme == 0:
+					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = (self.path, workspacePath, self.savePath,))
+				else:
+					decodingThread = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
                         else:
-        			p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
+				if self.decodingScheme == 0:
+					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = (self.path, workspacePath, self.savePath,) , name = "Decode Process")
+        			else:
+					decodingThread = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
         			
 			if not terminated:
-				p.start()
+				decodingThread.start()
                                 temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 				temp.SetSize((450,180))
 				if 'darwin' in sys.platform:
-                                        while p.isAlive():
+                                        while decodingThread.isAlive():
                                 		time.sleep(0.1)
                                 		if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-                                			#p.terminate()
-                                                        #terminated = True
                                                         wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-                                			#break
                                 	temp.Destroy()
-                                        if not p.isAlive():
-                                        	p.join()
+                                        if not decodingThread.isAlive():
+                                        	decodingThread.join()
                                 else:        
         				while len(multiprocessing.active_children()) != 0:
                                                 time.sleep(0.1)
         					if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-        						p.terminate()
+        						decodingThread.terminate()
         						terminated = True
         						self.clear()
         						break
                				temp.Destroy()
-        				p.join()
-        				p.terminate()
+        				decodingThread.join()
+        				decodingThread.terminate()
 			
 			if not terminated:
 				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 				
-                        """
-			if not terminated:
-				p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Encode Process")
-				p.start()
-				temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-				temp.SetSize((450,180))
-				while len(multiprocessing.active_children()) != 0:
-					time.sleep(0.1)
-					if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-						p.terminate()
-						terminated = True
-						self.clear()
-						break
-				temp.Destroy()
-				p.join()
-				p.terminate()
 				
-			if not terminated:
-				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-			"""
-                        
 		elif (not self.pnl1.txt.IsEmpty()) and (FILE_EXT in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())) and string != 'None':
 
                         terminated = False
                         xtime = datetime.now().timetuple()
-                        self.savePath = string + "/dCloud_decodedFile_" + `xtime[2]` + "_" + `xtime[1]` + "_" + `xtime[0]`
+                        self.savePath = string + "/decoded_"
                         
                         if 'darwin' in sys.platform:
                                 p = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
@@ -769,7 +762,7 @@ class MyFrame(wx.Frame):
 
 		else:
 			wx.MessageDialog(self,'Please Select a .dnac file', 'Note!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-
+	
         def discard1(self,e):
                 self.pnl1.txt21.Clear()
 
@@ -827,16 +820,7 @@ class MyFrame(wx.Frame):
 			      EXIST_DETAILS = False
 		
 		os.chdir(PATH)
-		"""
-		os.chdir(PATH + '\..\database')
-		os.system("del dnaBase.db")
-		os.chdir(PATH)
-		con = lite.connect(PATH + '\..\database\dnaBase.db')
-		with con:
-			cur = con.cursor()
-			cur.execute('DROP TABLE IF EXISTS DNA')
-			cur.execute('CREATE TABLE DNA(fileName TEXT NOT NULL,dnaString TEXT NOT NULL)')
-                """
+		
 		wx.MessageDialog(self,'Temporary Files have been removed\nSpace Freed : '+ str(size/1000000) + " MB" , 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 
 #######################################################################
@@ -951,25 +935,6 @@ class MyFrame(wx.Frame):
                                 if not terminated:
         				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 				
-                                """
-				if not terminated:
-					exportToPdf = multiprocessing.Process(target = extraModules.exportToPdf , name = "PDF Exporter" , args = (filePath,savePath))
-					exportToPdf.start()
-					temp = wx.ProgressDialog('Exporting to pdf....This may take a while....', 'Please wait...' ,parent = self,style = wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-					temp.SetSize((450,180))
-					while len(multiprocessing.active_children()) != 0:
-						time.sleep(0.1)
-						if not temp.UpdatePulse("Exporting the File....This may take several minutes...\n.....so sit back and relax.....")[0]:
-							exportToPdf.terminate()
-							terminated = True
-							break
-					temp.Destroy()
-					exportToPdf.join()
-					exportToPdf.terminate()
-			
-				if not terminated:
-					wx.MessageDialog(self,'PDF created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-				"""
 			else:
 				wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
                                 
@@ -1031,135 +996,17 @@ class MyFrame(wx.Frame):
                                                 temp.Destroy()
                                                 exportToLatex.join()
                                                 exportToLatex.terminate()
-
-        			"""
-				if not terminated:
-					exportToLatex = multiprocessing.Process(target = extraModules.exportToLatex , name = "Latex Exporter" , args = (filePath,savePath))
-					exportToLatex.start()
-					temp = wx.ProgressDialog('Exporting to latex file....This may take a while....', 'Please wait...',parent = self, style = 	wx.PD_APP_MODAL | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
-					temp.SetSize((450,180))
-					while len(multiprocessing.active_children()) != 0:
-						time.sleep(0.1)
-						if not temp.UpdatePulse("Exporting to latex file....This may take several minutes...\n.....so sit back and relax.....")[0]:
-							exportToLatex.terminate()
-							terminated = True
-							break
-					temp.Destroy()
-					exportToLatex.join()
-					exportToLatex.terminate()
-                                
-				if not terminated:
-					wx.MessageDialog(self,'Latex File created in the desired folder', 'Information!',wx.OK |wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-				"""
 			else:
 				wx.MessageDialog(self,'Please select a .dnac file', 'Information!',wx.OK |wx.ICON_ERROR | wx.STAY_ON_TOP).ShowModal()
 		fileSelector.Destroy()
 		del fileSelector
 		
 	def exportList(self,e):
-		"""
-		files = []
-		print PATH
-		con = lite.connect(PATH + '/../database/dnaBase.db')
-		with con:
-			cur = con.cursor()
-			for i in cur.execute('SELECT * FROM DNA'):
-				files.append(str(i[0]))
-		ChoiceSelected = wx.SingleChoiceDialog(self,"Please select file you like to export?","Export",files,wx.CHOICEDLG_STYLE)
-		result = ChoiceSelected.ShowModal()
-		ChoiceSelected.Centre(wx.BOTH)
-		if result == wx.ID_OK:
-			ChoiceSelected.Destroy()
-			for i in cur.execute('SELECT * FROM DNA'):
-				if ChoiceSelected.GetStringSelection() == i[0]:
-					p = multiprocessing.Process(target = extraModules.writeListToCsv , args = (i[1],PATH + "/../CSVFiles"))
-					p.start()
-					temp = wx.ProgressDialog('Exporting the List....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL)
-					temp.SetSize((400,100))
-					while len(multiprocessing.active_children()) != 0:
-						time.sleep(0.5)
-						temp.Pulse("Exporting the list....")
-					temp.Destroy()
-					wx.MessageDialog(self,'Your List is exported', 'Congratulations',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-					break
-			del ChoiceSelected
-		else:
-			ChoiceSelected.Destroy()
-		"""
+
                 wx.MessageDialog(self,'This feature is yet to be added please bear with us', 'Sorry',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
 
 	def importList(self,e):
-                """
-		print "Importing..."
-		fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
-		if fileSelector.ShowModal() == wx.ID_OK:
-			paths = fileSelector.GetPaths()
-			fileSelector.Destroy()
-			path = paths[0]
-			del fileSelector
-			p = multiprocessing.Process(target = extraModules.readListFromCsv , args = (path,PATH + '/../decodedFiles'))
-			p.start()
-			temp = wx.ProgressDialog('Importing the List....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL)
-			temp.SetSize((400,100))
-			while len(multiprocessing.active_children()) != 0:
-				time.sleep(0.5)
-				temp.Pulse("Importing the List....")
-			temp.Destroy()
-			wx.MessageDialog(self,'Your File is created in the folder from the string imported', 'Congratulations',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-		else:
-			fileSelector.Destroy()
-		"""
                 wx.MessageDialog(self,'This feature is yet to be added please bear with us', 'Sorry',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-        """
-	def exportString(self,e):
-                files = []
-                con = lite.connect(PATH + '/../database/dnaBase.db')
-                with con:
-                        cur = con.cursor()
-                        for i in cur.execute('SELECT * FROM DNA'):
-                                files.append(str(i[0]))
-		ChoiceSelected = wx.SingleChoiceDialog(self,"Please select file you like to export?","Export",files,wx.CHOICEDLG_STYLE)
-		result = ChoiceSelected.ShowModal()
-		ChoiceSelected.Centre(wx.BOTH)
-		if result == wx.ID_OK:
-			ChoiceSelected.Destroy()
-			for i in cur.execute('SELECT * FROM DNA'):
-				if ChoiceSelected.GetStringSelection() == i[0]:
-					p = multiprocessing.Process(target = extraModules.writeStringToCsv , args = (i[1],PATH + '/../CSVFiles') , name = "Export Process")
-					p.start()
-					temp = wx.ProgressDialog('Exporting the String....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL)
-					temp.SetSize((400,100))
-					while len(multiprocessing.active_children()) != 0:
-						time.sleep(0.5)
-						temp.Pulse("Exporting the String....This may take a while....")
-					temp.Destroy()
-					wx.MessageDialog(self,'Your String is exported', 'Congratulations',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-					break
-			del ChoiceSelected
-        	else:
-                	ChoiceSelected.Destroy()
-
-	
-	def importString(self,e):
-		print "Importing..."
-		fileSelector = wx.FileDialog(self, message="Choose a file",defaultFile="",style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR )
-		if fileSelector.ShowModal() == wx.ID_OK:
-			paths = fileSelector.GetPaths()
-			fileSelector.Destroy()
-			path = unicodedata.normalize('NFKD', paths[0]).encode('ascii','ignore')
-			del fileSelector
-			p = multiprocessing.Process(target = extraModules.readStringFromCsv , args = (path,PATH + '/../decodedFiles'))
-			p.start()
-			temp = wx.ProgressDialog('Importing the String....This may take a while....', 'Please wait...',style = wx.PD_APP_MODAL)
-			temp.SetSize((400,100))
-			while len(multiprocessing.active_children()) != 0:
-				time.sleep(0.5)
-				temp.Pulse("Importing the String....")
-			temp.Destroy()
-			wx.MessageDialog(self,'Your File is created in the folder from the string imported', 'Congratulations',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
-		else:
-			fileSelector.Destroy()
-	"""
 
 #Show a confirmation dialog box if the user wants to quit or not and for that show modal shows box 
 	def OnQuit(self,item):        
@@ -1228,20 +1075,6 @@ class MyFrame(wx.Frame):
 
 	def settings(self,e):
 	      p = panels.Preferences(None,0,"Details").ShowModal()
-
-	      """
-	      self.qrText = ""
-	      if "win" in sys.platform:
-			con = sqlite3.connect(PATH + '\..\database\prefs.db')
-		elif "linux" in sys.platform:
-			con = sqlite3.connect(PATH + '/../database/prefs.db')
-	      with con:
-			self.qrText = ""
-			cur = con.cursor()
-			for i in cur.execute('SELECT * FROM prefs WHERE id < 4'):
-				self.qrText = self.qrText + i[1] + "\n"
-	      #self.onUseQrcode(self.qrText)
-	      """
 
 	def memEstimator(self,e):
 		gc.collect()
