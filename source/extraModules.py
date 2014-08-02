@@ -25,12 +25,10 @@ import wx
 import thread
 import os
 import gc
-import mimetypes
+#import decode
 import pytxt2pdf
 
 OLIGO_SIZE = 117
-noOfChunks = 1
-noOfBits = 1
 if hasattr(sys, "frozen"):
         PATH = os.path.dirname(sys.executable)
 else:
@@ -48,8 +46,8 @@ def stringToAscii(string):
 #Given a list of ascii values as input returns the corrosponding string
 def asciiToString(listx):
     string = StringIO()
-    for i in range(len(listx)):
-        string.write(chr(int(listx[i])))
+    for i in listx:
+        string.write(chr(int(i)))
     return string.getvalue()
 
 
@@ -360,11 +358,7 @@ def appendPrepend(listx):
 #New version to convert string to chunks where in while converting to chunks parity bits are added
 def xstringToChunks(string):
 	f = []
-	global noOfChunks
-	global noOfBits
 	if len(string) > 100:
-		noOfChunks = ((len(string)/25)-3)
-		noOfBits = int(math.ceil(math.log(noOfChunks,3)))
 		for j in xrange((len(string)/25) - 3):
 			f.append(genErrorChecksForString(stringOfLength100(25*j,string),j,12))
 	else:
@@ -375,20 +369,14 @@ def xstringToChunks(string):
 #Take a dna chunk of lenght 100 as input and gives out corrosponding error conditions appended string
 def genErrorChecksForString(string,index,ID):
 	ID = str(ID)
-	global noOfBits
 	if len(string) != 100:
 		#print "Error String length :" , len(string)
 		return None
 	else:
 		if index % 2 != 0:
 			string = reverseCompliment(string)
-		i3 = str(decimalToBase3(index)).zfill(noOfBits)
-		#p = (int(ID[0]) + int(i3[0]) + int(i3[2]) + int(i3[4]) + int(i3[6]) + int(i3[8]) + int(i3[10]))%3
-		p=int(ID[0])
-		for x in range(0,noOfBits):
-			p = p + int(i3[x])
-			x = x+2
-		p = p % 3
+		i3 = format(decimalToBase3(index), '012d')
+		p = (int(ID[0]) + int(i3[0]) + int(i3[2]) + int(i3[4]) + int(i3[6]) + int(i3[8]) + int(i3[10]))%3
 		string = string + base3ToDNABaseWithChar('{}{}{}'.format(ID, i3, p),string[-1])
 		
 		if index % 2 != 0:
@@ -1117,9 +1105,47 @@ def exportToLatex(filePath,savePath):
 \\end{document}""")
 	detailsFile.close()
 	fileOpened.close()
-	
-###################################################################
-#File related modules
 
-def getFileType( inputPath ):
-	return mimetypes.guess_type( inputPath )[0]
+"""   
+#This are the older version of some modules
+def genIndexList(length,ID):
+    #i3List = []
+    print length
+    #P = []
+    indexInfoList = []
+    id = list(str(ID))
+    for i in xrange(length):
+        i3 = (str(decimalToBase3(i)))
+        while len(i3) <= 12:
+            i3 = '0' + i3
+        i3String = i3
+        #for j in i3:
+        #    i3String = i3String + str(j)
+        p = (int(str(ID)[0]) + int(i3[0]) + int(i3[2]) + int(i3[4]) + int(i3[6]) + int(i3[8]) + int(i3[10]))%3
+        #P.append(p)
+        #i3List.append(i3String)
+        indexInfoList.append(str(ID)+i3String+str(p))
+    #print indexInfoList
+    print "Index list made"
+    return indexInfoList    
+
+#@profile
+def divideStringIntoChunks(string):
+    length = len(string)
+    count = 100
+    seg = 0
+    listx = []
+    while length - count > 100:
+        temp = ''
+        for i in xrange(100):
+            temp = temp + str(string[i + 100 * seg])
+        listx.append(temp)
+        seg = seg + 1
+        count = count + 100
+    temp = ''
+    for i in xrange(length - count + 1):
+        temp = temp + str(string[i + 100 * seg])
+    listx.append(temp)
+    #print listx
+    return listx
+"""
