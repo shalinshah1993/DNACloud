@@ -1,6 +1,6 @@
 """
 #########################################################################
-Author: Shalin Shah, Vijay Dhameliya
+Author: Shalin Shah
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
@@ -32,7 +32,7 @@ else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 #print PATH , "encode"
 
-def encode( readPath, savePath ):
+def encode(readPath,savePath):
         con = sqlite3.connect(PATH + '/../database/prefs.db')
         with con:
                 cur = con.cursor()
@@ -43,39 +43,19 @@ def encode( readPath, savePath ):
         
                 if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
                         os.mkdir(WORKSPACE_PATH +  '/.temp')
-		
+
 	genDNAString(readPath,WORKSPACE_PATH)
 	genDNAChunks(readPath,savePath,WORKSPACE_PATH)
-		
+	#print "created"
 		
 def genDNAString(readPath,WORKSPACE_PATH):
          try:                      
 		fileOpened = open(readPath,"rb")
-		seperator = ""
 		if "win" in sys.platform and not 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + '\.temp\dnaString.txt','wb')
-			seperator = "\\"
 		elif "linux" in sys.platform or 'darwin' in sys.platform:
 			dnaFile = file(WORKSPACE_PATH + '/.temp/dnaString.txt','wb')
-			seperator = "/"
 		
-		file_type = ""
-		ext_type = ""
-		mtemp1 = readPath.split(seperator)
-		file_name = mtemp1[len(mtemp1)-1]
-		mtemp2 = file_name.split(".")
-		if(len(mtemp2) == 3):
-			file_type = mtemp2[len(mtemp2)-2]
-			ext_type = mtemp2[len(mtemp2)-1]
-		else:
-			file_type = mtemp2[len(mtemp2)-1]
-
-		del mtemp1
-		del mtemp2
-		del seperator
-		# print file_type
-		# print ext_type
-
 		dnaLength = 0
 		fileSize = os.path.getsize(readPath)
 		fileOpened.seek(0,0)
@@ -94,7 +74,7 @@ def genDNAString(readPath,WORKSPACE_PATH):
                         tempString = StringIO()
 			tempString.write(fileOpened.read(CHUNK_SIZE))
 			a = extraModules.stringToAscii(tempString.getvalue())
-			huffmanDictionary = HuffmanDictionary.stringToBase3(a)
+                        huffmanDictionary = HuffmanDictionary.stringToBase3(a)
 			S1 = extraModules.HuffmanToString(huffmanDictionary)
 			dnaString = extraModules.base3ToDNABase(S1)
 			dnaFile.write(dnaString)
@@ -163,45 +143,36 @@ def genDNAString(readPath,WORKSPACE_PATH):
 		fileOpened.close()
 		gc.collect()
 		length = extraModules.decimalToBase3(dnaLength)
-		S2 = str(length)
-		mtemp = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(","))
-		mfile_type_temp = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(file_type))
-		mext_type_temp = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(ext_type))
-		mtemp1 = HuffmanDictionary.stringToBase3(extraModules.stringToAscii(":"))
-		commaBase3 = ''.join(mtemp)
-		colonBase3 = ''.join(mtemp1)
-		mfile_type = ''.join(mfile_type_temp)
-		mext_type = ''.join(mext_type_temp)
-		length = dnaLength + len(S2) + len(commaBase3) + len(colonBase3) + len(mfile_type) + len(mext_type) + len(colonBase3)
+		S2 = extraModules.decimalOfLength20(length)
+		length = dnaLength + len(S2)
 		temp = length
 		sx = ""
 		while temp % 25 != 0:
 			sx = sx + "0"
 			temp = temp + 1
 		S3 = sx
-		S4 =  commaBase3 + mfile_type + colonBase3 + mext_type + colonBase3 + S3 + S2
-		# print S4
+			
+		S4 = S3 + S2
 		dnaFile.write(extraModules.base3ToDNABaseWithChar(S4,dnaString[-1]))
 		dnaFile.flush()
 		dnaFile.close()
+
+		#print "DNA length", dnaLength
+		#print "List" , (dnaLength + len(S4))/25 - 3
+		#print "List" , os.path.getsize(PATH + '/../.temp/dnaString.txt')/25 - 3
 	 except MemoryError:
 		return -1
 
 def genDNAChunks(readPath,path,WORKSPACE_PATH):
 	try:
-		if "." in readPath:
-			temp = readPath.split( "." )
-			readFileExtension = "." + temp[ len( temp ) - 1 ]
-		else:
-			readFileExtension = "" 
-		
+		xtemp = readPath.split(".")
 		if "win" in sys.platform and not 'darwin' in sys.platform:
-			fileOpened = open( WORKSPACE_PATH + '\.temp\dnaString.txt', "rb" )
-			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt' )
+			fileOpened = open(WORKSPACE_PATH + '\.temp\dnaString.txt',"rb")
+			fileSize = os.path.getsize(WORKSPACE_PATH + '\.temp\dnaString.txt')
 		elif "linux" in sys.platform or 'darwin' in sys.platform:
-			fileOpened = open( WORKSPACE_PATH + '/.temp/dnaString.txt',"rb" )
-			fileSize = os.path.getsize( WORKSPACE_PATH + '/.temp/dnaString.txt' )
-		dnaFile = file( path + readFileExtension + FILE_EXT, 'wb' )
+			fileOpened = open(WORKSPACE_PATH + '/.temp/dnaString.txt',"rb")
+			fileSize = os.path.getsize(WORKSPACE_PATH + '/.temp/dnaString.txt')
+		dnaFile = file(path + "." + xtemp[len(xtemp) - 1] + FILE_EXT,'wb')
 		
 		dnaListLength = 0
 		
@@ -243,6 +214,11 @@ def genDNAChunks(readPath,path,WORKSPACE_PATH):
 				tempString.write(prependString)
 				tempString.write(fileOpened.read(CHUNK_SIZE))
 				prependString = ""
+			#for i in fileToChunks.file_block(fileOpened, noOfFileChunks, chunk_number):
+			#	tempList.write(i)
+			#f = extraModules.stringToChunks(tempList.getvalue())
+			#fCompliment = extraModules.appendIndexInfo(f)
+			#fDoubleCompliment = extraModules.appendPrepend(fCompliment)
 				dnaString = tempString.getvalue()
 				dnaList = extraModules.xstringToChunks(dnaString)
 				dnaListLength = dnaListLength + len(dnaList)
@@ -303,3 +279,103 @@ def genDNAChunks(readPath,path,WORKSPACE_PATH):
 		return
 	except MemoryError:
 		return -1
+#encode('/Users/administrator/Desktop/Mac Pro.rtf','/Users/administrator/Desktop/abcd')
+"""
+		#Trivial method to encode where in the entire file is taken as input on a whole if want to try this just copy paste this one in onChoose method of mainFrame.py
+		try:
+			fileOpened = open(path,"rb")
+			self.pnl.txt.WriteText(path)             
+			del path
+
+			progressMax = 100
+			dialog = wx.ProgressDialog("Note!", "Your file is being converted to DNA String, Please Wait ..", progressMax,style=wx.PD_CAN_ABORT | wx.PD_APP_MODAL)
+			keepGoing = True
+			count = 0
+		
+			read = fileOpened.read()
+			fileOpened.close()
+			print "Read Memory : " , mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+			a = extraModules.stringToAscii(read)
+			self.pnl.txt5.WriteText(str(len(read)))                
+			del read
+			print "Ascii Memory : " , mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+		
+			self.huffmanDictionary = HuffmanDictionary.stringToBase3(a)
+			del a
+			print "Huffman Memory : " , mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+			self.S1 = extraModules.HuffmanToString(self.huffmanDictionary)
+			del self.huffmanDictionary
+			print "huffman to string Memory : " , mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+		
+			length = extraModules.decimalToBase3(len(self.S1))
+			self.S2 = extraModules.decimalOfLength20(length)
+		
+			length = len(self.S1) + len(self.S2)
+			temp = length
+			sx = ""
+			while temp % 25 != 0:
+				sx = sx + "0"
+				temp = temp + 1
+			self.S3 = sx
+				
+			self.S4 = self.S1 + self.S3 + self.S2
+			self.pnl.txt2.WriteText(str(len(self.S4)))
+			del self.S1
+			del self.S2
+			del self.S3
+			print "s1s2s3 memory : " , mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+			count = count + 25
+			keepGoing = dialog.Update(count)
+			
+			self.dnaString = extraModules.base3ToDNABase(self.S4)
+			print "DNA Memory : " ,  mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+			thread.start_new(self.writeTempString,(self.dnaString,))
+			del self.S4
+			print len(self.dnaString)
+
+			count = count + 25
+			keepGoing = dialog.Update(count)
+		
+			self.f = extraModules.stringToChunks(self.dnaString)
+			count = count + 25
+			keepGoing = dialog.Update(count)
+			del self.dnaString
+			print "Chunks Memory :" ,mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+
+			self.fCompliment = extraModules.appendIndexInfo(self.f)
+			count = count + 12
+			keepGoing = dialog.Update(count)
+			del self.f
+			print "Index Memory :", mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+
+			self.fDoubleCompliment = extraModules.appendPrepend(self.fCompliment)
+			count = count + 25
+			keepGoing = dialog.Update(count)
+			del self.fCompliment
+			print "Append Prepend :", mem1 - psutil.virtual_memory()[4]
+			mem1 = psutil.virtual_memory()[4]
+
+			noOfChunks = len(self.fDoubleCompliment)
+			self.pnl.txt3.WriteText(`noOfChunks`)
+			self.pnl.txt4.WriteText(`len(self.fDoubleCompliment[0])`)
+			thread.start_new(self.writeTempList,(self.fDoubleCompliment,noOfChunks,))
+
+			count = count + 13
+			keepGoing = dialog.Update(count)
+  
+			dialog.Destroy()
+			print "Done!!"
+			print time.time() - time1
+			print mem1 - psutil.virtual_memory()[4]
+
+		except MemoryError:
+			wx.MessageBox('MemoryError Please free up ypur memory or use swap memory or increase RAM', 'Information!',wx.OK | wx.ICON_ERROR | wx.STAY_ON_TOP) 
+		"""
