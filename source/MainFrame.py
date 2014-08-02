@@ -680,12 +680,12 @@ class MyFrame(wx.Frame):
 			self.decodingScheme = self.pnl.algoDecodeOptionsComboBox.GetCurrentSelection()
 			print self.savePath
 			if 'darwin' in sys.platform:
-				if self.decodingScheme == 1:
+				if self.decodingScheme == 0:
 					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = (self.path, workspacePath, self.savePath,))
 				else:
 					decodingThread = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
                         else:
-				if self.decodingScheme == 1:
+				if self.decodingScheme == 0:
 					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = (self.path, workspacePath, self.savePath,) , name = "Decode Process")
         			else:
 					decodingThread = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
