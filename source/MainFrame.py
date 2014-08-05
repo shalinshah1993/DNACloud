@@ -661,7 +661,8 @@ class MyFrame(wx.Frame):
                 except:
                         string = 'None'
 
-        
+		
+		
 		if (not self.pnl1.txt.IsEmpty()) and (FILE_EXT in self.pnl1.txt.GetString(0,self.pnl1.txt.GetLastPosition())) and string == 'None':
 
 			locationSelector = wx.FileDialog(self,"Please select location to save your decoded file",style = wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -677,17 +678,16 @@ class MyFrame(wx.Frame):
 			locationSelector.Destroy()
 			del locationSelector
 			
-			self.decodingScheme = self.pnl.algoDecodeOptionsComboBox.GetCurrentSelection()
-			print self.savePath
+			self.decodingScheme = self.pnl1.algoDecodeOptionsComboBox.GetCurrentSelection()
 			if 'darwin' in sys.platform:
 				if self.decodingScheme == 0:
-					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = (self.path, workspacePath, self.savePath,))
+					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = (self.path, self.savePath, self.savePath,))
 				else:
 					decodingThread = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
                         else:
 				if self.decodingScheme == 0:
-					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = (self.path, workspacePath, self.savePath,) , name = "Decode Process")
-        			else:
+					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = (self.path, self.savePath, self.savePath,) , name = "Decode Process")
+				else:
 					decodingThread = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
         			
 			if not terminated:
@@ -724,37 +724,45 @@ class MyFrame(wx.Frame):
                         xtime = datetime.now().timetuple()
                         self.savePath = string + "/decoded_"
                         
+                        self.decodingScheme = self.pnl1.algoDecodeOptionsComboBox.GetCurrentSelection()
+                        
                         if 'darwin' in sys.platform:
-                                p = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
+				if self.decodingScheme == 0:
+					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = (self.path, self.savePath, self.savePath,))
+				else:
+					decodingThread = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
                         else:
-        			p = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
+				if self.decodingScheme == 0:
+					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = (self.path, self.savePath, self.savePath,) , name = "Decode Process")
+				else:
+					decodingThread = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
         			
 			if not terminated:
-				p.start()
+				decodingThread.start()
                                 temp = wx.ProgressDialog('Please wait...', 'Decoding the File....This may take several minutes....\n\t....so sit back and relax....',parent = self,style = wx.PD_APP_MODAL |  wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME)
 				temp.SetSize((450,180))
 				if 'darwin' in sys.platform:
-                                        while p.isAlive():
+                                        while decodingThread.isAlive():
                                 		time.sleep(0.1)
                                 		if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-                                			#p.terminate()
+                                			#decodingThread.terminate()
                                                         #terminated = True
                                                         wx.MessageDialog(self,'Cannot be stopped.Sorry', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
                                 			#break
                                 	temp.Destroy()
-                                        if not p.isAlive():
-                                        	p.join()
+                                        if not decodingThread.isAlive():
+                                        	decodingThread.join()
                                 else:        
         				while len(multiprocessing.active_children()) != 0:
                                                 time.sleep(0.1)
         					if not temp.UpdatePulse("Decoding the File....This may take several minutes...\n\tso sit back and relax.....")[0]:
-        						p.terminate()
+        						decodingThread.terminate()
         						terminated = True
         						self.clear()
         						break
                				temp.Destroy()
-        				p.join()
-        				p.terminate()
+        				decodingThread.join()
+        				decodingThread.terminate()
 			
 			if not terminated:
 				wx.MessageDialog(self,'File has been created', 'Information!',wx.OK | wx.ICON_INFORMATION | wx.STAY_ON_TOP).ShowModal()
