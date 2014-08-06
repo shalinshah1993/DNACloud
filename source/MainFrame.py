@@ -529,12 +529,12 @@ class MyFrame(wx.Frame):
 		
 		if 'darwin' in sys.platform:
 			if self.encodingScheme == 0:
-				encodingThread = threading.Thread(name = "encode", target = encodeGolay.encode, args = ( self.readPath, workspacePath, self.savePath, ))
+				encodingThread = threading.Thread(name = "encode", target = encodeGolay.encode, args = ( self.readPath , self.savePath, ))
 			else:
 				encodingThread = threading.Thread(name = "encode", target = encode.encode, args = ( self.readPath, self.savePath, ))
 		else:
 			if self.encodingScheme == 0:
-				encodingThread = multiprocessing.Process(target = encodeGolay.encode , args = ( self.readPath, workspacePath, self.savePath, ) , name = "Encode Process")
+				encodingThread = multiprocessing.Process(target = encodeGolay.encode , args = ( self.readPath , self.savePath, ) , name = "Encode Process")
 			else:
 				encodingThread = multiprocessing.Process(target = encode.encode , args = ( self.readPath, self.savePath, ) , name = "Encode Process")
 		
@@ -681,14 +681,14 @@ class MyFrame(wx.Frame):
 			self.decodingScheme = self.pnl1.algoDecodeOptionsComboBox.GetCurrentSelection()
 			if 'darwin' in sys.platform:
 				if self.decodingScheme == 0:
-					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = (self.path, self.savePath, self.savePath,))
+					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = ( self.path , self.savePath, ))
 				else:
-					decodingThread = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
+					decodingThread = threading.Thread(name = "Decode", target = decode.decode, args = ( self.path , self.savePath, ))
                         else:
 				if self.decodingScheme == 0:
-					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = (self.path, self.savePath, self.savePath,) , name = "Decode Process")
+					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = ( self.path , self.savePath, ) , name = "Decode Process")
 				else:
-					decodingThread = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
+					decodingThread = multiprocessing.Process(target = decode.decode , args = ( self.path , self.savePath, ) , name = "Decode Process")
         			
 			if not terminated:
 				decodingThread.start()
@@ -728,14 +728,14 @@ class MyFrame(wx.Frame):
                         
                         if 'darwin' in sys.platform:
 				if self.decodingScheme == 0:
-					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = (self.path, self.savePath, self.savePath,))
+					decodingThread = threading.Thread(name = "Decode", target = decodeGolay.decode, args = ( self.path , self.savePath, ))
 				else:
 					decodingThread = threading.Thread(name = "Decode", target = decode.decode, args = (self.path,self.savePath,))
                         else:
 				if self.decodingScheme == 0:
-					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = (self.path, self.savePath, self.savePath,) , name = "Decode Process")
+					decodingThread = multiprocessing.Process(target = decodeGolay.decode , args = ( self.path , self.savePath, ) , name = "Decode Process")
 				else:
-					decodingThread = multiprocessing.Process(target = decode.decode , args = (self.path,self.savePath,) , name = "Decode Process")
+					decodingThread = multiprocessing.Process(target = decode.decode , args = ( self.path , self.savePath, ) , name = "Decode Process")
         			
 			if not terminated:
 				decodingThread.start()

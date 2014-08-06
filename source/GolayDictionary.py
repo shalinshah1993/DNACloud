@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+#########################################################################
+Author: Vijay Dhameliya, Madhav Khakhar
+Project: DNA Cloud
+Graduate Mentor: Dixita Limbachya
+Mentor: Prof. Manish K Gupta
+Date: 25 July 2014
+Website: www.guptalab.org/dnacloud
+This module contains encoding scheme which uses Golay Codes
+#########################################################################
+"""
+
 import gc
 import extraModules
 

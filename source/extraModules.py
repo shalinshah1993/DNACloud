@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 #########################################################################
-Author: Shalin Shah
+Author: Shalin Shah, Vijay Dhameliya, Madhav Khakhar
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta

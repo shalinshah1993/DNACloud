@@ -219,10 +219,14 @@ class decodePanel(wx.Panel):
 		self.hBox25.Add(self.txt3, 8, flag = wx.EXPAND | wx.RIGHT , border = 20)
 		self.vBox2.Add(self.hBox25,flag = wx.EXPAND | wx.TOP , border = 10)
 		
+		algoOptionsDecode = [ "Golay Decoding", "Huffman Decoding" ]
 		self.hBox26 = wx.BoxSizer(wx.HORIZONTAL)
 		self.butChoose = wx.Button(self , label = "Select .dnac File ",size = (160,30))
 		self.hBox26.Add(self.butChoose,flag = wx.EXPAND | wx.LEFT , border = 20)
 		self.decodeBut1 = wx.Button(self,label = "Decode selected File ",size = (160,30))
+		self.algoDecodeOptionsComboBox = wx.ComboBox(self, size = wx.DefaultSize, choices = algoOptionsDecode)
+		self.algoDecodeOptionsComboBox.SetStringSelection( "Golay Decoding" )
+		self.hBox26.Add(self.algoDecodeOptionsComboBox, flag = wx.EXPAND | wx.LEFT ,border = 20)
 		self.hBox26.Add(self.decodeBut1,flag = wx.EXPAND | wx.LEFT , border = 20)
 		self.vBox2.Add(self.hBox26,flag = wx.TOP | wx.BOTTOM, border = 15)
 
@@ -247,13 +251,10 @@ class decodePanel(wx.Panel):
 		self.hBox21.Add(self.txt21, 8,flag = wx.EXPAND | wx.RIGHT , border = 20)
 		self.vBox2.Add(self.hBox21 , flag = wx.EXPAND)
 
-		algoOptionsDecode = [ "Golay Decoding", "Huffman Decoding" ]
-		self.hBox22 = wx.BoxSizer(wx.HORIZONTAL)
-		self.algoDecodeOptionsComboBox = wx.ComboBox(self, size = wx.DefaultSize, choices = algoOptionsDecode)
-		self.algoDecodeOptionsComboBox.SetStringSelection( "Golay Decoding" )
+		
+		self.hBox22 = wx.BoxSizer(wx.HORIZONTAL)		
 		self.decodeBut = wx.Button(self,label = "Decode",size = (150,30))
 		self.resetBut = wx.Button(self,label = "Reset",size = (150,30))
-		self.hBox22.Add(self.algoDecodeOptionsComboBox, flag = wx.EXPAND | wx.LEFT ,border = 20)
 		self.hBox22.Add(self.decodeBut ,flag = wx.LEFT ,border = 20)
 		self.hBox22.Add(self.resetBut ,flag = wx.EXPAND | wx.LEFT , border = 20)
 		self.vBox2.Add(self.hBox22 ,flag = wx.EXPAND | wx.TOP | wx.ALIGN_CENTER, border = 15)   

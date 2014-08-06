@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 #########################################################################
-Author: Madhav Khakhar, Vijay Dhameliya
+Author: Vijay Dhameliya, Madhav Khakhar
 Project: DNA Cloud
 Graduate Mentor: Dixita Limbachya
 Mentor: Prof. Manish K Gupta
@@ -38,14 +38,20 @@ if hasattr(sys, "frozen"):
 else:
         PATH = os.path.dirname(os.path.abspath(__file__))
 
-def encode( readPath, tempPath, savePath ):
-	
-	if not os.path.isdir(tempPath + '/.temp'):
-		os.mkdir(tempPath +  '/.temp')
+def encode( readPath, savePath ):
+	con = sqlite3.connect(PATH + '/../database/prefs.db')
+        with con:
+                cur = con.cursor()
+                WORKSPACE_PATH = cur.execute('SELECT * FROM prefs WHERE id = 8').fetchone()[1]
+                if "linux" in sys.platform:
+                        WORKSPACE_PATH = unicodedata.normalize('NFKD', WORKSPACE_PATH).encode('ascii','ignore')
+                if not os.path.isdir(WORKSPACE_PATH + '/.temp'):
+                        os.mkdir(WORKSPACE_PATH +  '/.temp')
+                        
 	if "win" in sys.platform and not 'darwin' in sys.platform:
-		tempFilePath = tempPath + '\.temp\dnaString.txt'
+		tempFilePath = WORKSPACE_PATH + '\dnaString.txt'
 	elif "linux" in sys.platform or 'darwin' in sys.platform:
-		tempFilePath = tempPath + '/.temp/dnaString.txt'
+		tempFilePath = WORKSPACE_PATH + '/dnaString.txt'
 		
 	generateDNAString(readPath,tempFilePath)
 	generateDNAChunks(readPath,tempFilePath,savePath)
