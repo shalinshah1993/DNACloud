@@ -15,6 +15,7 @@ import gc
 import extraModules
 
 prevChar = ''
+errorCount = 0
 
 def getGolayTable():
 	golayDict = {	"0" : "00000000000" ,
@@ -320,6 +321,8 @@ def base3ToAsciiWithoutError(string):
 
 def base3ToAscii(string, dnaString, lastChar):
 	global prevChar
+	global errorCount
+	prevChar = lastChar
 	x = getGolayTable()
 	listKeys = []
 	listVal = []
@@ -338,7 +341,8 @@ def base3ToAscii(string, dnaString, lastChar):
 			prevChar = dnaString[i+10]
 			
 		else:
-			print "error correction needed"
+			errorCount +=1
+			#print "No of errors : " + str(errorCount)
 			res = errorCorrection(temp,dnaString[i:i+11],prevChar)
 			indexList.append(res)
 			if not prevChar == '0':
@@ -370,12 +374,12 @@ def errorCorrection(base3String, dnaString, lastChar):
 		if dist <= 4:
 			resList.append(i)
 	listDna = []
-	if lastChar == '0':
-		for i in resList:
-			listDna.append(extraModules.base3ToDNABase(i))
-	else:
+	if not lastChar == '0':
 		for i in resList:
 			listDna.append(extraModules.base3ToDNABaseWithChar(i,lastChar))
+	else:
+		for i in resList:
+			listDna.append(extraModules.base3ToDNABase(i))
 	dnaResList = minimumDistanceCode(dnaString,listDna)
 	return listVal.index(resList[listDna.index(dnaResList[0])])
 
