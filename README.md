@@ -65,3 +65,4 @@ Folder Info:-
  
  icons - Contains all the icons used in the software.
  
+**Note :- This software doesn't work in OSX 10.9 and above. We are working on this issue please cooperate with us.**
