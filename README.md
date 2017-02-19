@@ -5,11 +5,13 @@ DNACloud README
 
 -It also decodes the original file from the DNA string or DNA list. Since this conversion process is quiet heavy it comes with a build in estimator which approximates the physical memory used by the software when converting a particular file.
 
--This software is developed by [`Shalin Shah`](www.guptalab.org/shalinshah) at Laboratory of Natural Information Processing, DA-IICT (Gupta Lab). It has been presented as a poster at [FNANO'14](http://www.cs.duke.edu/FNANO/). If you use our tool and find it helpful, please cite our paper: `Shah, Shalin, Dixita Limbachiya, and Manish K. Gupta. "DNACloud: A Potential Tool for storing Big Data on DNA." arXiv preprint arXiv:1310.6992 (2013).`
+-This software is developed by [`Shalin Shah`](www.guptalab.org/shalinshah) at Laboratory of Natural Information Processing, DA-IICT (Gupta Lab). It has been presented as a poster at [FNANO'14](http://www.cs.duke.edu/FNANO/). 
 
 You could report bugs and feedback at :- `dnacloud@guptalab.org`                     
 To know more you can also visit our website :- `www.guptalab.org/dnacloud`                        
 You can also find our extended paper on [Cornell's archive](arxiv.org) :- `http://arxiv.org/pdf/1310.6992v2.pdf`        
+
+If you use our tool and find it helpful, please cite our paper: `Shah, Shalin, Dixita Limbachiya, and Manish K. Gupta. "DNACloud: A Potential Tool for storing Big Data on DNA." arXiv preprint arXiv:1310.6992 (2013).`
 
 **(C) - 2013 Gupta Lab**
 
@@ -66,4 +68,3 @@ Folder Info:-
  icons - Contains all the icons used in the software.
  
 **Note :- This software doesn't work in OSX 10.9 and above. We are working on this issue please cooperate with us.**
-**Note :- If you use our work, please cite our paper: `Shah, Shalin, Dixita Limbachiya, and Manish K. Gupta. "DNACloud: A Potential Tool for storing Big Data on DNA." arXiv preprint arXiv:1310.6992 (2013).`**
