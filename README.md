@@ -11,7 +11,7 @@ You could report bugs and feedback at :- `dnacloud@guptalab.org`
 To know more you can also visit our website :- `www.guptalab.org/dnacloud`                        
 You can also find our extended paper on [Cornell's archive](arxiv.org) :- `http://arxiv.org/pdf/1310.6992v2.pdf`        
 
-If you use our tool and find it helpful, please cite our paper: `Shah, Shalin, Dixita Limbachiya, and Manish K. Gupta. "DNACloud: A Potential Tool for storing Big Data on DNA." arXiv preprint arXiv:1310.6992 (2013).`
+**If you use our tool and find it helpful, please cite our paper:** `Shah, Shalin, Dixita Limbachiya, and Manish K. Gupta. "DNACloud: A Potential Tool for storing Big Data on DNA." arXiv preprint arXiv:1310.6992 (2013).`
 
 **(C) - 2013 Gupta Lab**
 
@@ -68,8 +68,3 @@ Folder Info:-
  icons - Contains all the icons used in the software.
  
 **Note :- This software doesn't work in OSX 10.9 and above. We are working on this issue please cooperate with us.**
-
-
-If you use this sosftware or any data please cite our paper:
-
-**Shah, Shalin, Dixita Limbachiya, and Manish K. Gupta. "DNACloud: A Potential Tool for storing Big Data on DNA." arXiv preprint arXiv:1310.6992 (2013).**
