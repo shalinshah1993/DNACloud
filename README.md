@@ -68,3 +68,8 @@ Folder Info:-
  icons - Contains all the icons used in the software.
  
 **Note :- This software doesn't work in OSX 10.9 and above. We are working on this issue please cooperate with us.**
+
+
+If you use this sosftware or any data please cite our paper:
+
+**Shah, Shalin, Dixita Limbachiya, and Manish K. Gupta. "DNACloud: A Potential Tool for storing Big Data on DNA." arXiv preprint arXiv:1310.6992 (2013).**
